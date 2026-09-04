@@ -12,14 +12,14 @@ export const CONFIG = {
    * browser and still appear in the Admin → Dashboard, but nothing is sent
    * to Google Sheets until this URL is set.
    */
-  GOOGLE_SCRIPT_URL: "",
+  GOOGLE_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbznESNpQfCihwM9rjpea7roKuS4z0tuhkqbES-LtJl-3C6bQgITvpLpj_G3XMYeMe37Tw/exec",
 
   /**
    * GOOGLE SHEET CRM — read endpoint (GET) used by Admin → Dashboard → "Sync from Sheet".
    * Usually the SAME Web App URL as above (the provided Apps Script handles
    * both GET and POST). Leave empty to disable sheet sync.
    */
-  SHEET_READ_URL: "",
+  SHEET_READ_URL: "https://script.google.com/macros/s/AKfycbznESNpQfCihwM9rjpea7roKuS4z0tuhkqbES-LtJl-3C6bQgITvpLpj_G3XMYeMe37Tw/exec",
 
   /** Floating Messenger widget target (m.me link). */
   MESSENGER_URL: "https://m.me/dreamhomenavigators01",
