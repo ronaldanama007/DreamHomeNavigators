@@ -1,4 +1,5 @@
-import { LOCATIONS, Page, PROPERTIES } from "../data";
+import { LOCATIONS, Page } from "../data";
+import { useStore } from "../store";
 import { Reveal } from "../ui";
 import PropertyCard from "../components/PropertyCard";
 
@@ -10,8 +11,9 @@ interface Props {
 }
 
 export default function Properties({ filter, onFilter, inquire, go }: Props) {
+  const { properties } = useStore();
   const filtered =
-    filter === "All" ? PROPERTIES : PROPERTIES.filter((p) => p.location === filter);
+    filter === "All" ? properties : properties.filter((p) => p.location === filter);
 
   return (
     <>
@@ -59,7 +61,7 @@ export default function Properties({ filter, onFilter, inquire, go }: Props) {
                       active ? "bg-white/25 text-white" : "bg-white/10 text-slate-300"
                     }`}
                   >
-                    {loc === "All" ? PROPERTIES.length : PROPERTIES.filter((p) => p.location === loc).length}
+                    {loc === "All" ? properties.length : properties.filter((p) => p.location === loc).length}
                   </span>
                 </button>
               );
@@ -70,7 +72,7 @@ export default function Properties({ filter, onFilter, inquire, go }: Props) {
         {/* Result meta */}
         <div className="mt-8 flex items-center gap-3 text-[13px] font-semibold text-slate-400">
           <span className="h-px w-8 bg-brand-500/60" />
-          Showing <strong className="text-brand-300">{filtered.length}</strong> of {PROPERTIES.length} units
+          Showing <strong className="text-brand-300">{filtered.length}</strong> of {properties.length} units
           {filter !== "All" && (
             <>
               in <strong className="text-slate-100">{filter}</strong>
@@ -79,11 +81,30 @@ export default function Properties({ filter, onFilter, inquire, go }: Props) {
         </div>
 
         {/* Grid */}
-        <div className="mt-7 grid gap-7 sm:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((p, i) => (
-            <PropertyCard key={`${filter}-${p.id}`} p={p} onInquire={inquire} index={i} />
-          ))}
-        </div>
+        {filtered.length > 0 ? (
+          <div className="mt-7 grid gap-7 sm:grid-cols-2 xl:grid-cols-3">
+            {filtered.map((p, i) => (
+              <PropertyCard key={`${filter}-${p.id}`} p={p} onInquire={inquire} index={i} />
+            ))}
+          </div>
+        ) : (
+          <div className="glass-panel mt-7 flex flex-col items-center rounded-2xl px-6 py-16 text-center">
+            <span className="grid h-16 w-16 place-items-center rounded-full border border-brand-400/30 bg-brand-500/10 text-2xl text-brand-300">
+              <i className="fa-solid fa-house-circle-xmark" />
+            </span>
+            <h3 className="font-display mt-5 text-xl font-semibold text-white">
+              No units here right now
+            </h3>
+            <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-slate-400">
+              Listings in {filter === "All" ? "the portfolio" : filter} are being updated. Send an
+              inquiry and our matching desk will source options for you.
+            </p>
+            <button onClick={() => go("contact")} className="btn btn-primary mt-6">
+              <i className="fa-solid fa-magnifying-glass-location" />
+              Request Matching
+            </button>
+          </div>
+        )}
 
         {/* Sourcing band */}
         <Reveal>

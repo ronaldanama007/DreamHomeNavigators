@@ -1,4 +1,6 @@
-export type Page = "home" | "properties" | "services" | "about" | "contact";
+import { CONFIG } from "./config";
+
+export type Page = "home" | "properties" | "services" | "about" | "contact" | "admin";
 
 export interface Prefill {
   property: string;
@@ -324,9 +326,9 @@ export const BUDGETS = [
 export const CONTACT = {
   phone: "+63 917 555 0123",
   phoneHref: "tel:+639175550123",
-  email: "inquiries@dreamhomenavigators.com",
-  emailHref: "mailto:inquiries@dreamhomenavigators.com",
-  messenger: "https://m.me/dreamhomenavigators01",
+  email: CONFIG.EMAIL,
+  emailHref: `mailto:${CONFIG.EMAIL}`,
+  messenger: CONFIG.MESSENGER_URL,
   facebook: "https://www.facebook.com/dreamhomenavigators01",
   address: "Unit 1204, Pioneer Heights, Pioneer St., Mandaluyong City, Metro Manila",
   hours: "Mon – Sat · 9:00 AM – 6:00 PM",

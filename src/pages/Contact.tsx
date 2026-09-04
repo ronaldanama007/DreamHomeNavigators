@@ -1,13 +1,8 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { BUDGETS, CONTACT, LOCATIONS, Page, Prefill, PROPERTIES } from "../data";
+import { CONFIG } from "../config";
+import { BUDGETS, CONTACT, LOCATIONS, Page, Prefill } from "../data";
+import { useStore } from "../store";
 import { prefersReduced, Reveal, SectionHead } from "../ui";
-
-/**
- * Replace with the client's deployed Google Apps Script Web App URL
- * (the script appends each lead row to the "Dream Home Navigators" Google Sheet CRM).
- */
-const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/REPLACE_WITH_DEPLOYED_SCRIPT_ID/exec";
 
 interface FormState {
   name: string;
@@ -43,6 +38,7 @@ export default function Contact({
   const [flash, setFlash] = useState(0);
   const formRef = useRef<HTMLDivElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
+  const { addLead, properties } = useStore();
 
   /* One-click "Inquire About This Unit" pre-fill */
   useEffect(() => {
@@ -80,9 +76,11 @@ export default function Contact({
     };
 
     /* CRM: POST to Google Apps Script (no-cors, text/plain avoids preflight) */
-    if (!GOOGLE_SCRIPT_URL.includes("REPLACE_WITH")) {
+    let sheetConfigured = false;
+    if (CONFIG.GOOGLE_SCRIPT_URL) {
+      sheetConfigured = true;
       try {
-        await fetch(GOOGLE_SCRIPT_URL, {
+        await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
           method: "POST",
           mode: "no-cors",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -95,6 +93,19 @@ export default function Contact({
       await new Promise((r) => setTimeout(r, 900)); // demo pacing while Script URL is unset
       console.info("[DHN CRM · demo] Lead captured:", payload);
     }
+
+    /* Always log locally too → Admin → Leads Dashboard */
+    addLead({
+      name: form.name,
+      phone: form.phone,
+      email: form.email,
+      location: form.location,
+      budget: form.budget,
+      propertyInterest: form.propertyInterest,
+      message: form.message,
+      source: "Website Contact Form",
+      synced: sheetConfigured,
+    });
 
     setStatus("success");
     window.setTimeout(() => {
@@ -296,7 +307,7 @@ export default function Contact({
                     <i className="fa-solid fa-house absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                     <select value={form.propertyInterest} onChange={set("propertyInterest")} className="field" aria-label="Property of interest">
                       <option value="">Property of interest…</option>
-                      {PROPERTIES.map((p) => (
+                      {properties.map((p) => (
                         <option key={p.id} value={p.name}>{p.name} — {p.location}</option>
                       ))}
                       <option value="Not sure yet — need matching">Not sure yet — need matching</option>

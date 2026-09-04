@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { CONTACT, FEATURED_PROPERTY } from "../data";
+import { CONFIG } from "../config";
 
-const QUICK_REPLIES = [
-  { label: "Schedule a site visit", ref: "site_visit" },
-  { label: `Inquire about ${FEATURED_PROPERTY.name.split(" at ")[0]}`, ref: "pine_deluxe" },
-  { label: "Talk to an advisor", ref: "advisor" },
-];
+const MESSENGER_URL = CONFIG.MESSENGER_URL;
+const QUICK_REPLIES = CONFIG.MESSENGER_QUICK_REPLIES.map((label, i) => ({
+  label,
+  ref: `qr_${i + 1}`,
+}));
 
 export default function MessengerFab() {
   const [open, setOpen] = useState(false);
@@ -38,7 +38,7 @@ export default function MessengerFab() {
               {QUICK_REPLIES.map((q) => (
                 <a
                   key={q.ref}
-                  href={`${CONTACT.messenger}?ref=${q.ref}`}
+                  href={`${MESSENGER_URL}?ref=${q.ref}`}
                   target="_blank"
                   rel="noreferrer"
                   className="rounded-full border border-brand-400/40 bg-brand-500/10 px-3 py-1.5 text-[12px] font-semibold text-brand-200 transition hover:-translate-y-0.5 hover:border-brand-300 hover:bg-brand-500/25 hover:text-white"
@@ -48,7 +48,7 @@ export default function MessengerFab() {
               ))}
             </div>
             <a
-              href={CONTACT.messenger}
+              href={MESSENGER_URL}
               target="_blank"
               rel="noreferrer"
               className="btn btn-primary mt-4 w-full justify-center !py-2.5 text-[13px]"

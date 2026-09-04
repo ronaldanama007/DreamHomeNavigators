@@ -67,6 +67,7 @@ export default function Footer({
                   ["services", "Services"],
                   ["about", "About Us"],
                   ["contact", "Contact"],
+                  ["admin", "Admin Console"],
                 ] as [Page, string][]
               ).map(([id, label]) => (
                 <li key={id}>
