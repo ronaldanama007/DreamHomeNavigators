@@ -8,6 +8,8 @@ import Properties from "./pages/Properties";
 import Services from "./pages/Services";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import Admin from "./pages/Admin";
+import { StoreProvider } from "./store";
 
 export default function App() {
   const [page, setPage] = useState<Page>("home");
@@ -45,13 +47,14 @@ export default function App() {
       page === "home"
         ? "Dream Home Navigators — Find the Right Property. Build the Future You Envision."
         : `${
-            { properties: "Properties", services: "Services", about: "About Us", contact: "Contact" }[
+            { properties: "Properties", services: "Services", about: "About Us", contact: "Contact", admin: "Admin Console" }[
               page as Exclude<Page, "home">
             ]
           } · Dream Home Navigators`;
   }, [page]);
 
   return (
+    <StoreProvider>
     <div className="relative min-h-screen">
       {/* ---- Fixed ambient background ---- */}
       <div className="fixed inset-0 -z-10 overflow-hidden bg-ink-950">
@@ -104,10 +107,12 @@ export default function App() {
         {page === "services" && <Services go={go} />}
         {page === "about" && <About go={go} inquire={inquire} />}
         {page === "contact" && <Contact prefill={prefill} go={go} />}
+        {page === "admin" && <Admin go={go} />}
       </main>
 
       <Footer go={go} browseLocation={browseLocation} />
       <MessengerFab />
     </div>
+    </StoreProvider>
   );
 }

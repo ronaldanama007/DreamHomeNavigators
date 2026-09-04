@@ -3,12 +3,12 @@ import {
   FEATURED_PROPERTY,
   LOCATIONS,
   Page,
-  PROPERTIES,
   SERVICES,
   STATS,
   TESTIMONIALS,
   fmtPrice,
 } from "../data";
+import { useStore } from "../store";
 import { CountUp, Diamond, Reveal, SectionHead } from "../ui";
 import PropertyCard from "../components/PropertyCard";
 
@@ -26,8 +26,10 @@ const STEPS = [
 ];
 
 export default function Home({ go, inquire, browseLocation }: Props) {
-  const latest = PROPERTIES.filter((p) => p.id !== "pine-deluxe").slice(0, 3);
-  const f = FEATURED_PROPERTY;
+  const { properties } = useStore();
+  const f =
+    properties.find((p) => p.badge === "Featured") ?? properties[0] ?? FEATURED_PROPERTY;
+  const latest = properties.filter((p) => p.id !== f.id).slice(0, 3);
 
   return (
     <>
@@ -195,7 +197,7 @@ export default function Home({ go, inquire, browseLocation }: Props) {
           />
           <Reveal delay={150}>
             <button onClick={() => go("properties")} className="btn btn-ghost">
-              View all {PROPERTIES.length} listings
+              View all {properties.length} listings
               <i className="fa-solid fa-arrow-right" />
             </button>
           </Reveal>
