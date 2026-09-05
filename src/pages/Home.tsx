@@ -212,23 +212,11 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                       )}
                     </div>
                     <div className="flex items-center gap-2">
-                      {f.websiteUrl && (
-                        <a
-                          href={f.websiteUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="btn btn-ghost !px-3 !py-2 text-xs"
-                          title="View Official Project Materials"
-                        >
-                          <i className="fa-solid fa-arrow-up-right-from-square text-brand-300" />
-                          <span className="hidden sm:inline">Official Site</span>
-                        </a>
-                      )}
                       <button
                         onClick={() => inquire(f.name)}
-                        className="btn btn-primary btn-glow !px-4 !py-2 text-xs"
+                        className="btn btn-primary btn-glow !px-5 !py-2.5 text-xs font-bold"
                       >
-                        Inquire
+                        Inquire Now
                         <i className="fa-solid fa-arrow-right" />
                       </button>
                     </div>

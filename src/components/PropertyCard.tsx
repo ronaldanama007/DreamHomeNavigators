@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Property, fmtPrice } from "../data";
 
 export default function PropertyCard({
@@ -21,6 +21,26 @@ export default function PropertyCard({
     setShowVideo(withVideo && Boolean(p.videoId));
     setLightboxOpen(true);
   };
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setLightboxOpen(false);
+      } else if (e.key === "ArrowLeft") {
+        setActiveIdx((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+      } else if (e.key === "ArrowRight") {
+        setActiveIdx((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [lightboxOpen, images.length]);
 
   return (
     <>
@@ -259,39 +279,82 @@ export default function PropertyCard({
         </div>
       </article>
 
-      {/* Lightbox / Video Modal */}
+      {/* Lightbox / Video Modal (True Fullscreen) */}
       {lightboxOpen && (
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-md animate-card-in"
-          onClick={() => setLightboxOpen(false)}
+          className="fixed inset-0 z-[9999] flex flex-col justify-between bg-black/95 text-white backdrop-blur-xl animate-card-in select-none"
         >
-          <div
-            className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-3xl border border-white/20 bg-ink-950 p-4 shadow-2xl sm:p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between pb-3">
+          {/* Top Bar */}
+          <div className="flex items-center justify-between border-b border-white/10 bg-ink-950/80 px-4 py-3 sm:px-8 sm:py-4">
+            <div className="flex items-center gap-3">
               <div>
-                <h4 className="font-display text-lg font-semibold text-white">
-                  {p.name}
-                </h4>
+                <div className="flex items-center gap-2">
+                  <h4 className="font-display text-base sm:text-xl font-semibold text-white">
+                    {p.name}
+                  </h4>
+                  <span className="rounded-full bg-brand-600/80 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                    {p.badge}
+                  </span>
+                </div>
                 <p className="text-xs text-brand-300">
+                  <i className="fa-solid fa-location-dot mr-1" />
                   {p.area} {p.developer ? `· ${p.developer}` : ""}
+                  {!showVideo && images.length > 1 && (
+                    <span className="ml-2 font-mono text-slate-400">
+                      (Photo {activeIdx + 1} of {images.length})
+                    </span>
+                  )}
                 </p>
               </div>
-              <button
-                onClick={() => setLightboxOpen(false)}
-                className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
-                aria-label="Close preview"
-              >
-                <i className="fa-solid fa-xmark text-lg" />
-              </button>
             </div>
 
-            {/* Media Content: Video or Image */}
+            {/* Video vs Photo toggle if video exists */}
+            <div className="flex items-center gap-3">
+              {p.videoId && (
+                <div className="flex items-center rounded-xl bg-white/10 p-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowVideo(true)}
+                    className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                      showVideo ? "bg-brand-600 text-white shadow" : "text-slate-300 hover:text-white"
+                    }`}
+                  >
+                    <i className="fa-solid fa-film" />
+                    <span className="hidden sm:inline">Video Tour</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowVideo(false)}
+                    className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                      !showVideo ? "bg-brand-600 text-white shadow" : "text-slate-300 hover:text-white"
+                    }`}
+                  >
+                    <i className="fa-solid fa-images" />
+                    <span className="hidden sm:inline">Photos</span> ({images.length})
+                  </button>
+                </div>
+              )}
+
+              {/* Close Button: Only exit on X or Esc */}
+              <button
+                type="button"
+                onClick={() => setLightboxOpen(false)}
+                className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-white transition hover:bg-white/20 hover:border-white/40 active:scale-95 shadow-md"
+                aria-label="Close fullscreen (Esc)"
+                title="Close (Esc)"
+              >
+                <i className="fa-solid fa-xmark text-base sm:text-lg" />
+                <span className="hidden sm:inline text-xs font-bold uppercase tracking-wider">Close (Esc)</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Media Content: True Fullscreen stage */}
+          <div className="relative flex flex-1 w-full items-center justify-center min-h-0 overflow-hidden p-2 sm:p-6">
             {p.videoId && showVideo ? (
-              <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black">
+              <div className="relative aspect-video w-full max-w-5xl overflow-hidden rounded-2xl bg-black shadow-2xl border border-white/15">
                 <iframe
                   src={`https://www.youtube-nocookie.com/embed/${p.videoId}?autoplay=1&rel=0`}
                   title={`${p.name} Video Tour`}
@@ -301,110 +364,80 @@ export default function PropertyCard({
                 />
               </div>
             ) : (
-              <div className="relative max-h-[62vh] overflow-hidden rounded-2xl bg-black/50 flex items-center justify-center">
+              <div className="relative flex h-full w-full items-center justify-center">
                 <img
                   src={currentImg}
-                  alt={p.name}
-                  className="h-auto max-h-[62vh] w-full rounded-2xl object-contain"
+                  alt={`${p.name} - Photo ${activeIdx + 1}`}
+                  className="h-full w-full max-h-[82vh] object-contain rounded-xl shadow-2xl transition-all duration-200 select-none"
                 />
+
                 {images.length > 1 && (
                   <>
                     <button
                       type="button"
                       onClick={() => setActiveIdx((prev) => (prev > 0 ? prev - 1 : images.length - 1))}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 z-10 grid h-10 w-10 place-items-center rounded-full bg-black/60 text-white backdrop-blur-sm transition hover:bg-black/90 hover:scale-110"
+                      className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-30 grid h-12 w-12 sm:h-16 sm:w-16 place-items-center rounded-full bg-black/65 text-white border border-white/20 backdrop-blur-md transition-all hover:bg-black/90 hover:scale-110 shadow-2xl active:scale-95"
                       aria-label="Previous photo"
+                      title="Previous (Left Arrow)"
                     >
-                      <i className="fa-solid fa-chevron-left text-base" />
+                      <i className="fa-solid fa-chevron-left text-lg sm:text-2xl" />
                     </button>
                     <button
                       type="button"
                       onClick={() => setActiveIdx((prev) => (prev < images.length - 1 ? prev + 1 : 0))}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 z-10 grid h-10 w-10 place-items-center rounded-full bg-black/60 text-white backdrop-blur-sm transition hover:bg-black/90 hover:scale-110"
+                      className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-30 grid h-12 w-12 sm:h-16 sm:w-16 place-items-center rounded-full bg-black/65 text-white border border-white/20 backdrop-blur-md transition-all hover:bg-black/90 hover:scale-110 shadow-2xl active:scale-95"
                       aria-label="Next photo"
+                      title="Next (Right Arrow)"
                     >
-                      <i className="fa-solid fa-chevron-right text-base" />
+                      <i className="fa-solid fa-chevron-right text-lg sm:text-2xl" />
                     </button>
-                    <span className="absolute bottom-3 left-3 z-10 rounded-full bg-black/70 px-3 py-1 text-xs font-mono font-bold text-white backdrop-blur-sm">
-                      {activeIdx + 1} / {images.length}
-                    </span>
                   </>
                 )}
               </div>
             )}
+          </div>
 
-            {/* Switch between Video and Photos if both exist */}
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-3">
-              <div className="flex items-center gap-2 max-w-full overflow-hidden">
-                {p.videoId && (
+          {/* Bottom Bar: Thumbnails & Inquire CTA (NO external website link) */}
+          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 bg-ink-950/80 px-4 py-3 sm:px-8 sm:py-3.5">
+            {images.length > 1 && !showVideo ? (
+              <div className="flex items-center gap-2 overflow-x-auto max-w-[65vw] sm:max-w-[75vw] py-1 scrollbar-thin">
+                {images.map((img, i) => (
                   <button
-                    onClick={() => setShowVideo(true)}
-                    className={`inline-flex items-center gap-1.5 shrink-0 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                      showVideo ? "bg-brand-600 text-white" : "bg-white/10 text-slate-300 hover:bg-white/20"
+                    key={i}
+                    onClick={() => {
+                      setShowVideo(false);
+                      setActiveIdx(i);
+                    }}
+                    className={`overflow-hidden rounded-lg border-2 shrink-0 transition-all ${
+                      activeIdx === i
+                        ? "border-brand-400 scale-105 shadow-md shadow-brand-500/50"
+                        : "border-transparent opacity-50 hover:opacity-100 hover:border-white/40"
                     }`}
                   >
-                    <i className="fa-solid fa-film" />
-                    Video Tour
+                    <img
+                      src={img}
+                      alt={`Thumb ${i + 1}`}
+                      className="h-10 w-14 object-cover"
+                    />
                   </button>
-                )}
-                {images.length > 0 && (
-                  <button
-                    onClick={() => setShowVideo(false)}
-                    className={`inline-flex items-center gap-1.5 shrink-0 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                      !showVideo ? "bg-brand-600 text-white" : "bg-white/10 text-slate-300 hover:bg-white/20"
-                    }`}
-                  >
-                    <i className="fa-solid fa-images" />
-                    Photos ({images.length})
-                  </button>
-                )}
-                {images.length > 1 && !showVideo && (
-                  <div className="flex items-center gap-1.5 ml-2 overflow-x-auto max-w-[280px] sm:max-w-md md:max-w-lg py-1 scrollbar-thin">
-                    {images.map((img, i) => (
-                      <button
-                        key={i}
-                        onClick={() => {
-                          setShowVideo(false);
-                          setActiveIdx(i);
-                        }}
-                        className={`overflow-hidden rounded-md border-2 shrink-0 transition ${
-                          activeIdx === i ? "border-brand-400 scale-105" : "border-transparent opacity-60 hover:opacity-100"
-                        }`}
-                      >
-                        <img
-                          src={img}
-                          alt={`Thumb ${i + 1}`}
-                          className="h-9 w-12 object-cover"
-                        />
-                      </button>
-                    ))}
-                  </div>
-                )}
+                ))}
               </div>
+            ) : (
+              <div className="text-xs text-slate-400">
+                Dream Home Navigators · Verified Property Inclusions
+              </div>
+            )}
 
-              <div className="flex items-center gap-3">
-                {p.websiteUrl && (
-                  <a
-                    href={p.websiteUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-300 hover:underline"
-                  >
-                    <i className="fa-solid fa-arrow-up-right-from-square" />
-                    Official Website
-                  </a>
-                )}
-                <button
-                  onClick={() => {
-                    setLightboxOpen(false);
-                    onInquire(p.name);
-                  }}
-                  className="btn btn-primary !py-2 !px-4 text-xs"
-                >
-                  Inquire About This Unit
-                </button>
-              </div>
-            </div>
+            <button
+              onClick={() => {
+                setLightboxOpen(false);
+                onInquire(p.name);
+              }}
+              className="btn btn-primary !py-2.5 !px-6 text-xs sm:text-sm font-bold shadow-lg shadow-brand-600/50 ml-auto"
+            >
+              Inquire About This Unit
+              <i className="fa-solid fa-arrow-right" />
+            </button>
           </div>
         </div>
       )}
