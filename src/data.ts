@@ -356,8 +356,8 @@ export const BUDGETS = [
 ];
 
 export const CONTACT = {
-  phone: "+63 917 555 0123",
-  phoneHref: "tel:+639175550123",
+  phone: "0921 603 0693",
+  phoneHref: "tel:+639216030693",
   email: CONFIG.EMAIL,
   emailHref: `mailto:${CONFIG.EMAIL}`,
   messenger: CONFIG.MESSENGER_URL,

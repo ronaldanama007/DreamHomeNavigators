@@ -204,7 +204,16 @@ Script and live status badges showing which integrations are configured.
 | `ADMIN_LOCK_SECONDS` | Lockout duration in seconds (default 60) |
 | `EMAIL` | Business email shown site-wide |
 
-## 5. Run & deploy
+## 5. Handover to another AI agent (Gemini, etc.)
+
+This repo includes **`GEMINI.md`** at the project root — the Gemini CLI reads it
+automatically as project context. It contains the full architecture map, design-system
+rules, routing/console behavior, state-layer keys, config reference, key feature specs,
+conventions/gotchas, and outstanding client-side items, so a new agent can continue the
+work with zero ramp-up. Other agents (Claude Code → `CLAUDE.md`, Cursor → `.cursorrules`)
+can simply be pointed at the same file.
+
+## 6. Run & deploy
 
 ```bash
 npm install
