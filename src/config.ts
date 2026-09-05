@@ -48,5 +48,16 @@ export const CONFIG = {
   ADMIN_LOCK_SECONDS: 60,
 
   /** Business email shown across the site + contact cards. */
-  EMAIL: "inquiries@dreamhomenavigators.com",
+  EMAIL: "support@dreamhomenavigators.com",
+
+  /**
+   * Brand logo shown in the header, footer and console.
+   * Currently hot-linked from the client's Google Drive.
+   * ⚠ The Drive file must be shared as "Anyone with the link → Viewer".
+   * For the most reliable production setup, save the file into this project's
+   * public/ folder (e.g. public/logo.png) and set this to "/logo.png".
+   * If the image ever fails to load, the site automatically falls back to the
+   * built-in compass mark — visitors never see a broken image.
+   */
+  LOGO_URL: "https://lh3.googleusercontent.com/d/1sYTdg6Izwy6pxVxTlgifZ3vewRuWEiwa",
 };
