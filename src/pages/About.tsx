@@ -132,8 +132,35 @@ export default function About({ go, inquire }: { go: (p: Page) => void; inquire:
           title={<>Licensed hands on <span className="text-brand-300">your wheel</span></>}
           sub="A small, senior team — you'll know your navigator by name, not by ticket number."
         />
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-          {TEAM.map((m, i) => (
+        {/* Founding partners — featured pair */}
+        <div className="mx-auto mt-12 grid max-w-3xl gap-6 sm:grid-cols-2">
+          {TEAM.filter((m) => m.role.includes("Founder")).map((m, i) => (
+            <Reveal key={m.name} delay={i * 120}>
+              <article className="glass-panel group relative h-full overflow-hidden p-7 text-center transition-all duration-300 hover:-translate-y-1.5 hover:border-brass-300/50">
+                <span
+                  className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-brass-300/80 to-transparent"
+                  aria-hidden="true"
+                />
+                <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-gradient-to-br from-brand-500 via-brand-700 to-brand-900 font-display text-[26px] font-semibold text-white shadow-lg shadow-brand-950/50 ring-2 ring-brass-300/40 transition-transform duration-300 group-hover:scale-105">
+                  {m.initials}
+                </div>
+                <span className="glass-chip mt-5 inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.2em] text-brass-300">
+                  <i className="fa-solid fa-star text-[8px]" />
+                  Founding Partner
+                </span>
+                <h3 className="font-display mt-3 text-xl font-semibold text-white">{m.name}</h3>
+                <p className="mt-1 text-[11px] font-extrabold uppercase tracking-[0.16em] text-brand-300">
+                  {m.role}
+                </p>
+                <p className="mt-3 text-[13.5px] leading-relaxed text-slate-300/85">{m.note}</p>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+
+        {/* Senior crew */}
+        <div className="mx-auto mt-6 grid max-w-4xl gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          {TEAM.filter((m) => !m.role.includes("Founder")).map((m, i) => (
             <Reveal key={m.name} delay={i * 100}>
               <article className="glass-panel group h-full p-6 text-center transition-all duration-300 hover:-translate-y-1.5 hover:border-brand-400/40">
                 <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-brand-500 via-brand-700 to-brand-900 font-display text-2xl font-semibold text-white shadow-lg shadow-brand-950/50 ring-2 ring-brand-300/30 transition-transform duration-300 group-hover:scale-105">
