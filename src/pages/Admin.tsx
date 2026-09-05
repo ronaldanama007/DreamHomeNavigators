@@ -1,6 +1,6 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { CONFIG } from "../config";
-import { fmtPrice, LOCATIONS, Page, Property } from "../data";
+import { fmtPrice, LOCATIONS, Property } from "../data";
 import { Lead, useStore } from "../store";
 import { Logo } from "../ui";
 
@@ -118,22 +118,64 @@ function json_(obj) {
 
 /* ─────────────────────────── gate ─────────────────────────── */
 
+const LOCK_KEY = "dhn_admin_lock";
+const ATTEMPTS_KEY = "dhn_admin_attempts";
+
 function Gate({ onUnlock }: { onUnlock: () => void }) {
   const [code, setCode] = useState("");
   const [wrong, setWrong] = useState(false);
+  const [attempts, setAttempts] = useState(
+    () => Number(localStorage.getItem(ATTEMPTS_KEY) ?? 0) || 0
+  );
+  const [lockLeft, setLockLeft] = useState(() => {
+    const until = Number(localStorage.getItem(LOCK_KEY) ?? 0);
+    return Math.max(0, Math.ceil((until - Date.now()) / 1000));
+  });
+  const locked = lockLeft > 0;
+
+  /* Lockout countdown — persists across reloads via localStorage */
+  useEffect(() => {
+    if (!locked) return;
+    const t = window.setInterval(() => {
+      setLockLeft((s) => {
+        if (s <= 1) {
+          localStorage.removeItem(LOCK_KEY);
+          localStorage.setItem(ATTEMPTS_KEY, "0");
+          setAttempts(0);
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => window.clearInterval(t);
+  }, [locked]);
 
   function submit(e: FormEvent) {
     e.preventDefault();
+    if (locked) return;
     if (code.trim() === CONFIG.ADMIN_PASSCODE) {
+      localStorage.setItem(ATTEMPTS_KEY, "0");
       onUnlock();
-    } else {
-      setWrong(true);
-      setTimeout(() => setWrong(false), 600);
+      return;
     }
+    const next = attempts + 1;
+    setWrong(true);
+    setTimeout(() => setWrong(false), 600);
+    if (next >= CONFIG.ADMIN_MAX_ATTEMPTS) {
+      localStorage.setItem(LOCK_KEY, String(Date.now() + CONFIG.ADMIN_LOCK_SECONDS * 1000));
+      setLockLeft(CONFIG.ADMIN_LOCK_SECONDS);
+      setAttempts(next);
+    } else {
+      setAttempts(next);
+      localStorage.setItem(ATTEMPTS_KEY, String(next));
+    }
+    setCode("");
   }
 
+  const remaining = Math.max(0, CONFIG.ADMIN_MAX_ATTEMPTS - attempts);
+
   return (
-    <section className="mx-auto flex min-h-[80vh] max-w-md flex-col justify-center px-5 pt-32 pb-10">
+    <section className="mx-auto flex min-h-[85vh] max-w-md flex-col justify-center px-5 py-10">
       <form
         onSubmit={submit}
         className={`glass-panel-deep rounded-2xl p-8 text-center transition-transform ${
@@ -141,40 +183,62 @@ function Gate({ onUnlock }: { onUnlock: () => void }) {
         }`}
       >
         <div className="mx-auto flex justify-center">
-          <Logo size={52} />
+          <span className={`relative grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-800 text-2xl text-white shadow-lg shadow-brand-950/60 ${locked ? "opacity-60" : ""}`}>
+            <i className={`fa-solid ${locked ? "fa-user-lock" : "fa-shield-halved"}`} />
+            {!locked && (
+              <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-ink-900 bg-emerald-400" />
+            )}
+          </span>
         </div>
         <h1 className="font-display mt-5 text-2xl font-semibold text-white">
-          Navigator Console
+          Owner Console
         </h1>
         <p className="mt-2 text-[13px] leading-relaxed text-slate-400">
-          Restricted area for the Dream Home Navigators team. Enter the admin
-          passcode to manage properties and view leads.
+          Restricted area for the Dream Home Navigators team. Enter the owner
+          passcode to continue.
         </p>
-        <div className="relative mt-6">
-          <i className="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="password"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="Admin passcode"
-            autoFocus
-            className="w-full rounded-xl border bg-white/5 py-3 pl-10 pr-4 text-sm font-semibold text-white outline-none transition placeholder:text-slate-500 focus:border-brand-400 focus:bg-white/10 focus:ring-2 focus:ring-brand-500/30"
-          />
-        </div>
-        {wrong && (
-          <p className="mt-3 text-xs font-bold text-rose-400">
-            <i className="fa-solid fa-triangle-exclamation mr-1.5" />
-            Incorrect passcode. Check Admin → Setup Guide in the docs.
-          </p>
+
+        {locked ? (
+          <div className="mt-6 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-4">
+            <p className="text-sm font-extrabold text-amber-300">
+              <i className="fa-solid fa-lock mr-2" />
+              Too many attempts
+            </p>
+            <p className="mt-1.5 text-[12.5px] font-semibold text-amber-200/80">
+              Console locked for security. Try again in{" "}
+              <span className="font-mono text-[15px] font-extrabold text-white">0:{String(lockLeft).padStart(2, "0")}</span>
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="relative mt-6">
+              <i className="fa-solid fa-key absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="password"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="Owner passcode"
+                autoFocus
+                autoComplete="off"
+                className="w-full rounded-xl border border-white/12 bg-white/5 py-3 pl-10 pr-4 text-sm font-semibold text-white outline-none transition placeholder:text-slate-500 focus:border-brand-400 focus:bg-white/10 focus:ring-2 focus:ring-brand-500/30"
+              />
+            </div>
+            {wrong && (
+              <p className="mt-3 text-xs font-bold text-rose-400" role="alert">
+                <i className="fa-solid fa-triangle-exclamation mr-1.5" />
+                Incorrect passcode — {remaining} attempt{remaining === 1 ? "" : "s"} remaining before lockout.
+              </p>
+            )}
+            <button type="submit" className="btn btn-primary mt-5 w-full">
+              <i className="fa-solid fa-unlock" />
+              Unlock Console
+            </button>
+          </>
         )}
-        <button type="submit" className="btn btn-primary mt-5 w-full">
-          <i className="fa-solid fa-unlock" />
-          Unlock Console
-        </button>
-        <p className="mt-5 text-[11px] text-slate-500">
-          Default passcode is set in <code className="text-brand-300">src/config.ts</code> (ADMIN_PASSCODE)
-        </p>
       </form>
+      <p className="mt-5 text-center text-[11px] text-slate-600">
+        Unauthorized access attempts are rate-limited and time-locked.
+      </p>
     </section>
   );
 }
@@ -460,10 +524,12 @@ const EMPTY_FORM = {
   location: LOCATIONS[0],
   area: "",
   price: "",
+  priceNote: "TCP",
   beds: "3",
   baths: "2",
   sqm: "",
   parking: "1",
+  lotNote: "",
   type: "House & Lot",
   badge: "New Launch",
   tagline: "",
@@ -472,9 +538,18 @@ const EMPTY_FORM = {
 };
 
 function PropertiesAdmin({ notify }: { notify: (msg: string, ok?: boolean) => void }) {
-  const { properties, addProperty, deleteProperty, resetProperties, customCount, deletedCount } =
-    useStore();
+  const {
+    properties,
+    editedIds,
+    addProperty,
+    updateProperty,
+    deleteProperty,
+    resetProperties,
+    customCount,
+    deletedCount,
+  } = useStore();
   const [f, setF] = useState(EMPTY_FORM);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
@@ -482,29 +557,65 @@ function PropertiesAdmin({ notify }: { notify: (msg: string, ok?: boolean) => vo
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => setF((p) => ({ ...p, [k]: e.target.value }));
 
+  function resetForm() {
+    setF(EMPTY_FORM);
+    setEditingId(null);
+  }
+
+  /* Load every detail of a listing into the form for editing */
+  function startEdit(p: Property) {
+    setEditingId(p.id);
+    setF({
+      name: p.name,
+      location: p.location,
+      area: p.area,
+      price: String(p.price),
+      priceNote: p.priceNote ?? "TCP",
+      beds: String(p.beds),
+      baths: String(p.baths),
+      sqm: String(p.sqm),
+      parking: String(p.parking),
+      lotNote: p.lotNote ?? "",
+      type: p.type,
+      badge: p.badge,
+      tagline: p.tagline,
+      img: IMAGE_CHOICES.includes(p.img) ? p.img : IMAGE_CHOICES[0],
+      customImg: IMAGE_CHOICES.includes(p.img) ? "" : p.img,
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   function submit(e: FormEvent) {
     e.preventDefault();
     if (!f.name.trim() || !f.price || !f.sqm) {
       notify("Name, price and floor area are required.", false);
       return;
     }
-    addProperty({
+    const details = {
       name: f.name.trim(),
       location: f.location,
       area: f.area.trim() || f.location,
       price: Number(f.price),
-      priceNote: "TCP",
+      priceNote: f.priceNote.trim() || "TCP",
       beds: Number(f.beds) || 0,
       baths: Number(f.baths) || 0,
       sqm: Number(f.sqm),
       parking: Number(f.parking) || 0,
+      lotNote: f.lotNote.trim() || undefined,
       type: f.type,
       badge: f.badge,
       tagline: f.tagline.trim() || "Newly listed by Dream Home Navigators — inquire for full unit details and viewing schedule.",
       img: f.customImg.trim() || f.img,
-    });
-    notify(`"${f.name.trim()}" is now live on the Properties page.`, true);
-    setF(EMPTY_FORM);
+    };
+    if (editingId) {
+      const orig = properties.find((p) => p.id === editingId);
+      if (orig) updateProperty({ ...orig, ...details, id: editingId });
+      notify(`"${details.name}" updated on the live site.`, true);
+    } else {
+      addProperty(details);
+      notify(`"${details.name}" is now live on the Properties page.`, true);
+    }
+    resetForm();
   }
 
   const inputCls =
@@ -513,14 +624,33 @@ function PropertiesAdmin({ notify }: { notify: (msg: string, ok?: boolean) => vo
 
   return (
     <div className="animate-card-in grid gap-8 lg:grid-cols-5">
-      {/* Add form */}
-      <form onSubmit={submit} className="glass-panel-deep rounded-2xl p-6 lg:col-span-3 sm:p-7">
-        <h2 className="font-display text-xl font-semibold text-white">
-          <i className="fa-solid fa-plus mr-2.5 text-brand-300" />
-          Add a Property
-        </h2>
+      {/* Add / Edit form */}
+      <form
+        onSubmit={submit}
+        className={`glass-panel-deep rounded-2xl p-6 lg:col-span-3 sm:p-7 transition-shadow ${
+          editingId ? "ring-2 ring-brand-400/50" : ""
+        }`}
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-display text-xl font-semibold text-white">
+            <i className={`fa-solid ${editingId ? "fa-pen-to-square" : "fa-plus"} mr-2.5 text-brand-300`} />
+            {editingId ? "Edit Property" : "Add a Property"}
+          </h2>
+          {editingId && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="rounded-lg border border-amber-400/50 bg-amber-400/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-amber-300 transition hover:bg-amber-400/20"
+            >
+              <i className="fa-solid fa-xmark mr-1.5" />
+              Cancel edit
+            </button>
+          )}
+        </div>
         <p className="mt-1.5 text-[12.5px] text-slate-400">
-          Appears instantly on the Properties page (and Home, if Featured). Saved in this browser.
+          {editingId
+            ? "Every detail below is editable — changes go live the moment you save. Saved in this browser."
+            : "Appears instantly on the Properties page (and Home, if Featured). Saved in this browser."}
         </p>
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -543,6 +673,10 @@ function PropertiesAdmin({ notify }: { notify: (msg: string, ok?: boolean) => vo
             <input value={f.price} onChange={set("price")} type="number" min="0" placeholder="e.g. 8500000" className={inputCls} />
           </div>
           <div>
+            <label className={labelCls}>Price note</label>
+            <input value={f.priceNote} onChange={set("priceNote")} placeholder="e.g. TCP, Spot cash, Negotiable" className={inputCls} />
+          </div>
+          <div>
             <label className={labelCls}>Floor area (sqm) *</label>
             <input value={f.sqm} onChange={set("sqm")} type="number" min="0" placeholder="e.g. 120" className={inputCls} />
           </div>
@@ -559,6 +693,10 @@ function PropertiesAdmin({ notify }: { notify: (msg: string, ok?: boolean) => vo
               <label className={labelCls}>Parking</label>
               <input value={f.parking} onChange={set("parking")} type="number" min="0" className={inputCls} />
             </div>
+          </div>
+          <div className="sm:col-span-2">
+            <label className={labelCls}>Lot note <span className="normal-case tracking-normal text-slate-500">(shown for Lot-type listings, e.g. "Corner lot · 220 sqm")</span></label>
+            <input value={f.lotNote} onChange={set("lotNote")} placeholder="Optional — replaces beds/baths on the card for lot-only listings" className={inputCls} />
           </div>
           <div>
             <label className={labelCls}>Type</label>
@@ -617,8 +755,8 @@ function PropertiesAdmin({ notify }: { notify: (msg: string, ok?: boolean) => vo
         </div>
 
         <button type="submit" className="btn btn-primary mt-6 w-full sm:w-auto">
-          <i className="fa-solid fa-house-circle-check" />
-          Publish Listing
+          <i className={`fa-solid ${editingId ? "fa-floppy-disk" : "fa-house-circle-check"}`} />
+          {editingId ? "Save Changes" : "Publish Listing"}
         </button>
       </form>
 
@@ -665,18 +803,35 @@ function PropertiesAdmin({ notify }: { notify: (msg: string, ok?: boolean) => vo
                   <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] font-semibold text-slate-400">
                     <span><i className="fa-solid fa-location-dot mr-1 text-brand-400" />{p.location}</span>
                     <span className="text-brand-300">{fmtPrice(p.price)}</span>
-                    {p.id.startsWith("custom-") && (
+                    {p.id.startsWith("custom-") ? (
                       <span className="rounded-full bg-brass-400/20 px-2 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider text-brass-300">
                         Added
                       </span>
-                    )}
+                    ) : editedIds.includes(p.id) ? (
+                      <span className="rounded-full bg-brand-400/20 px-2 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider text-brand-300">
+                        Edited
+                      </span>
+                    ) : null}
                   </p>
                 </div>
+                <button
+                  onClick={() => startEdit(p)}
+                  aria-label={`Edit ${p.name}`}
+                  title="Edit details"
+                  className={`shrink-0 rounded-lg border px-3 py-2 text-[11px] font-extrabold uppercase tracking-wider transition ${
+                    editingId === p.id
+                      ? "border-brand-400/70 bg-brand-500/25 text-brand-200"
+                      : "border-white/12 text-slate-500 hover:border-brand-400/50 hover:bg-brand-400/10 hover:text-brand-300"
+                  }`}
+                >
+                  <i className="fa-solid fa-pen" />
+                </button>
                 <button
                   onClick={() => {
                     if (confirmDelete === p.id) {
                       deleteProperty(p.id);
                       setConfirmDelete(null);
+                      if (editingId === p.id) resetForm();
                       notify(`"${p.name}" removed.`, true);
                     } else {
                       setConfirmDelete(p.id);
@@ -817,18 +972,52 @@ MESSENGER_QUICK_REPLIES: [
         </p>
       </div>
 
-      {/* 4 — Admin & storage notes */}
+      {/* 4 — Console security & data notes */}
       <div className={stepCls}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h3 className={h3Cls}>
             <span className={numCls}>4</span>
-            Admin console & data notes
+            Console security & data notes
           </h3>
           <StatusDot ok />
         </div>
         <ul className={olCls}>
-          <li className={liCls}>{tick}<span>Change the console passcode via <code className="rounded bg-white/10 px-1.5 py-0.5 text-[12px] text-brand-200">ADMIN_PASSCODE</code> in src/config.ts (current: <b className="text-white">{CONFIG.ADMIN_PASSCODE}</b>).</span></li>
-          <li className={liCls}>{tick}<span>Added/removed properties and locally captured leads persist in the browser's <b className="text-white">localStorage</b> — ideal for a single-device demo, and instantly visible to visitors of that browser.</span></li>
+          <li className={liCls}>
+            {tick}
+            <span>
+              <b className="text-white">Hidden route — no public link exists.</b> The console is
+              reachable only by typing the secret route into the browser address bar:{" "}
+              <code className="rounded bg-white/10 px-1.5 py-0.5 text-[12px] text-brand-200">
+                https://yoursite.com{CONFIG.ADMIN_ROUTE_HASH}
+              </code>
+              . Change it to something only the owners know via{" "}
+              <code className="rounded bg-white/10 px-1.5 py-0.5 text-[12px] text-brand-200">ADMIN_ROUTE_HASH</code>{" "}
+              in src/config.ts (keep the leading <b className="text-white">#/</b>).
+            </span>
+          </li>
+          <li className={liCls}>
+            {tick}
+            <span>
+              <b className="text-white">Passcode + lockout.</b> After{" "}
+              <b className="text-white">{CONFIG.ADMIN_MAX_ATTEMPTS} wrong attempts</b> the gate locks
+              for <b className="text-white">{CONFIG.ADMIN_LOCK_SECONDS} seconds</b> (persists across
+              reloads). Change <code className="rounded bg-white/10 px-1.5 py-0.5 text-[12px] text-brand-200">ADMIN_PASSCODE</code> before
+              launch — and never share it. The session auto-locks when the browser tab closes or you
+              press <b className="text-white">Lock</b>.
+            </span>
+          </li>
+          <li className={liCls}>
+            {tick}
+            <span>
+              <i className="fa-solid fa-triangle-exclamation mr-1.5 text-amber-300" />
+              <b className="text-white">Honest note:</b> this is a static website, so the gate is a
+              strong deterrent but not military-grade — a developer could inspect the bundle. For
+              truly private data, additionally password-protect the route at the host level
+              (Cloudflare Access, Netlify password protection, or an .htpasswd directory) and treat
+              the Google Sheet as the only sensitive record.
+            </span>
+          </li>
+          <li className={liCls}>{tick}<span>Added/edited/removed properties and locally captured leads persist in the browser's <b className="text-white">localStorage</b> — ideal for a single-device demo, and instantly visible to visitors of that browser.</span></li>
           <li className={liCls}>{tick}<span>For a multi-user production setup, keep the Google Sheet as the source of truth: manage listings in a second "Properties" sheet tab, and leads sync here via the button in step 2.</span></li>
           <li className={liCls}>{tick}<span>Business email shown site-wide is set via <code className="rounded bg-white/10 px-1.5 py-0.5 text-[12px] text-brand-200">EMAIL</code> in src/config.ts.</span></li>
         </ul>
@@ -841,7 +1030,7 @@ MESSENGER_QUICK_REPLIES: [
 
 type Tab = "dashboard" | "properties" | "setup";
 
-export default function Admin({ go }: { go: (p: Page) => void }) {
+export default function Admin({ exit }: { exit: () => void }) {
   const [authed, setAuthed] = useState(() => sessionStorage.getItem("dhn_admin") === "1");
   const [tab, setTab] = useState<Tab>("dashboard");
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
@@ -869,7 +1058,7 @@ export default function Admin({ go }: { go: (p: Page) => void }) {
   ];
 
   return (
-    <section className="relative mx-auto max-w-7xl px-5 pt-32 pb-6 sm:px-8 sm:pt-36">
+    <section className="relative mx-auto max-w-7xl px-5 pt-12 pb-6 sm:px-8 sm:pt-16">
       {toast && (
         <div
           className={`fixed left-1/2 top-24 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-xl border px-5 py-3 text-[13px] font-bold shadow-2xl backdrop-blur-xl animate-card-in ${
@@ -895,7 +1084,7 @@ export default function Admin({ go }: { go: (p: Page) => void }) {
           </p>
         </div>
         <div className="flex gap-2.5">
-          <button onClick={() => go("properties")} className="btn btn-ghost !px-4 !py-2.5 text-[13px]">
+          <button onClick={exit} className="btn btn-ghost !px-4 !py-2.5 text-[13px]">
             <i className="fa-solid fa-eye text-brand-300" />
             View live site
           </button>

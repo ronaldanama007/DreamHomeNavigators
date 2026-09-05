@@ -32,8 +32,20 @@ export const CONFIG = {
     "What are your current promos?",
   ],
 
-  /** Passcode for the Admin Console (/#/admin). Change before launch. */
+  /**
+   * HIDDEN ADMIN ROUTE — the console is NOT linked anywhere on the public site.
+   * It can only be opened by typing this hash route in the browser address bar,
+   * e.g. https://yoursite.com/#/dhn-owner
+   * Change it to something only the owners know (keep the leading "#/").
+   */
+  ADMIN_ROUTE_HASH: "#/dhn-owner",
+
+  /** Passcode for the Admin Console. Change before launch. */
   ADMIN_PASSCODE: "DHN2026",
+
+  /** Lockout policy: after MAX wrong passcodes, the gate locks for LOCK seconds. */
+  ADMIN_MAX_ATTEMPTS: 5,
+  ADMIN_LOCK_SECONDS: 60,
 
   /** Business email shown across the site + contact cards. */
   EMAIL: "inquiries@dreamhomenavigators.com",

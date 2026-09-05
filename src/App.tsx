@@ -10,11 +10,29 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Admin from "./pages/Admin";
 import { StoreProvider } from "./store";
+import { CONFIG } from "./config";
 
 export default function App() {
   const [page, setPage] = useState<Page>("home");
   const [locFilter, setLocFilter] = useState<string>("All");
   const [prefill, setPrefill] = useState<Prefill | null>(null);
+
+  /* ── Hidden owner route ────────────────────────────────────────────────────
+     The console is reachable ONLY by typing the secret hash route
+     (CONFIG.ADMIN_ROUTE_HASH, default "#/dhn-owner") in the address bar.
+     No link to it exists anywhere on the public site.                    */
+  const [ownerMode, setOwnerMode] = useState(
+    () => window.location.hash === CONFIG.ADMIN_ROUTE_HASH
+  );
+  useEffect(() => {
+    const onHash = () => setOwnerMode(window.location.hash === CONFIG.ADMIN_ROUTE_HASH);
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+  const exitOwnerMode = useCallback(() => {
+    window.location.hash = "";
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, []);
 
   const go = useCallback((p: Page) => {
     setPage(p);
@@ -43,15 +61,41 @@ export default function App() {
   );
 
   useEffect(() => {
+    if (ownerMode) {
+      /* Deliberately nondescript — does not advertise an admin area */
+      document.title = "Owner Console";
+      return;
+    }
     document.title =
       page === "home"
         ? "Dream Home Navigators — Find the Right Property. Build the Future You Envision."
         : `${
-            { properties: "Properties", services: "Services", about: "About Us", contact: "Contact", admin: "Admin Console" }[
+            { properties: "Properties", services: "Services", about: "About Us", contact: "Contact" }[
               page as Exclude<Page, "home">
             ]
           } · Dream Home Navigators`;
-  }, [page]);
+  }, [page, ownerMode]);
+
+  /* Owner console: standalone full-screen view, hidden from the public shell */
+  if (ownerMode) {
+    return (
+      <StoreProvider>
+        <div className="relative min-h-screen">
+          <div className="fixed inset-0 -z-10 bg-ink-950">
+            <div
+              className="absolute inset-0 opacity-70"
+              style={{
+                background:
+                  "radial-gradient(52% 44% at 18% 8%, rgba(37,99,235,0.22), transparent 70%), radial-gradient(46% 40% at 88% 82%, rgba(30,64,175,0.26), transparent 70%)",
+              }}
+            />
+            <div className="blueprint-grid absolute inset-0" />
+          </div>
+          <Admin exit={exitOwnerMode} />
+        </div>
+      </StoreProvider>
+    );
+  }
 
   return (
     <StoreProvider>
@@ -107,7 +151,6 @@ export default function App() {
         {page === "services" && <Services go={go} />}
         {page === "about" && <About go={go} inquire={inquire} />}
         {page === "contact" && <Contact prefill={prefill} go={go} />}
-        {page === "admin" && <Admin go={go} />}
       </main>
 
       <Footer go={go} browseLocation={browseLocation} />

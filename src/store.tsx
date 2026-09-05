@@ -55,7 +55,10 @@ interface StoreValue {
   properties: Property[];
   customCount: number;
   deletedCount: number;
+  /** ids of default listings that were edited via the console (stored as overrides) */
+  editedIds: string[];
   addProperty: (p: Omit<Property, "id">) => void;
+  updateProperty: (p: Property) => void;
   deleteProperty: (id: string) => void;
   resetProperties: () => void;
   leads: Lead[];
@@ -88,12 +91,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     properties,
     customCount: custom.length,
     deletedCount: deleted.length,
+    editedIds: useMemo(
+      () => custom.filter((p) => !p.id.startsWith("custom-")).map((p) => p.id),
+      [custom]
+    ),
     addProperty: (p) =>
       setCustom((c) => [{ ...p, id: `custom-${uuid().slice(0, 8)}` }, ...c]),
-    deleteProperty: (id) => {
-      if (id.startsWith("custom-")) {
-        setCustom((c) => c.filter((p) => p.id !== id));
+    updateProperty: (p) => {
+      if (p.id.startsWith("custom-")) {
+        /* Custom listing → edit in place */
+        setCustom((c) => c.map((x) => (x.id === p.id ? p : x)));
       } else {
+        /* Default listing → hide the original, store the edited override */
+        setDeleted((d) => (d.includes(p.id) ? d : [...d, p.id]));
+        setCustom((c) => [...c.filter((x) => x.id !== p.id), p]);
+      }
+    },
+    deleteProperty: (id) => {
+      /* Covers custom listings AND edited-default overrides */
+      setCustom((c) => c.filter((p) => p.id !== id));
+      if (!id.startsWith("custom-")) {
         setDeleted((d) => (d.includes(id) ? d : [...d, id]));
       }
     },
