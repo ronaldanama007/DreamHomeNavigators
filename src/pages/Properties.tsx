@@ -19,15 +19,13 @@ export default function Properties({ filter, onFilter, inquire, go }: Props) {
     <>
       <section className="mx-auto max-w-7xl px-5 pt-32 sm:px-8 sm:pt-36">
         <Reveal>
-          <span className="kicker">Listings & inventory</span>
+          <span className="kicker">Property listings</span>
           <div className="mt-4 flex flex-wrap items-end justify-between gap-6">
             <h1 className="font-display max-w-2xl text-4xl font-semibold leading-[1.08] text-slate-50 sm:text-5xl xl:text-6xl">
-              Properties across <span className="text-brand-300">five territories</span>
+              Explore <span className="text-brand-300">selected properties</span>
             </h1>
-            <p className="max-w-sm text-[15px] leading-relaxed text-slate-300/90">
-              Verified units with clean documentation. Filter by location, then hit{" "}
-              <strong className="text-slate-100">"Inquire About This Unit"</strong> — we pre-fill
-              everything for you.
+            <p className="max-w-md text-[15px] leading-relaxed text-slate-300/90">
+              Browse a selection of current property materials and contact Dream Home Navigators for availability, pricing and viewing details.
             </p>
           </div>
         </Reveal>
@@ -93,36 +91,43 @@ export default function Properties({ filter, onFilter, inquire, go }: Props) {
               <i className="fa-solid fa-house-circle-xmark" />
             </span>
             <h3 className="font-display mt-5 text-xl font-semibold text-white">
-              No units here right now
+              No listings match those filters
             </h3>
             <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-slate-400">
-              Listings in {filter === "All" ? "the portfolio" : filter} are being updated. Send an
-              inquiry and our matching desk will source options for you.
+              Try widening your search — or tell us what you are looking for and we will check what is available.
             </p>
             <button onClick={() => go("contact")} className="btn btn-primary mt-6">
-              <i className="fa-solid fa-magnifying-glass-location" />
-              Request Matching
+              <i className="fa-regular fa-paper-plane" />
+              Send an Inquiry
             </button>
           </div>
         )}
 
-        {/* Sourcing band */}
+        {/* Sourcing / CTA band */}
         <Reveal>
           <div className="glass-panel-deep mt-16 flex flex-col items-center justify-between gap-6 rounded-2xl px-7 py-9 md:flex-row">
             <div>
               <h2 className="font-display text-2xl font-semibold text-white sm:text-3xl">
-                Didn't find <em className="italic text-brass-300">the one?</em>
+                Looking for a property in another location?
               </h2>
               <p className="mt-2 max-w-xl text-[14.5px] leading-relaxed text-slate-300">
-                Tell us your budget and target area — our property matching desk sources
-                off-market and pre-launch units within 48 hours, at no cost to you.
+                Tell us the area and type of property you are looking for and the team can discuss available options with you.
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap gap-3">
               <button onClick={() => go("contact")} className="btn btn-primary">
-                <i className="fa-solid fa-magnifying-glass-location" />
-                Request Property Matching
+                <i className="fa-regular fa-paper-plane" />
+                Send an Inquiry
               </button>
+              <a
+                href="https://m.me/dreamhomenavigators01"
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-ghost"
+              >
+                <i className="fa-brands fa-facebook-messenger text-brand-300" />
+                Message on Messenger
+              </a>
             </div>
           </div>
         </Reveal>

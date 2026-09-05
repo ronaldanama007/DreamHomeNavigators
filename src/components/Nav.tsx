@@ -46,15 +46,15 @@ export default function Nav({
           className="group flex items-center gap-3 text-left"
           aria-label="Dream Home Navigators — home"
         >
-          <span className="transition-transform duration-500 group-hover:rotate-45">
-            <Logo size={40} />
+          <span className="transition-transform duration-500 group-hover:rotate-12">
+            <Logo size={42} />
           </span>
           <span className="leading-tight">
             <span className="block font-display text-[17px] font-semibold tracking-wide text-slate-50">
-              Dream Home
+              Dream Home Navigators
             </span>
-            <span className="block text-[10px] font-extrabold uppercase tracking-[0.32em] text-brand-300">
-              Navigators
+            <span className="hidden sm:block text-[10.5px] font-medium tracking-wide text-brand-200/80">
+              Guiding You Home, Building Your Future
             </span>
           </span>
         </button>
@@ -78,12 +78,19 @@ export default function Nav({
               />
             </button>
           ))}
+          <a
+            href="tel:+639216030693"
+            className="ml-2 flex items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] font-medium text-slate-300 transition hover:text-white"
+          >
+            <i className="fa-solid fa-phone text-xs text-brand-300" />
+            <span>+63 921 603 0693</span>
+          </a>
           <button
             onClick={() => nav("contact")}
-            className="btn btn-primary ml-3 !px-4 !py-2 text-[13px]"
+            className="btn btn-primary ml-1 !px-4 !py-2 text-[13px]"
           >
             <i className="fa-regular fa-paper-plane" />
-            Inquire Now
+            Send an Inquiry
           </button>
         </nav>
 
@@ -118,9 +125,16 @@ export default function Nav({
               {l.label}
             </button>
           ))}
+          <a
+            href="tel:+639216030693"
+            className="flex items-center justify-center gap-2 rounded-lg border border-white/10 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-white/5"
+          >
+            <i className="fa-solid fa-phone text-xs text-brand-300" />
+            Call +63 921 603 0693
+          </a>
           <button onClick={() => nav("contact")} className="btn btn-primary mt-1 justify-center">
             <i className="fa-regular fa-paper-plane" />
-            Inquire Now
+            Send an Inquiry
           </button>
         </div>
       </div>

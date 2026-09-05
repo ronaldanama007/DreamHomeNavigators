@@ -43,7 +43,7 @@ export default function Home({ go, inquire, browseLocation }: Props) {
             <Reveal>
               <span className="glass-chip inline-flex items-center gap-2 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.22em] text-brand-200">
                 <i className="fa-solid fa-compass text-brass-300" />
-                Licensed Real Estate Brokerage · Philippines
+                Guiding You Home, Building Your Future
               </span>
             </Reveal>
             <Reveal delay={100}>
@@ -56,21 +56,35 @@ export default function Home({ go, inquire, browseLocation }: Props) {
             </Reveal>
             <Reveal delay={200}>
               <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-slate-300 sm:text-lg">
-                Dream Home Navigators guides families, first-time buyers, investors and OFWs
-                to verified homes, condos and lots across five thriving territories — with
-                financing, paperwork and site visits handled for you.
+                Discover carefully selected homes and investment opportunities across
+                Iloilo, Tagaytay, Antipolo, Cavite, and Binondo — with guidance from first
+                inquiry to site viewing.
               </p>
             </Reveal>
             <Reveal delay={300}>
               <div className="mt-8 flex flex-wrap gap-3.5">
                 <button onClick={() => go("properties")} className="btn btn-primary">
-                  Browse Properties
+                  Explore Properties
                   <i className="fa-solid fa-arrow-right" />
                 </button>
                 <button onClick={() => go("contact")} className="btn btn-ghost">
-                  <i className="fa-solid fa-headset text-brand-300" />
-                  Talk to an Advisor
+                  <i className="fa-regular fa-paper-plane text-brand-300" />
+                  Send an Inquiry
                 </button>
+              </div>
+              <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-semibold text-slate-300/80">
+                <span className="inline-flex items-center gap-2">
+                  <i className="fa-solid fa-location-dot text-brand-400" />
+                  5 areas served
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <i className="fa-solid fa-eye text-brand-400" />
+                  Site viewing on request
+                </span>
+                <a href={CONTACT.phoneHref} className="inline-flex items-center gap-2 transition hover:text-white">
+                  <i className="fa-solid fa-phone text-brand-400" />
+                  {CONTACT.phone}
+                </a>
               </div>
             </Reveal>
             <Reveal delay={400}>
@@ -121,17 +135,32 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                 </div>
                 <div className="p-5">
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] font-semibold text-slate-200">
-                    <span><i className="fa-solid fa-bed mr-1.5 text-brand-300" />{f.beds} Beds</span>
-                    <span><i className="fa-solid fa-bath mr-1.5 text-brand-300" />{f.baths} Baths</span>
-                    <span><i className="fa-solid fa-ruler-combined mr-1.5 text-brand-300" />{f.sqm} sqm</span>
-                    <span><i className="fa-solid fa-car mr-1.5 text-brand-300" />{f.parking} Parking</span>
+                    {f.beds > 0 ? (
+                      <>
+                        <span><i className="fa-solid fa-bed mr-1.5 text-brand-300" />{f.beds} Beds</span>
+                        <span><i className="fa-solid fa-bath mr-1.5 text-brand-300" />{f.baths} Baths</span>
+                        <span><i className="fa-solid fa-ruler-combined mr-1.5 text-brand-300" />{f.sqm} sqm</span>
+                      </>
+                    ) : (
+                      <span><i className="fa-solid fa-house mr-1.5 text-brand-300" />{f.lotNote ?? "House / Residential"}</span>
+                    )}
+                    {f.parking > 0 && (
+                      <span><i className="fa-solid fa-car mr-1.5 text-brand-300" />Carport</span>
+                    )}
                   </div>
                   <div className="mt-4 flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Starting at</p>
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        {f.price < 100_000 ? "Price starts at" : "Starting at"}
+                      </p>
                       <p className="font-display text-3xl font-semibold text-brand-300">
                         {fmtPrice(f.price)}
                       </p>
+                      {f.priceNote && (
+                        <p className="mt-0.5 text-[10.5px] italic text-slate-400">
+                          {f.priceNote}
+                        </p>
+                      )}
                     </div>
                     <button
                       onClick={() => inquire(f.name)}
@@ -167,6 +196,48 @@ export default function Home({ go, inquire, browseLocation }: Props) {
             ))}
           </div>
         </Reveal>
+
+        {/* Quick service strip */}
+        <Reveal delay={200}>
+          <div className="glass-panel mt-6 grid grid-cols-2 gap-4 rounded-2xl p-4 sm:grid-cols-4 sm:p-5">
+            <div className="flex items-center gap-3">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand-500/20 text-brand-300">
+                <i className="fa-solid fa-key text-sm" />
+              </div>
+              <div className="leading-tight">
+                <strong className="block text-sm text-white">Buying</strong>
+                <span className="text-xs text-slate-400">Purchase assistance</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand-500/20 text-brand-300">
+                <i className="fa-solid fa-chart-line text-sm" />
+              </div>
+              <div className="leading-tight">
+                <strong className="block text-sm text-white">Investing</strong>
+                <span className="text-xs text-slate-400">Investment guidance</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand-500/20 text-brand-300">
+                <i className="fa-solid fa-magnifying-glass-location text-sm" />
+              </div>
+              <div className="leading-tight">
+                <strong className="block text-sm text-white">Matching</strong>
+                <span className="text-xs text-slate-400">Property matching</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand-500/20 text-brand-300">
+                <i className="fa-solid fa-eye text-sm" />
+              </div>
+              <div className="leading-tight">
+                <strong className="block text-sm text-white">Viewing</strong>
+                <span className="text-xs text-slate-400">Site viewing &amp; consultation</span>
+              </div>
+            </div>
+          </div>
+        </Reveal>
       </section>
 
       {/* ============ LOCATION TICKER ============ */}
@@ -190,28 +261,141 @@ export default function Home({ go, inquire, browseLocation }: Props) {
         </div>
       </section>
 
-      {/* ============ LATEST LISTINGS ============ */}
+      {/* ============ FEATURED LISTINGS ============ */}
       <section className="mx-auto max-w-7xl px-5 pt-24 sm:px-8">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <SectionHead
-            kicker="Fresh on the market"
-            title={<>Handpicked units, <span className="text-brand-300">verified & vetted</span></>}
-            sub="Every listing is checked for clean titles, registered developers and honest pricing before it ever reaches you."
+            kicker="Featured listings"
+            title={<>Properties <span className="text-brand-300">currently on offer</span></>}
+            sub="Every listing below comes straight from official Dream Home Navigators material — nothing is estimated or embellished."
           />
           <Reveal delay={150}>
             <button onClick={() => go("properties")} className="btn btn-ghost">
-              View all {properties.length} listings
+              View all listings
               <i className="fa-solid fa-arrow-right" />
             </button>
           </Reveal>
         </div>
-        <div className="mt-12 grid gap-7 sm:grid-cols-2 xl:grid-cols-3">
-          {latest.map((p, i) => (
+        <div className="mt-12 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+          {properties.slice(0, 3).map((p, i) => (
             <Reveal key={p.id} delay={i * 120}>
               <PropertyCard p={p} onInquire={inquire} index={i} />
             </Reveal>
           ))}
         </div>
+      </section>
+
+      {/* ============ BUYERS & INVESTORS ============ */}
+      <section className="mx-auto max-w-7xl px-5 pt-24 sm:px-8">
+        <div className="grid items-center gap-12 lg:grid-cols-12">
+          <div className="order-2 lg:order-1 lg:col-span-6">
+            <Reveal>
+              <div className="relative overflow-hidden rounded-2xl glass-panel p-2">
+                <img
+                  src="/assets/img/pine-deluxe-living.jpg"
+                  alt="Living area of the Pine Deluxe unit with sofa, centre table and dining space beyond"
+                  className="w-full rounded-xl object-cover shadow-2xl"
+                />
+              </div>
+            </Reveal>
+          </div>
+          <div className="order-1 lg:order-2 lg:col-span-6">
+            <Reveal delay={150}>
+              <p className="kicker">Buyers &amp; investors</p>
+              <h2 className="font-display mt-3 text-3xl font-semibold text-white sm:text-4xl">
+                Whether it is your first home or your next investment
+              </h2>
+              <p className="mt-4 text-[14.5px] leading-relaxed text-slate-300">
+                Some clients are looking for a place to raise a family. Others are
+                weighing a property as a long-term investment. The questions are different, and so is the
+                guidance — but both start the same way: a conversation about what you actually need.
+              </p>
+              <ul className="mt-6 space-y-3 text-sm text-slate-200">
+                <li className="flex items-center gap-3">
+                  <i className="fa-solid fa-check text-brand-300" />
+                  Shortlists matched to your preferred location and budget
+                </li>
+                <li className="flex items-center gap-3">
+                  <i className="fa-solid fa-check text-brand-300" />
+                  Clear answers on what a listing does and does not include
+                </li>
+                <li className="flex items-center gap-3">
+                  <i className="fa-solid fa-check text-brand-300" />
+                  Site viewing and consultation arranged on request
+                </li>
+                <li className="flex items-center gap-3">
+                  <i className="fa-solid fa-check text-brand-300" />
+                  Assistance with buyer inquiries throughout the process
+                </li>
+              </ul>
+              <div className="mt-8 flex flex-wrap gap-4">
+                <button onClick={() => go("contact")} className="btn btn-primary">
+                  Book a consultation
+                </button>
+                <button onClick={() => go("properties")} className="btn btn-ghost">
+                  Browse listings
+                </button>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ============ SPOTLIGHT: JARO HOUSE ============ */}
+      <section className="mx-auto max-w-7xl px-5 pt-24 sm:px-8">
+        <Reveal>
+          <div className="glass-panel-deep relative overflow-hidden rounded-3xl p-6 sm:p-10">
+            <div className="grid items-center gap-8 lg:grid-cols-12">
+              <div className="lg:col-span-7">
+                <div className="relative overflow-hidden rounded-2xl">
+                  <span className="absolute left-3 top-3 z-10 rounded-full bg-brand-600 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-lg">
+                    Property Spotlight
+                  </span>
+                  <img
+                    src="/assets/img/jaro-house-exterior.jpg"
+                    alt="Facade of the two-storey house for sale in Jaro, Iloilo City with balcony"
+                    className="h-80 w-full object-cover sm:h-96"
+                  />
+                </div>
+              </div>
+              <div className="lg:col-span-5">
+                <p className="kicker">Jaro, Iloilo City</p>
+                <h3 className="font-display mt-2 text-2xl font-semibold text-white sm:text-3xl">
+                  House for Sale in Jaro, Iloilo City
+                </h3>
+                <p className="mt-3 text-[14px] leading-relaxed text-slate-300">
+                  A two-storey residence with a spacious living room, modern kitchen and dining area, three bedrooms, two toilet &amp; bath, and a carport.
+                </p>
+                <div className="mt-6 grid grid-cols-2 gap-3 border-y border-white/10 py-4 text-xs">
+                  <div>
+                    <span className="block text-slate-400">Monthly amortization</span>
+                    <span className="text-base font-bold text-brand-300">₱37,921.82</span>
+                  </div>
+                  <div>
+                    <span className="block text-slate-400">Bedrooms</span>
+                    <span className="text-base font-bold text-white">3 Bedrooms</span>
+                  </div>
+                  <div>
+                    <span className="block text-slate-400">Toilet &amp; bath</span>
+                    <span className="text-base font-bold text-white">2 Toilet &amp; Bath</span>
+                  </div>
+                  <div>
+                    <span className="block text-slate-400">Parking</span>
+                    <span className="text-base font-bold text-white">Carport</span>
+                  </div>
+                </div>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button onClick={() => go("properties")} className="btn btn-primary">
+                    View Properties
+                  </button>
+                  <button onClick={() => inquire("House for Sale in Jaro, Iloilo City")} className="btn btn-ghost">
+                    Inquire now
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Reveal>
       </section>
 
       {/* ============ PROCESS ============ */}
@@ -316,13 +500,12 @@ export default function Home({ go, inquire, browseLocation }: Props) {
               className="pointer-events-none absolute inset-0 opacity-60"
               style={{ background: "radial-gradient(60% 90% at 50% 110%, rgba(37,99,235,0.4), transparent 70%)" }}
             />
-            <p className="kicker justify-center">Set your bearing</p>
+            <p className="kicker justify-center">Get started</p>
             <h2 className="font-display mx-auto mt-4 max-w-2xl text-3xl font-semibold leading-tight text-white sm:text-[2.6rem]">
-              Ready to find the home your future deserves?
+              Ready to find the right property?
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-slate-300">
-              Send an inquiry and a licensed navigator replies within 24 hours — or chat with
-              us live on Messenger right now.
+              Send us your preferred location, property type and budget range — we will come back to you with the options that actually fit.
             </p>
             <div className="relative mt-9 flex flex-wrap justify-center gap-4">
               <button onClick={() => go("contact")} className="btn btn-primary btn-glow">
@@ -331,12 +514,12 @@ export default function Home({ go, inquire, browseLocation }: Props) {
               </button>
               <a href={CONTACT.messenger} target="_blank" rel="noreferrer" className="btn btn-ghost">
                 <i className="fa-brands fa-facebook-messenger text-brand-300" />
-                Chat on Messenger
+                Message on Messenger
               </a>
             </div>
             <p className="relative mt-7 text-sm font-semibold text-slate-400">
               <i className="fa-solid fa-phone mr-2 text-brand-400" />
-              <a href={CONTACT.phoneHref} className="transition hover:text-white">{CONTACT.phone}</a>
+              <a href={CONTACT.phoneHref} className="transition hover:text-white">Call {CONTACT.phone}</a>
             </p>
           </div>
         </Reveal>

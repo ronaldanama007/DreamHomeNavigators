@@ -16,9 +16,9 @@ export default function Services({ go }: { go: (p: Page) => void }) {
       <section className="mx-auto max-w-7xl px-5 pt-32 sm:px-8 sm:pt-36">
         <SectionHead
           align="center"
-          kicker="What we do"
-          title={<>One licensed team. <span className="text-brand-300">Every mile</span> of the journey.</>}
-          sub="Buying property in the Philippines involves brokers, banks, developers and bureaucracy. We consolidate all of it behind one point of contact — you."
+          kicker="Our services"
+          title={<>Services built around <span className="text-brand-300">the buyer</span></>}
+          sub="From the first question to the site viewing and beyond — here is how Dream Home Navigators supports buyers and investors."
         />
 
         <div className="mt-14 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
@@ -44,6 +44,15 @@ export default function Services({ go }: { go: (p: Page) => void }) {
                     </li>
                   ))}
                 </ul>
+                <div className="mt-6 border-t border-white/10 pt-4">
+                  <button
+                    onClick={() => go("contact")}
+                    className="btn btn-ghost w-full justify-center !py-2 text-xs"
+                  >
+                    Ask about this service
+                    <i className="fa-solid fa-arrow-right" />
+                  </button>
+                </div>
               </article>
             </Reveal>
           ))}
