@@ -299,6 +299,38 @@ export const WHY_US = [
   "Dedicated OFW desk with video tours and consulate-signed SPAs",
 ];
 
+/* Editable site content — seeded into the store & managed from the Owner Console */
+export interface ServiceItem extends Service {
+  id: string;
+}
+export const SERVICE_SEED: ServiceItem[] = SERVICES.map((s, i) => ({
+  id: `svc-${i + 1}`,
+  ...s,
+}));
+
+export interface AboutContent {
+  kicker: string;
+  headline: string;
+  paragraph1: string;
+  paragraph2: string;
+  mission: string;
+  vision: string;
+  whyUs: string[];
+}
+export const ABOUT_SEED: AboutContent = {
+  kicker: "Our story",
+  headline: "We don't sell houses. We navigate people home.",
+  paragraph1:
+    "Dream Home Navigators started in 2014 with one observation: Filipino buyers — especially first-timers and OFWs — were being steered toward whatever earned the agent the biggest commission, not what fit their lives. So we flipped the model. We begin with your budget and your future, then go find the property that answers to them.",
+  paragraph2:
+    "Today our licensed team serves five territories — Iloilo, Tagaytay, Cavite, Antipolo and Binondo — with a promise that hasn't changed: verified projects, honest yield numbers, free site visits, and one accountable navigator from reservation to turnover.",
+  mission:
+    "To make every Filipino property decision an informed one — pairing each family with a home that fits their budget, their roots, and their plans.",
+  vision:
+    "A Philippines where buying a home — from Quezon City or Qatar — feels transparent, protected, and genuinely exciting.",
+  whyUs: [...WHY_US],
+};
+
 export interface Stat {
   value: number;
   prefix?: string;
