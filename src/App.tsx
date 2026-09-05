@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { Page, Prefill } from "./data";
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
@@ -112,6 +113,7 @@ export default function App() {
 
       <Footer go={go} browseLocation={browseLocation} />
       <MessengerFab />
+      <Analytics />
     </div>
     </StoreProvider>
   );
