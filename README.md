@@ -154,14 +154,31 @@ MESSENGER_QUICK_REPLIES: [
 - **Add:** name, location, area, price (PHP), price note, beds/baths/parking,
   floor area, lot note (for lot-only listings), type, badge, tagline, and a photo
   (pick a preset or paste any image URL). New listings appear on the Properties
-  page instantly (and on Home if badged "Featured").
+  page instantly.
 - **Edit:** pencil icon loads every detail of a listing into the form — price,
   specs, badge, photo, tagline, everything — and "Save Changes" pushes it live.
   Rows show **Added** / **Edited** status chips.
+- **Home featured listing:** the ★ star on any row makes that unit the featured
+  card in the Home hero (rows show a "Home featured" chip). Badging a unit
+  "Featured" while adding/editing claims the spot automatically. Clearing it
+  falls back to the first "Featured" badge, then the first listing.
 - **Delete:** trash icon on any listing with a two-step confirm
-  (defaults are soft-deleted, custom ones removed).
+  (defaults are soft-deleted, custom ones removed; deleting the featured unit
+  clears the featured spot).
 - **Restore defaults** brings back the original listings.
 - Changes persist in the browser's `localStorage`.
+
+### Services tab — edit the Services page (and Home previews)
+- Add, edit, and delete service cards: icon (curated icon picker), title,
+  description, and a "what's included" bullet list (one per line).
+- Updates the Services page grid and the three service previews on Home.
+- **Restore defaults** returns the original six services.
+
+### About Page tab — edit the About Us copy
+- Story kicker + headline, both story paragraphs, mission, vision, and the
+  "Why choose us" checklist (one point per line — add/remove freely).
+- **Restore defaults** returns the original copy. (Team roster stays in
+  `src/data.ts` → `TEAM`.)
 
 > 📌 **Production note:** localStorage is per-browser. For a multi-user rollout, keep the
 > Google Sheet as the source of truth — manage listings in a second `Properties` tab and

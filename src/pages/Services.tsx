@@ -1,4 +1,5 @@
-import { CONTACT, Page, SERVICES } from "../data";
+import { CONTACT, Page } from "../data";
+import { useStore } from "../store";
 import { Reveal, SectionHead } from "../ui";
 
 const OFW_POINTS = [
@@ -9,6 +10,7 @@ const OFW_POINTS = [
 ];
 
 export default function Services({ go }: { go: (p: Page) => void }) {
+  const { services } = useStore();
   return (
     <>
       <section className="mx-auto max-w-7xl px-5 pt-32 sm:px-8 sm:pt-36">
@@ -20,8 +22,8 @@ export default function Services({ go }: { go: (p: Page) => void }) {
         />
 
         <div className="mt-14 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {SERVICES.map((s, i) => (
-            <Reveal key={s.title} delay={(i % 3) * 110}>
+          {services.map((s, i) => (
+            <Reveal key={s.id} delay={(i % 3) * 110}>
               <article className="glass-panel group flex h-full flex-col p-6.5 transition-all duration-300 hover:-translate-y-1.5 hover:border-brand-400/40 hover:bg-white/[0.11]">
                 <div className="flex items-center gap-4">
                   <span className="grid h-13 w-13 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-800 text-xl text-white shadow-lg shadow-brand-950/60 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">

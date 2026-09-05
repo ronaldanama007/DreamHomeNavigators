@@ -1,9 +1,11 @@
-import { Page, TEAM, WHY_US } from "../data";
+import { Page, TEAM } from "../data";
+import { useStore } from "../store";
 import { CountUp, Reveal, SectionHead } from "../ui";
 
 export default function About({ go, inquire }: { go: (p: Page) => void; inquire: (n: string) => void }) {
   const founders = TEAM.filter((m) => m.role.includes("Founder"));
   const crew = TEAM.filter((m) => !m.role.includes("Founder"));
+  const { about } = useStore();
 
   return (
     <>
@@ -37,25 +39,11 @@ export default function About({ go, inquire }: { go: (p: Page) => void; inquire:
           </Reveal>
 
           <div className="lg:col-span-7">
-            <SectionHead
-              kicker="Our story"
-              title={<>We don't sell houses. We <span className="text-brand-300">navigate</span> people home.</>}
-            />
+            <SectionHead kicker={about.kicker} title={about.headline} />
             <Reveal delay={150}>
               <div className="mt-6 space-y-5 text-[15px] leading-relaxed text-slate-300">
-                <p>
-                  Dream Home Navigators started in 2014 with one observation: Filipino buyers —
-                  especially first-timers and OFWs — were being steered toward whatever earned
-                  the agent the biggest commission, not what fit their lives. So we flipped the
-                  model. We begin with your budget and your future, then go find the property
-                  that answers to them.
-                </p>
-                <p>
-                  Today our licensed team serves five territories —{" "}
-                  <strong className="text-slate-100">Iloilo, Tagaytay, Cavite, Antipolo and Binondo</strong>{" "}
-                  — with a promise that hasn't changed: verified projects, honest yield numbers,
-                  free site visits, and one accountable navigator from reservation to turnover.
-                </p>
+                <p>{about.paragraph1}</p>
+                <p>{about.paragraph2}</p>
               </div>
             </Reveal>
             <Reveal delay={250}>
@@ -66,8 +54,7 @@ export default function About({ go, inquire }: { go: (p: Page) => void; inquire:
                     Mission
                   </p>
                   <p className="mt-3 text-[13.5px] leading-relaxed text-slate-200">
-                    To make every Filipino property decision an informed one — pairing each
-                    family with a home that fits their budget, their roots, and their plans.
+                    {about.mission}
                   </p>
                 </div>
                 <div className="glass-panel p-6">
@@ -76,8 +63,7 @@ export default function About({ go, inquire }: { go: (p: Page) => void; inquire:
                     Vision
                   </p>
                   <p className="mt-3 text-[13.5px] leading-relaxed text-slate-200">
-                    A Philippines where buying a home — from Quezon City or Qatar — feels
-                    transparent, protected, and genuinely exciting.
+                    {about.vision}
                   </p>
                 </div>
               </div>
@@ -110,8 +96,8 @@ export default function About({ go, inquire }: { go: (p: Page) => void; inquire:
               </div>
               <div className="lg:col-span-7">
                 <ul className="grid gap-4 sm:grid-cols-2">
-                  {WHY_US.map((w, i) => (
-                    <Reveal key={w} delay={i * 80}>
+                  {about.whyUs.map((w, i) => (
+                    <Reveal key={`${i}-${w}`} delay={i * 80}>
                       <li className="glass-panel flex h-full items-start gap-3.5 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-brand-400/40">
                         <i className="fa-solid fa-circle-check mt-0.5 text-lg text-brand-300" />
                         <span className="text-[13.5px] font-semibold leading-relaxed text-slate-100">

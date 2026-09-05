@@ -7,7 +7,14 @@ import {
   useState,
 } from "react";
 import { v4 as uuid } from "uuid";
-import { Property, PROPERTIES } from "./data";
+import {
+  AboutContent,
+  ABOUT_SEED,
+  Property,
+  PROPERTIES,
+  ServiceItem,
+  SERVICE_SEED,
+} from "./data";
 
 /* ────────────────────────────────────────────────────────────────────────────
    Persistent client-side store.
@@ -34,6 +41,9 @@ export interface Lead {
 const LS_CUSTOM = "dhn_custom_properties_v1";
 const LS_DELETED = "dhn_deleted_properties_v1";
 const LS_LEADS = "dhn_leads_v1";
+const LS_SERVICES = "dhn_services_v1";
+const LS_ABOUT = "dhn_about_v1";
+const LS_FEATURED = "dhn_featured_v1";
 
 function read<T>(key: string, fallback: T): T {
   try {
@@ -57,15 +67,25 @@ interface StoreValue {
   deletedCount: number;
   /** ids of default listings that were edited via the console (stored as overrides) */
   editedIds: string[];
-  addProperty: (p: Omit<Property, "id">) => void;
+  addProperty: (p: Omit<Property, "id">) => Property;
   updateProperty: (p: Property) => void;
   deleteProperty: (id: string) => void;
   resetProperties: () => void;
+  featuredId: string | null;
+  setFeatured: (id: string | null) => void;
   leads: Lead[];
   addLead: (l: Omit<Lead, "id" | "timestamp">) => void;
   deleteLead: (id: string) => void;
   clearLeads: () => void;
   importLeads: (rows: Omit<Lead, "id">[]) => number;
+  services: ServiceItem[];
+  addService: (s: Omit<ServiceItem, "id">) => void;
+  updateService: (s: ServiceItem) => void;
+  deleteService: (id: string) => void;
+  resetServices: () => void;
+  about: AboutContent;
+  updateAbout: (a: AboutContent) => void;
+  resetAbout: () => void;
 }
 
 const StoreCtx = createContext<StoreValue | null>(null);
@@ -74,10 +94,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [custom, setCustom] = useState<Property[]>(() => read(LS_CUSTOM, []));
   const [deleted, setDeleted] = useState<string[]>(() => read(LS_DELETED, []));
   const [leads, setLeads] = useState<Lead[]>(() => read(LS_LEADS, []));
+  const [services, setServices] = useState<ServiceItem[]>(() =>
+    read(LS_SERVICES, SERVICE_SEED)
+  );
+  const [about, setAbout] = useState<AboutContent>(() => read(LS_ABOUT, ABOUT_SEED));
+  const [featuredId, setFeaturedId] = useState<string | null>(() =>
+    read<string | null>(LS_FEATURED, null)
+  );
 
   useEffect(() => write(LS_CUSTOM, custom), [custom]);
   useEffect(() => write(LS_DELETED, deleted), [deleted]);
   useEffect(() => write(LS_LEADS, leads), [leads]);
+  useEffect(() => write(LS_SERVICES, services), [services]);
+  useEffect(() => write(LS_ABOUT, about), [about]);
+  useEffect(() => write(LS_FEATURED, featuredId), [featuredId]);
 
   const properties = useMemo(
     () => [
@@ -95,8 +125,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       () => custom.filter((p) => !p.id.startsWith("custom-")).map((p) => p.id),
       [custom]
     ),
-    addProperty: (p) =>
-      setCustom((c) => [{ ...p, id: `custom-${uuid().slice(0, 8)}` }, ...c]),
+    addProperty: (p) => {
+      const created: Property = { ...p, id: `custom-${uuid().slice(0, 8)}` };
+      setCustom((c) => [created, ...c]);
+      return created;
+    },
     updateProperty: (p) => {
       if (p.id.startsWith("custom-")) {
         /* Custom listing → edit in place */
@@ -117,7 +150,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     resetProperties: () => {
       setCustom([]);
       setDeleted([]);
+      setFeaturedId(null);
     },
+    featuredId,
+    setFeatured: (id) => setFeaturedId(id),
     leads,
     addLead: (l) =>
       setLeads((ls) => [
@@ -141,6 +177,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       });
       return added;
     },
+    /* ── Services page content ── */
+    services,
+    addService: (s) =>
+      setServices((sv) => [...sv, { ...s, id: `svc-${uuid().slice(0, 8)}` }]),
+    updateService: (s) =>
+      setServices((sv) => sv.map((x) => (x.id === s.id ? s : x))),
+    deleteService: (id) => setServices((sv) => sv.filter((x) => x.id !== id)),
+    resetServices: () => setServices(SERVICE_SEED),
+    /* ── About page content ── */
+    about,
+    updateAbout: (a) => setAbout(a),
+    resetAbout: () => setAbout(ABOUT_SEED),
   };
 
   return <StoreCtx.Provider value={value}>{children}</StoreCtx.Provider>;

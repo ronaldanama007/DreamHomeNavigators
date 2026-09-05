@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { CONFIG } from "../config";
-import { fmtPrice, LOCATIONS, Property } from "../data";
+import { ABOUT_SEED, fmtPrice, LOCATIONS, Property, ServiceItem } from "../data";
 import { Lead, useStore } from "../store";
 import { Logo } from "../ui";
 
@@ -547,6 +547,8 @@ function PropertiesAdmin({ notify }: { notify: (msg: string, ok?: boolean) => vo
     resetProperties,
     customCount,
     deletedCount,
+    featuredId,
+    setFeatured,
   } = useStore();
   const [f, setF] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -607,14 +609,25 @@ function PropertiesAdmin({ notify }: { notify: (msg: string, ok?: boolean) => vo
       tagline: f.tagline.trim() || "Newly listed by Dream Home Navigators — inquire for full unit details and viewing schedule.",
       img: f.customImg.trim() || f.img,
     };
+    let id: string | null = editingId;
     if (editingId) {
       const orig = properties.find((p) => p.id === editingId);
       if (orig) updateProperty({ ...orig, ...details, id: editingId });
-      notify(`"${details.name}" updated on the live site.`, true);
     } else {
-      addProperty(details);
-      notify(`"${details.name}" is now live on the Properties page.`, true);
+      id = addProperty(details).id;
     }
+    /* Badging a unit "Featured" also claims the Home hero spot */
+    let extra = "";
+    if (details.badge === "Featured" && id) {
+      setFeatured(id);
+      extra = " Also set as the Home featured listing.";
+    }
+    notify(
+      (editingId
+        ? `"${details.name}" updated on the live site.`
+        : `"${details.name}" is now live on the Properties page.`) + extra,
+      true
+    );
     resetForm();
   }
 
@@ -803,6 +816,12 @@ function PropertiesAdmin({ notify }: { notify: (msg: string, ok?: boolean) => vo
                   <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] font-semibold text-slate-400">
                     <span><i className="fa-solid fa-location-dot mr-1 text-brand-400" />{p.location}</span>
                     <span className="text-brand-300">{fmtPrice(p.price)}</span>
+                    {featuredId === p.id && (
+                      <span className="rounded-full bg-brass-400/25 px-2 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider text-brass-200">
+                        <i className="fa-solid fa-star mr-1 text-[8px]" />
+                        Home featured
+                      </span>
+                    )}
                     {p.id.startsWith("custom-") ? (
                       <span className="rounded-full bg-brass-400/20 px-2 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider text-brass-300">
                         Added
@@ -814,6 +833,27 @@ function PropertiesAdmin({ notify }: { notify: (msg: string, ok?: boolean) => vo
                     ) : null}
                   </p>
                 </div>
+                <button
+                  onClick={() => {
+                    const next = featuredId === p.id ? null : p.id;
+                    setFeatured(next);
+                    notify(
+                      next
+                        ? `"${p.name}" is now the featured listing on the Home hero.`
+                        : `Featured spot cleared — Home falls back to the first "Featured" badge.`,
+                      true
+                    );
+                  }}
+                  aria-label={featuredId === p.id ? `Unfeature ${p.name}` : `Feature ${p.name} on Home`}
+                  title={featuredId === p.id ? "Remove from Home hero" : "Show in the Home hero"}
+                  className={`shrink-0 rounded-lg border px-3 py-2 text-[11px] font-extrabold tracking-wider transition ${
+                    featuredId === p.id
+                      ? "border-brass-300/60 bg-brass-400/15 text-brass-300"
+                      : "border-white/12 text-slate-500 hover:border-brass-300/50 hover:bg-brass-400/10 hover:text-brass-300"
+                  }`}
+                >
+                  <i className={`fa-${featuredId === p.id ? "solid" : "regular"} fa-star`} />
+                </button>
                 <button
                   onClick={() => startEdit(p)}
                   aria-label={`Edit ${p.name}`}
@@ -830,6 +870,7 @@ function PropertiesAdmin({ notify }: { notify: (msg: string, ok?: boolean) => vo
                   onClick={() => {
                     if (confirmDelete === p.id) {
                       deleteProperty(p.id);
+                      if (featuredId === p.id) setFeatured(null);
                       setConfirmDelete(null);
                       if (editingId === p.id) resetForm();
                       notify(`"${p.name}" removed.`, true);
@@ -857,6 +898,346 @@ function PropertiesAdmin({ notify }: { notify: (msg: string, ok?: boolean) => vo
           </ul>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────── services tab ─────────────────────────── */
+
+const ICON_CHOICES = [
+  "fa-house-chimney",
+  "fa-magnifying-glass-location",
+  "fa-chart-line",
+  "fa-file-signature",
+  "fa-building-columns",
+  "fa-handshake",
+  "fa-video",
+  "fa-key",
+  "fa-scale-balanced",
+  "fa-clipboard-list",
+  "fa-phone-volume",
+  "fa-earth-asia",
+  "fa-compass",
+  "fa-sack-dollar",
+  "fa-tower-broadcast",
+  "fa-hand-holding-dollar",
+  "fa-headset",
+  "fa-shield-halved",
+];
+
+const ADMIN_INPUT =
+  "w-full rounded-lg border border-white/12 bg-white/[0.06] px-3.5 py-2.5 text-sm font-semibold text-white outline-none transition placeholder:text-slate-500 focus:border-brand-400 focus:bg-white/10 focus:ring-2 focus:ring-brand-500/25";
+const ADMIN_LABEL =
+  "mb-1.5 block text-[10.5px] font-extrabold uppercase tracking-[0.18em] text-slate-400";
+
+const EMPTY_SVC = { icon: ICON_CHOICES[0], title: "", desc: "", bullets: "" };
+
+function ServicesAdmin({ notify }: { notify: (msg: string, ok?: boolean) => void }) {
+  const { services, addService, updateService, deleteService, resetServices } = useStore();
+  const [f, setF] = useState(EMPTY_SVC);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [confirmReset, setConfirmReset] = useState(false);
+
+  const set = (k: keyof typeof EMPTY_SVC) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => setF((p) => ({ ...p, [k]: e.target.value }));
+
+  function resetForm() {
+    setF(EMPTY_SVC);
+    setEditingId(null);
+  }
+
+  function startEdit(s: ServiceItem) {
+    setEditingId(s.id);
+    setF({ icon: s.icon, title: s.title, desc: s.desc, bullets: s.bullets.join("\n") });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    if (!f.title.trim() || !f.desc.trim()) {
+      notify("Service title and description are required.", false);
+      return;
+    }
+    const data = {
+      icon: f.icon,
+      title: f.title.trim(),
+      desc: f.desc.trim(),
+      bullets: f.bullets.split("\n").map((b) => b.trim()).filter(Boolean),
+    };
+    if (editingId) {
+      updateService({ ...data, id: editingId });
+      notify(`Service "${data.title}" updated on the live site.`, true);
+    } else {
+      addService(data);
+      notify(`Service "${data.title}" added to the Services page.`, true);
+    }
+    resetForm();
+  }
+
+  return (
+    <div className="animate-card-in grid gap-8 lg:grid-cols-5">
+      {/* Service form */}
+      <form onSubmit={submit} className="glass-panel-deep rounded-2xl p-6 sm:p-7 lg:col-span-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-display text-xl font-semibold text-white">
+            <i className={`fa-solid ${editingId ? "fa-pen-to-square" : "fa-plus"} mr-2.5 text-brand-300`} />
+            {editingId ? "Edit Service" : "Add a Service"}
+          </h2>
+          {editingId && (
+            <button type="button" onClick={resetForm} className="text-[12px] font-extrabold uppercase tracking-wider text-slate-400 transition hover:text-white">
+              <i className="fa-solid fa-xmark mr-1.5" />
+              Cancel edit
+            </button>
+          )}
+        </div>
+        <p className="mt-1.5 text-[12.5px] text-slate-400">
+          Service cards on the Services page — and the three previews on Home — update instantly.
+        </p>
+
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className={ADMIN_LABEL}>Icon</label>
+            <div className="flex items-center gap-3">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-800 text-lg text-white shadow-lg">
+                <i className={`fa-solid ${f.icon}`} />
+              </span>
+              <select value={f.icon} onChange={set("icon")} className={ADMIN_INPUT}>
+                {ICON_CHOICES.map((ic) => (
+                  <option key={ic} value={ic} className="bg-ink-900">
+                    {ic.replace("fa-", "").replace(/-/g, " ")}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className={ADMIN_LABEL}>Service title *</label>
+            <input value={f.title} onChange={set("title")} placeholder="e.g. Lease-to-Own Assistance" className={ADMIN_INPUT} />
+          </div>
+          <div className="sm:col-span-2">
+            <label className={ADMIN_LABEL}>Description *</label>
+            <textarea value={f.desc} onChange={set("desc")} rows={3} placeholder="What this service does for the client…" className={`${ADMIN_INPUT} resize-none`} />
+          </div>
+          <div className="sm:col-span-2">
+            <label className={ADMIN_LABEL}>What's included — one bullet per line</label>
+            <textarea
+              value={f.bullets}
+              onChange={set("bullets")}
+              rows={4}
+              placeholder={"Needs & budget discovery call\nCurated shortlist in 48 hours\nSide-by-side unit comparisons"}
+              className={`${ADMIN_INPUT} resize-none`}
+            />
+          </div>
+        </div>
+
+        <button type="submit" className="btn btn-primary mt-6 w-full sm:w-auto">
+          <i className={`fa-solid ${editingId ? "fa-floppy-disk" : "fa-briefcase"}`} />
+          {editingId ? "Save Changes" : "Add Service"}
+        </button>
+      </form>
+
+      {/* Manage list */}
+      <div className="lg:col-span-2">
+        <div className="glass-panel-deep rounded-2xl p-6">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-display text-xl font-semibold text-white">
+              <i className="fa-solid fa-list-check mr-2.5 text-brand-300" />
+              Services
+              <span className="ml-2.5 rounded-full bg-brand-500/20 px-2.5 py-1 align-middle text-xs font-extrabold text-brand-300">
+                {services.length}
+              </span>
+            </h2>
+            <button
+              onClick={() => {
+                if (confirmReset) {
+                  resetServices();
+                  resetForm();
+                  setConfirmReset(false);
+                  notify("Services restored to defaults.", true);
+                } else {
+                  setConfirmReset(true);
+                  setTimeout(() => setConfirmReset(false), 3000);
+                }
+              }}
+              className={`rounded-lg border px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider transition ${
+                confirmReset
+                  ? "border-amber-400/60 bg-amber-400/15 text-amber-300"
+                  : "border-white/12 text-slate-400 hover:border-brand-300/50 hover:text-white"
+              }`}
+            >
+              {confirmReset ? "Confirm?" : "Restore defaults"}
+            </button>
+          </div>
+
+          <ul className="mt-5 max-h-[560px] space-y-3 overflow-y-auto pr-1">
+            {services.map((s) => (
+              <li key={s.id} className="group flex items-center gap-3.5 rounded-xl border border-white/8 bg-white/[0.04] p-2.5 transition hover:border-white/20 hover:bg-white/[0.07]">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-800 text-base text-white shadow-lg">
+                  <i className={`fa-solid ${s.icon}`} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[13.5px] font-bold text-white">{s.title}</p>
+                  <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-400">
+                    {s.bullets.length} bullet{s.bullets.length === 1 ? "" : "s"} · {s.desc}
+                  </p>
+                </div>
+                <button
+                  onClick={() => startEdit(s)}
+                  aria-label={`Edit ${s.title}`}
+                  title="Edit service"
+                  className={`shrink-0 rounded-lg border px-3 py-2 text-[11px] transition ${
+                    editingId === s.id
+                      ? "border-brand-400/70 bg-brand-500/25 text-brand-200"
+                      : "border-white/12 text-slate-500 hover:border-brand-400/50 hover:bg-brand-400/10 hover:text-brand-300"
+                  }`}
+                >
+                  <i className="fa-solid fa-pen" />
+                </button>
+                <button
+                  onClick={() => {
+                    if (confirmDelete === s.id) {
+                      deleteService(s.id);
+                      setConfirmDelete(null);
+                      if (editingId === s.id) resetForm();
+                      notify(`Service "${s.title}" removed.`, true);
+                    } else {
+                      setConfirmDelete(s.id);
+                      setTimeout(() => setConfirmDelete(null), 2600);
+                    }
+                  }}
+                  aria-label={`Delete ${s.title}`}
+                  className={`shrink-0 rounded-lg border px-3 py-2 text-[11px] transition ${
+                    confirmDelete === s.id
+                      ? "border-rose-400/60 bg-rose-500/20 text-rose-300"
+                      : "border-white/12 text-slate-500 hover:border-rose-400/50 hover:bg-rose-400/10 hover:text-rose-300"
+                  }`}
+                >
+                  {confirmDelete === s.id ? "Sure?" : <i className="fa-solid fa-trash-can" />}
+                </button>
+              </li>
+            ))}
+            {services.length === 0 && (
+              <li className="rounded-xl border border-dashed border-white/15 p-6 text-center text-[13px] text-slate-400">
+                No services yet. Add one or restore defaults.
+              </li>
+            )}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────── about tab ─────────────────────────── */
+
+function AboutAdmin({ notify }: { notify: (msg: string, ok?: boolean) => void }) {
+  const { about, updateAbout, resetAbout } = useStore();
+  const [f, setF] = useState(() => ({ ...about, whyUsText: about.whyUs.join("\n") }));
+  const [confirmReset, setConfirmReset] = useState(false);
+
+  const set = (k: keyof typeof f) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => setF((p) => ({ ...p, [k]: e.target.value }));
+
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    if (!f.headline.trim() || !f.paragraph1.trim()) {
+      notify("Headline and the first story paragraph are required.", false);
+      return;
+    }
+    updateAbout({
+      kicker: f.kicker.trim() || "Our story",
+      headline: f.headline.trim(),
+      paragraph1: f.paragraph1.trim(),
+      paragraph2: f.paragraph2.trim(),
+      mission: f.mission.trim(),
+      vision: f.vision.trim(),
+      whyUs: f.whyUsText.split("\n").map((w) => w.trim()).filter(Boolean),
+    });
+    notify("About page updated on the live site.", true);
+  }
+
+  function doReset() {
+    resetAbout();
+    setF({ ...ABOUT_SEED, whyUsText: ABOUT_SEED.whyUs.join("\n") });
+    setConfirmReset(false);
+    notify("About page restored to defaults.", true);
+  }
+
+  return (
+    <div className="animate-card-in mx-auto max-w-4xl">
+      <form onSubmit={submit} className="glass-panel-deep rounded-2xl p-6 sm:p-8">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="font-display text-xl font-semibold text-white">
+              <i className="fa-solid fa-address-card mr-2.5 text-brand-300" />
+              About Page Content
+            </h2>
+            <p className="mt-1.5 text-[12.5px] text-slate-400">
+              Story, mission & vision, and the "Why choose us" checklist — all live-editable.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (confirmReset) doReset();
+              else {
+                setConfirmReset(true);
+                setTimeout(() => setConfirmReset(false), 3000);
+              }
+            }}
+            className={`rounded-lg border px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider transition ${
+              confirmReset
+                ? "border-amber-400/60 bg-amber-400/15 text-amber-300"
+                : "border-white/12 text-slate-400 hover:border-brand-300/50 hover:text-white"
+            }`}
+          >
+            {confirmReset ? "Confirm reset?" : "Restore defaults"}
+          </button>
+        </div>
+
+        <div className="mt-6 grid gap-5 sm:grid-cols-2">
+          <div>
+            <label className={ADMIN_LABEL}>Section kicker</label>
+            <input value={f.kicker} onChange={set("kicker")} className={ADMIN_INPUT} />
+          </div>
+          <div>
+            <label className={ADMIN_LABEL}>Story headline *</label>
+            <input value={f.headline} onChange={set("headline")} className={ADMIN_INPUT} />
+          </div>
+          <div className="sm:col-span-2">
+            <label className={ADMIN_LABEL}>Story — paragraph 1 *</label>
+            <textarea value={f.paragraph1} onChange={set("paragraph1")} rows={4} className={`${ADMIN_INPUT} resize-none`} />
+          </div>
+          <div className="sm:col-span-2">
+            <label className={ADMIN_LABEL}>Story — paragraph 2</label>
+            <textarea value={f.paragraph2} onChange={set("paragraph2")} rows={3} className={`${ADMIN_INPUT} resize-none`} />
+          </div>
+          <div>
+            <label className={ADMIN_LABEL}>Mission</label>
+            <textarea value={f.mission} onChange={set("mission")} rows={4} className={`${ADMIN_INPUT} resize-none`} />
+          </div>
+          <div>
+            <label className={ADMIN_LABEL}>Vision</label>
+            <textarea value={f.vision} onChange={set("vision")} rows={4} className={`${ADMIN_INPUT} resize-none`} />
+          </div>
+          <div className="sm:col-span-2">
+            <label className={ADMIN_LABEL}>"Why choose us" checklist — one point per line</label>
+            <textarea value={f.whyUsText} onChange={set("whyUsText")} rows={7} className={`${ADMIN_INPUT} resize-none`} />
+          </div>
+        </div>
+
+        <button type="submit" className="btn btn-primary mt-6">
+          <i className="fa-solid fa-floppy-disk" />
+          Save About Page
+        </button>
+      </form>
+      <p className="mt-4 text-center text-[12px] text-slate-500">
+        <i className="fa-solid fa-circle-info mr-1.5 text-brand-400" />
+        Team roster and credentials are set in <code className="text-brand-300">src/data.ts</code> (TEAM array).
+      </p>
     </div>
   );
 }
@@ -1028,7 +1409,7 @@ MESSENGER_QUICK_REPLIES: [
 
 /* ─────────────────────────── page shell ─────────────────────────── */
 
-type Tab = "dashboard" | "properties" | "setup";
+type Tab = "dashboard" | "properties" | "services" | "about" | "setup";
 
 export default function Admin({ exit }: { exit: () => void }) {
   const [authed, setAuthed] = useState(() => sessionStorage.getItem("dhn_admin") === "1");
@@ -1054,6 +1435,8 @@ export default function Admin({ exit }: { exit: () => void }) {
   const tabs: { id: Tab; label: string; icon: string }[] = [
     { id: "dashboard", label: "Leads Dashboard", icon: "fa-gauge-high" },
     { id: "properties", label: "Properties", icon: "fa-house" },
+    { id: "services", label: "Services", icon: "fa-briefcase" },
+    { id: "about", label: "About Page", icon: "fa-address-card" },
     { id: "setup", label: "Setup Guide", icon: "fa-plug" },
   ];
 
@@ -1080,7 +1463,7 @@ export default function Admin({ exit }: { exit: () => void }) {
             Navigator Console
           </h1>
           <p className="mt-2 max-w-xl text-[13.5px] leading-relaxed text-slate-400">
-            Manage listings, monitor the lead CRM, and configure integrations — without touching code.
+            Manage listings, the Home featured unit, services, About copy, and the lead CRM — without touching code.
           </p>
         </div>
         <div className="flex gap-2.5">
@@ -1121,6 +1504,8 @@ export default function Admin({ exit }: { exit: () => void }) {
       <div className="mt-7">
         {tab === "dashboard" && <Dashboard notify={notify} />}
         {tab === "properties" && <PropertiesAdmin notify={notify} />}
+        {tab === "services" && <ServicesAdmin notify={notify} />}
+        {tab === "about" && <AboutAdmin notify={notify} />}
         {tab === "setup" && <SetupGuide />}
       </div>
     </section>

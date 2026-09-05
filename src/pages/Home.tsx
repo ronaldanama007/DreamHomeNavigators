@@ -3,7 +3,6 @@ import {
   FEATURED_PROPERTY,
   LOCATIONS,
   Page,
-  SERVICES,
   STATS,
   TESTIMONIALS,
   fmtPrice,
@@ -26,9 +25,13 @@ const STEPS = [
 ];
 
 export default function Home({ go, inquire, browseLocation }: Props) {
-  const { properties } = useStore();
+  const { properties, featuredId, services } = useStore();
+  /* Featured on Home: explicit owner pick → first "Featured" badge → first listing */
   const f =
-    properties.find((p) => p.badge === "Featured") ?? properties[0] ?? FEATURED_PROPERTY;
+    properties.find((p) => p.id === featuredId) ??
+    properties.find((p) => p.badge === "Featured") ??
+    properties[0] ??
+    FEATURED_PROPERTY;
   const latest = properties.filter((p) => p.id !== f.id).slice(0, 3);
 
   return (
@@ -254,8 +257,8 @@ export default function Home({ go, inquire, browseLocation }: Props) {
             </Reveal>
           </div>
           <div className="grid gap-5 lg:col-span-7">
-            {SERVICES.slice(0, 3).map((s, i) => (
-              <Reveal key={s.title} delay={i * 110}>
+            {services.slice(0, 3).map((s, i) => (
+              <Reveal key={s.id} delay={i * 110}>
                 <button
                   onClick={() => go("services")}
                   className="glass-panel group flex w-full items-center gap-5 p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:border-brand-400/40 hover:bg-white/[0.11]"
