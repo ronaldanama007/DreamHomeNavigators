@@ -243,7 +243,7 @@ export const SERVICES: Service[] = [
   },
   {
     icon: "fa-solid fa-house",
-    title: "House & Lot / Residential",
+    title: "House & Lot / Residential Property Assistance",
     desc: "Dedicated help for buyers looking at residential house and lot properties in Iloilo, Tagaytay, Antipolo, Cavite and Binondo.",
     bullets: [
       "Residential listings in the areas we serve",
@@ -296,23 +296,23 @@ export interface ProcessStep {
 export const PROCESS_STEPS: ProcessStep[] = [
   {
     step: "1",
-    title: "You tell us what you need",
-    desc: "Preferred location, property type, budget range and timeline — whatever you already know.",
+    title: "Send your inquiry",
+    desc: "Share your preferred location, property type and budget range — or just your questions.",
   },
   {
     step: "2",
-    title: "We match properties to it",
-    desc: "We shortlist what fits and set out clearly what each listing includes.",
+    title: "We match and shortlist",
+    desc: "We come back with the listings that fit, and what each one actually includes.",
   },
   {
     step: "3",
-    title: "You view and compare",
-    desc: "Site viewing or a consultation is arranged at a time that works for you.",
+    title: "View or consult",
+    desc: "Arrange a site viewing, or talk it through first by call, text or Messenger.",
   },
   {
     step: "4",
-    title: "We stay with you after",
-    desc: "Buyer inquiries, follow-up questions and next steps — you keep the same point of contact.",
+    title: "Decide with support",
+    desc: "Follow-up questions, requirements and next steps — handled with the same point of contact.",
   },
 ];
 

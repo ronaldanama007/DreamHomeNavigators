@@ -1,4 +1,4 @@
-import { CONTACT, Page } from "../data";
+import { CONTACT, Page, PROCESS_STEPS } from "../data";
 import { useStore } from "../store";
 import { Reveal, SectionHead } from "../ui";
 
@@ -11,55 +11,126 @@ const OFW_POINTS = [
 
 export default function Services({ go }: { go: (p: Page) => void }) {
   const { services } = useStore();
+
   return (
     <>
+      {/* Page Hero */}
       <section className="mx-auto max-w-7xl px-5 pt-32 sm:px-8 sm:pt-36">
         <SectionHead
           align="center"
           kicker="Our services"
-          title={<>Services built around <span className="text-brand-300">the buyer</span></>}
+          title={<>Everything you need to <span className="text-brand-300">buy with confidence</span></>}
           sub="From the first question to the site viewing and beyond — here is how Dream Home Navigators supports buyers and investors."
         />
 
+        {/* 6 Core Services Grid */}
         <div className="mt-14 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {services.map((s, i) => (
-            <Reveal key={s.id} delay={(i % 3) * 110}>
-              <article className="glass-panel group flex h-full flex-col p-6.5 transition-all duration-300 hover:-translate-y-1.5 hover:border-brand-400/40 hover:bg-white/[0.11]">
-                <div className="flex items-center gap-4">
-                  <span className="grid h-13 w-13 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-800 text-xl text-white shadow-lg shadow-brand-950/60 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
-                    <i className={`fa-solid ${s.icon}`} />
-                  </span>
-                  <h3 className="font-display text-[19px] font-semibold leading-snug text-white">
+          {services.map((s, i) => {
+            const num = String(i + 1).padStart(2, "0");
+            return (
+              <Reveal key={s.id} delay={(i % 3) * 110}>
+                <article className="glass-panel group relative flex h-full flex-col p-6.5 transition-all duration-300 hover:-translate-y-1.5 hover:border-brand-400/40 hover:bg-white/[0.11]">
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="grid h-13 w-13 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-800 text-xl text-white shadow-lg shadow-brand-950/60 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                      <i className={`fa-solid ${s.icon}`} />
+                    </span>
+                    <span className="font-mono text-2xl font-bold tracking-tight text-white/20 transition-colors duration-300 group-hover:text-brand-300/60">
+                      {num}
+                    </span>
+                  </div>
+
+                  <h3 className="mt-4 font-display text-[19px] font-semibold leading-snug text-white">
                     {s.title}
                   </h3>
-                </div>
-                <p className="mt-4 flex-1 text-[13.5px] leading-relaxed text-slate-300/90">
-                  {s.desc}
-                </p>
-                <ul className="mt-5 space-y-2.5 border-t border-white/10 pt-5">
-                  {s.bullets.map((b) => (
-                    <li key={b} className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-200">
-                      <i className="fa-solid fa-circle-check mt-0.5 text-brand-300" />
-                      {b}
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-6 border-t border-white/10 pt-4">
-                  <button
-                    onClick={() => go("contact")}
-                    className="btn btn-ghost w-full justify-center !py-2 text-xs"
-                  >
-                    Ask about this service
-                    <i className="fa-solid fa-arrow-right" />
-                  </button>
-                </div>
-              </article>
-            </Reveal>
-          ))}
+
+                  <p className="mt-3 flex-1 text-[13.5px] leading-relaxed text-slate-300/90">
+                    {s.desc}
+                  </p>
+
+                  <ul className="mt-5 space-y-2.5 border-t border-white/10 pt-5">
+                    {s.bullets.map((b) => (
+                      <li key={b} className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-200">
+                        <i className="fa-solid fa-circle-check mt-0.5 text-brand-300" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-6 border-t border-white/10 pt-4">
+                    <button
+                      onClick={() => go("contact")}
+                      className="btn btn-ghost w-full justify-center !py-2 text-xs group-hover:text-brand-300"
+                    >
+                      Ask about this service
+                      <i className="fa-solid fa-arrow-right transition-transform duration-200 group-hover:translate-x-1" />
+                    </button>
+                  </div>
+                </article>
+              </Reveal>
+            );
+          })}
         </div>
       </section>
 
-      {/* OFW spotlight */}
+      {/* What to expect: Process Timeline */}
+      <section className="mx-auto max-w-7xl px-5 pt-24 sm:px-8">
+        <Reveal>
+          <div className="glass-panel-deep relative overflow-hidden rounded-3xl p-7 sm:p-10 lg:p-14">
+            <div
+              className="pointer-events-none absolute inset-0 opacity-60"
+              style={{ background: "radial-gradient(60% 80% at 0% 0%, rgba(30,64,175,0.4), transparent 70%)" }}
+            />
+            <div className="relative grid items-center gap-12 lg:grid-cols-12">
+              <div className="lg:col-span-7">
+                <span className="kicker">What to expect</span>
+                <h2 className="mt-3 font-display text-3xl font-semibold leading-tight text-white sm:text-4xl">
+                  A simple, predictable process
+                </h2>
+                <p className="mt-4 max-w-xl text-[14.5px] leading-relaxed text-slate-300">
+                  You should never have to guess what happens next. Every inquiry follows the same clear path.
+                </p>
+
+                <div className="mt-8 space-y-5">
+                  {PROCESS_STEPS.map((step) => (
+                    <div
+                      key={step.step}
+                      className="glass-panel flex items-start gap-4 p-4.5 transition-all duration-300 hover:border-brand-400/40 hover:bg-white/[0.09]"
+                    >
+                      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500/30 to-brand-800/30 border border-brand-400/30 font-mono text-sm font-bold text-brand-300 shadow-sm">
+                        {step.step}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-display text-[16.5px] font-semibold text-white">
+                          {step.title}
+                        </h3>
+                        <p className="mt-1 text-[13px] leading-relaxed text-slate-300/85">
+                          {step.desc}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="relative lg:col-span-5">
+                <div className="overflow-hidden rounded-2xl border border-white/15 bg-ink-900/60 shadow-2xl shadow-ink-950/80">
+                  <img
+                    src="/assets/img/pine-deluxe-living.jpg"
+                    alt="Living and dining area of Pine Deluxe unit"
+                    className="h-full w-full object-cover aspect-[4/3] transition-transform duration-500 hover:scale-105"
+                    loading="lazy"
+                  />
+                  <div className="border-t border-white/10 bg-ink-950/80 px-4 py-3 text-center text-xs font-medium text-slate-300">
+                    Pine Deluxe living & dining interior — verified project materials
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* For Kabayans abroad: Remote Desk */}
       <section className="mx-auto max-w-7xl px-5 pt-24 sm:px-8">
         <Reveal>
           <div className="glass-panel-deep relative overflow-hidden rounded-3xl">
@@ -70,7 +141,7 @@ export default function Services({ go }: { go: (p: Page) => void }) {
             <div className="relative grid gap-10 p-7 sm:p-10 lg:grid-cols-2 lg:p-14">
               <div>
                 <span className="kicker">For Kabayans abroad</span>
-                <h2 className="font-display mt-4 text-3xl font-semibold leading-tight text-white sm:text-4xl">
+                <h2 className="mt-4 font-display text-3xl font-semibold leading-tight text-white sm:text-4xl">
                   Buying from abroad? We built a desk <em className="italic text-brass-300">just for you.</em>
                 </h2>
                 <p className="mt-5 max-w-md text-[14.5px] leading-relaxed text-slate-300">
@@ -101,6 +172,41 @@ export default function Services({ go }: { go: (p: Page) => void }) {
                     </div>
                   </Reveal>
                 ))}
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* Consultation CTA Band */}
+      <section className="mx-auto max-w-7xl px-5 pt-20 sm:px-8">
+        <Reveal>
+          <div className="glass-panel relative overflow-hidden rounded-3xl border border-brand-500/30 bg-gradient-to-r from-brand-950/90 via-ink-900/90 to-brand-900/70 p-8 sm:p-12">
+            <div className="relative flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
+              <div className="max-w-2xl">
+                <span className="kicker">Free to start the conversation</span>
+                <h2 className="mt-3 font-display text-2xl font-semibold leading-tight text-white sm:text-3xl">
+                  Book a consultation with Dream Home Navigators
+                </h2>
+                <p className="mt-3 text-[14.5px] leading-relaxed text-slate-300">
+                  Tell us what you are looking for and we will set out the options that actually fit — no obligation to proceed.
+                </p>
+              </div>
+              <div className="flex shrink-0 flex-wrap items-center gap-3.5">
+                <button
+                  onClick={() => go("contact")}
+                  className="btn btn-primary shadow-lg shadow-brand-950/50"
+                >
+                  Book a Consultation
+                  <i className="fa-solid fa-arrow-right" />
+                </button>
+                <a
+                  href={`tel:${CONTACT.phone.replace(/[^+\d]/g, "")}`}
+                  className="btn btn-ghost border-white/20 text-white hover:bg-white/10"
+                >
+                  <i className="fa-solid fa-phone text-brand-300" />
+                  +63 921 603 0693
+                </a>
               </div>
             </div>
           </div>
