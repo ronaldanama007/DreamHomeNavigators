@@ -2,6 +2,9 @@ import { Page, TEAM, WHY_US } from "../data";
 import { CountUp, Reveal, SectionHead } from "../ui";
 
 export default function About({ go, inquire }: { go: (p: Page) => void; inquire: (n: string) => void }) {
+  const founders = TEAM.filter((m) => m.role.includes("Founder"));
+  const crew = TEAM.filter((m) => !m.role.includes("Founder"));
+
   return (
     <>
       {/* Story */}
@@ -132,9 +135,13 @@ export default function About({ go, inquire }: { go: (p: Page) => void; inquire:
           title={<>Licensed hands on <span className="text-brand-300">your wheel</span></>}
           sub="A small, senior team — you'll know your navigator by name, not by ticket number."
         />
-        {/* Founding partners — featured pair */}
-        <div className="mx-auto mt-12 grid max-w-3xl gap-6 sm:grid-cols-2">
-          {TEAM.filter((m) => m.role.includes("Founder")).map((m, i) => (
+        {/* Founding partners — featured (adapts to 1 or 2 founders) */}
+        <div
+          className={`mx-auto mt-12 grid gap-6 ${
+            founders.length > 1 ? "max-w-3xl sm:grid-cols-2" : "max-w-md"
+          }`}
+        >
+          {founders.map((m, i) => (
             <Reveal key={m.name} delay={i * 120}>
               <article className="glass-panel group relative h-full overflow-hidden p-7 text-center transition-all duration-300 hover:-translate-y-1.5 hover:border-brass-300/50">
                 <span
@@ -160,7 +167,7 @@ export default function About({ go, inquire }: { go: (p: Page) => void; inquire:
 
         {/* Senior crew */}
         <div className="mx-auto mt-6 grid max-w-4xl gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {TEAM.filter((m) => !m.role.includes("Founder")).map((m, i) => (
+          {crew.map((m, i) => (
             <Reveal key={m.name} delay={i * 100}>
               <article className="glass-panel group h-full p-6 text-center transition-all duration-300 hover:-translate-y-1.5 hover:border-brand-400/40">
                 <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-brand-500 via-brand-700 to-brand-900 font-display text-2xl font-semibold text-white shadow-lg shadow-brand-950/50 ring-2 ring-brand-300/30 transition-transform duration-300 group-hover:scale-105">
