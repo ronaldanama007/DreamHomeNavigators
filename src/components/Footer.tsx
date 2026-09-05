@@ -16,15 +16,14 @@ export default function Footer({
             <div className="flex items-center gap-3">
               <Logo size={44} />
               <div className="leading-tight">
-                <p className="font-display text-lg font-semibold text-slate-50">Dream Home</p>
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.32em] text-brand-300">
-                  Navigators
+                <p className="font-display text-lg font-semibold text-slate-50">Dream Home Navigators</p>
+                <p className="text-[10.5px] font-medium text-brand-300">
+                  Guiding You Home, Building Your Future
                 </p>
               </div>
             </div>
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-slate-300/85">
-              A licensed Philippine real estate brokerage navigating families, first-time
-              buyers, investors and OFWs to the right property across five key territories.
+              A client-focused real estate team helping buyers and investors find suitable properties across Iloilo, Tagaytay, Antipolo, Cavite and Binondo.
             </p>
             <div className="mt-6 flex gap-3">
               <a
@@ -103,13 +102,9 @@ export default function Footer({
 
           <div className="md:col-span-3">
             <h4 className="text-[11px] font-extrabold uppercase tracking-[0.24em] text-brand-300">
-              Reach Us
+              Get in touch
             </h4>
             <ul className="mt-5 space-y-4 text-sm text-slate-300">
-              <li className="flex gap-3">
-                <i className="fa-solid fa-location-dot mt-1 text-brand-400" />
-                <span>{CONTACT.address}</span>
-              </li>
               <li className="flex gap-3">
                 <i className="fa-solid fa-phone mt-1 text-brand-400" />
                 <a href={CONTACT.phoneHref} className="transition hover:text-white">
@@ -117,14 +112,20 @@ export default function Footer({
                 </a>
               </li>
               <li className="flex gap-3">
-                <i className="fa-solid fa-envelope mt-1 text-brand-400" />
-                <a href={CONTACT.emailHref} className="break-all transition hover:text-white">
-                  {CONTACT.email}
+                <i className="fa-brands fa-facebook-messenger mt-1 text-brand-400" />
+                <a href={CONTACT.messenger} target="_blank" rel="noreferrer" className="transition hover:text-white">
+                  Messenger
                 </a>
               </li>
               <li className="flex gap-3">
-                <i className="fa-regular fa-clock mt-1 text-brand-400" />
-                <span>{CONTACT.hours}</span>
+                <i className="fa-brands fa-facebook mt-1 text-brand-400" />
+                <a href={CONTACT.facebook} target="_blank" rel="noreferrer" className="transition hover:text-white">
+                  dreamhomenavigators01
+                </a>
+              </li>
+              <li className="flex gap-3">
+                <i className="fa-solid fa-location-dot mt-1 text-brand-400" />
+                <span>{CONTACT.areasServed}</span>
               </li>
             </ul>
           </div>
@@ -133,11 +134,11 @@ export default function Footer({
         <div className="border-t border-white/10">
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-5 py-5 text-xs text-slate-400 sm:flex-row sm:px-8">
             <p>
-              © 2026 Dream Home Navigators · Licensed Real Estate Brokerage · Philippines
+              © 2026 Dream Home Navigators. Guiding You Home, Building Your Future.
             </p>
             <p className="inline-flex items-center gap-2">
               <i className="fa-solid fa-shield-halved text-brand-400" />
-              Secure inquiries · HTTPS · Leads synced to our CRM
+              Verified materials · Direct guidance · Easy to reach
             </p>
           </div>
         </div>

@@ -17,23 +17,23 @@ export default function About({ go, inquire }: { go: (p: Page) => void; inquire:
               <div className="glass-panel overflow-hidden rounded-2xl p-2.5">
                 <div className="overflow-hidden rounded-xl">
                   <img
-                    src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1000&auto=format&fit=crop"
-                    alt="Signing a property agreement"
+                    src="/assets/img/pine-deluxe-exterior.jpg"
+                    alt="Two-storey Pine Deluxe unit at Emerald Estate with covered carport and roof-deck balcony"
                     className="h-[420px] w-full object-cover transition-transform duration-[1.4s] hover:scale-105 sm:h-[480px]"
                   />
                 </div>
               </div>
               <div className="glass-panel-deep absolute -bottom-6 -right-3 rounded-2xl px-6 py-4 text-center shadow-2xl sm:-right-6">
                 <p className="font-display text-3xl font-semibold text-brand-300">
-                  <CountUp value={12} suffix="+" />
+                  <CountUp value={5} />
                 </p>
                 <p className="mt-0.5 text-[10.5px] font-extrabold uppercase tracking-[0.18em] text-slate-300">
-                  Years navigating
+                  Key areas served
                 </p>
               </div>
               <div className="glass-chip absolute -top-4 left-6 inline-flex items-center gap-2 !bg-ink-900/70 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.18em] text-brand-200">
                 <i className="fa-solid fa-compass text-brass-300" />
-                Est. 2014 · Metro Manila
+                Dream Home Navigators
               </div>
             </div>
           </Reveal>
@@ -47,32 +47,68 @@ export default function About({ go, inquire }: { go: (p: Page) => void; inquire:
               </div>
             </Reveal>
             <Reveal delay={250}>
-              <div className="mt-8 grid gap-5 sm:grid-cols-2">
-                <div className="glass-panel p-6">
-                  <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-brand-300">
-                    <i className="fa-solid fa-bullseye mr-2" />
-                    Mission
-                  </p>
-                  <p className="mt-3 text-[13.5px] leading-relaxed text-slate-200">
-                    {about.mission}
-                  </p>
-                </div>
-                <div className="glass-panel p-6">
-                  <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-brand-300">
-                    <i className="fa-regular fa-eye mr-2" />
-                    Vision
-                  </p>
-                  <p className="mt-3 text-[13.5px] leading-relaxed text-slate-200">
-                    {about.vision}
-                  </p>
-                </div>
+              <div className="glass-panel-deep mt-8 rounded-2xl p-7 text-center">
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.24em] text-brand-300">
+                  Our Mission
+                </p>
+                <h3 className="font-display mx-auto mt-3 max-w-2xl text-xl font-semibold leading-snug text-white sm:text-2xl">
+                  "{about.mission}"
+                </h3>
+                <p className="mt-3 text-sm font-bold text-brass-300">
+                  {about.vision}
+                </p>
               </div>
             </Reveal>
           </div>
         </div>
       </section>
 
-      {/* Why choose us */}
+      {/* How we work / 3 Core Principles */}
+      <section className="mx-auto max-w-7xl px-5 pt-24 sm:px-8">
+        <SectionHead
+          align="center"
+          kicker="How we work"
+          title={<>Trusted, professional <span className="text-brand-300">service</span></>}
+          sub="A consistent way of working, so you always know what happens next."
+        />
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <Reveal delay={100}>
+            <div className="glass-panel h-full rounded-2xl p-7 transition-all duration-300 hover:-translate-y-1 hover:border-brand-400/40">
+              <span className="grid h-12 w-12 place-items-center rounded-xl bg-brand-500/20 text-xl text-brand-300">
+                <i className="fa-solid fa-shield-halved" />
+              </span>
+              <h3 className="font-display mt-5 text-xl font-semibold text-white">Straight information</h3>
+              <p className="mt-3 text-sm leading-relaxed text-slate-300">
+                We work from what is actually documented about a property. Where a detail has not been confirmed, we say so rather than filling the gap with a guess.
+              </p>
+            </div>
+          </Reveal>
+          <Reveal delay={180}>
+            <div className="glass-panel h-full rounded-2xl p-7 transition-all duration-300 hover:-translate-y-1 hover:border-brand-400/40">
+              <span className="grid h-12 w-12 place-items-center rounded-xl bg-brand-500/20 text-brand-300">
+                <i className="fa-solid fa-compass" />
+              </span>
+              <h3 className="font-display mt-5 text-xl font-semibold text-white">Guidance, not pressure</h3>
+              <p className="mt-3 text-sm leading-relaxed text-slate-300">
+                The goal is a property that fits your plans. That means honest answers about what suits you — and what does not.
+              </p>
+            </div>
+          </Reveal>
+          <Reveal delay={260}>
+            <div className="glass-panel h-full rounded-2xl p-7 transition-all duration-300 hover:-translate-y-1 hover:border-brand-400/40">
+              <span className="grid h-12 w-12 place-items-center rounded-xl bg-brand-500/20 text-brand-300">
+                <i className="fa-solid fa-comments" />
+              </span>
+              <h3 className="font-display mt-5 text-xl font-semibold text-white">Available when it matters</h3>
+              <p className="mt-3 text-sm leading-relaxed text-slate-300">
+                Buying property runs on timing. Questions get answered by call, text or Messenger so you are never left waiting.
+              </p>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* 4-Step Timeline & Why choose us */}
       <section className="mx-auto max-w-7xl px-5 pt-24 sm:px-8">
         <Reveal>
           <div className="glass-panel-deep rounded-3xl p-7 sm:p-12">
@@ -80,17 +116,16 @@ export default function About({ go, inquire }: { go: (p: Page) => void; inquire:
               <div className="lg:col-span-5">
                 <SectionHead
                   kicker="Why choose us"
-                  title={<>The difference between an agent and a <em className="italic text-brass-300">navigator</em></>}
-                  sub="Anyone can show you a unit. Very few will tell you which one to walk away from — we do both."
+                  title={<>A straightforward, <em className="italic text-brass-300">client-focused</em> approach</>}
+                  sub="We concentrate on the locations we know rather than spreading thin across Luzon and Visayas."
                 />
                 <div className="mt-8 flex flex-wrap gap-3">
                   <button onClick={() => go("contact")} className="btn btn-primary">
                     <i className="fa-regular fa-paper-plane" />
-                    Start Your Inquiry
+                    Send an Inquiry
                   </button>
-                  <button onClick={() => inquire("Pine Deluxe at Emerald Estate")} className="btn btn-ghost">
-                    <i className="fa-solid fa-star text-brass-300" />
-                    Ask About Pine Deluxe
+                  <button onClick={() => go("properties")} className="btn btn-ghost">
+                    Browse Properties
                   </button>
                 </div>
               </div>
@@ -117,13 +152,32 @@ export default function About({ go, inquire }: { go: (p: Page) => void; inquire:
       <section className="mx-auto max-w-7xl px-5 pt-24 sm:px-8">
         <SectionHead
           align="center"
-          kicker="The crew"
-          title={<>Licensed hands on <span className="text-brand-300">your wheel</span></>}
-          sub="A small, senior team — you'll know your navigator by name, not by ticket number."
+          kicker="The team"
+          title={<>The people you will be <span className="text-brand-300">working with</span></>}
+          sub="Direct guidance from experienced real estate navigators."
         />
-        {/* Founding partners — featured (adapts to 1 or 2 founders) */}
+
+        {/* Official Team Card from Demo */}
+        <Reveal delay={150}>
+          <div className="glass-panel mx-auto mt-10 max-w-2xl rounded-2xl p-7 text-center">
+            <div className="mx-auto grid h-20 w-20 place-items-center rounded-2xl bg-brand-500/20 p-2">
+              <img src="/assets/img/logo-mark-light.png" alt="Dream Home Navigators" className="h-10 w-auto" />
+            </div>
+            <h3 className="font-display mt-4 text-2xl font-semibold text-white">Dream Home Navigators</h3>
+            <p className="mt-1 text-xs font-extrabold uppercase tracking-[0.2em] text-brand-300">Real Estate Team</p>
+            <p className="mt-4 text-sm leading-relaxed text-slate-300">
+              A client-focused real estate team helping buyers and investors find suitable properties across Iloilo, Tagaytay, Antipolo, Cavite and Binondo. We work directly with you through inquiry, shortlisting, site viewing and closing.
+            </p>
+            <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-slate-400">
+              <i className="fa-solid fa-circle-info text-brand-300" />
+              <span>PRC &amp; DHSUD Accredited Team</span>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* Leadership members */}
         <div
-          className={`mx-auto mt-12 grid gap-6 ${
+          className={`mx-auto mt-8 grid gap-6 ${
             founders.length > 1 ? "max-w-3xl sm:grid-cols-2" : "max-w-md"
           }`}
         >
@@ -146,24 +200,6 @@ export default function About({ go, inquire }: { go: (p: Page) => void; inquire:
                   {m.role}
                 </p>
                 <p className="mt-3 text-[13.5px] leading-relaxed text-slate-300/85">{m.note}</p>
-              </article>
-            </Reveal>
-          ))}
-        </div>
-
-        {/* Senior crew */}
-        <div className="mx-auto mt-6 grid max-w-4xl gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {crew.map((m, i) => (
-            <Reveal key={m.name} delay={i * 100}>
-              <article className="glass-panel group h-full p-6 text-center transition-all duration-300 hover:-translate-y-1.5 hover:border-brand-400/40">
-                <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-brand-500 via-brand-700 to-brand-900 font-display text-2xl font-semibold text-white shadow-lg shadow-brand-950/50 ring-2 ring-brand-300/30 transition-transform duration-300 group-hover:scale-105">
-                  {m.initials}
-                </div>
-                <h3 className="font-display mt-5 text-[17px] font-semibold text-white">{m.name}</h3>
-                <p className="mt-1 text-[11px] font-extrabold uppercase tracking-[0.16em] text-brand-300">
-                  {m.role}
-                </p>
-                <p className="mt-3 text-[13px] leading-relaxed text-slate-300/85">{m.note}</p>
               </article>
             </Reveal>
           ))}

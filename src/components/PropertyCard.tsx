@@ -64,26 +64,35 @@ export default function PropertyCard({
               </span>
             </>
           ) : (
-            <span className="inline-flex items-center gap-1.5">
-              <i className="fa-solid fa-mountain-sun text-brand-600" /> {p.lotNote ?? "Lot only"}
+            <span className="inline-flex items-center gap-1.5 text-[12px]">
+              <i className="fa-solid fa-house text-brand-600" /> {p.lotNote ?? "House / Residential"}
             </span>
           )}
-          <span className="inline-flex items-center gap-1.5">
-            <i className="fa-solid fa-ruler-combined text-brand-600" /> {p.sqm} sqm
-          </span>
+          {p.sqm > 0 && p.beds > 0 && (
+            <span className="inline-flex items-center gap-1.5">
+              <i className="fa-solid fa-ruler-combined text-brand-600" /> {p.sqm} sqm
+            </span>
+          )}
           {p.parking > 0 && (
             <span className="inline-flex items-center gap-1.5">
-              <i className="fa-solid fa-car text-brand-600" /> {p.parking}
+              <i className="fa-solid fa-car text-brand-600" /> Carport
             </span>
           )}
         </div>
 
-        <div className="mt-4 flex items-baseline justify-between gap-2">
-          <p className="text-[22px] font-extrabold tracking-tight text-brand-800">
-            {fmtPrice(p.price)}
-          </p>
+        <div className="mt-4">
+          {p.price < 100_000 && (
+            <span className="block text-[11px] font-semibold text-slate-500">
+              {p.id === "jaro-house" ? "Monthly amortization" : "Price starts at"}
+            </span>
+          )}
+          <div className="flex items-baseline justify-between gap-2">
+            <p className="text-[22px] font-extrabold tracking-tight text-brand-800">
+              {fmtPrice(p.price)}
+            </p>
+          </div>
           {p.priceNote && (
-            <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
+            <p className="mt-0.5 text-[11px] italic text-slate-500">
               {p.priceNote}
             </p>
           )}
@@ -94,7 +103,7 @@ export default function PropertyCard({
           className="btn btn-primary mt-4 w-full justify-center !py-2.5 text-[13.5px]"
         >
           <i className="fa-regular fa-paper-plane" />
-          Inquire About This Unit
+          Ask About This Property
         </button>
       </div>
     </article>

@@ -120,8 +120,8 @@ export default function Contact({
         <SectionHead
           align="center"
           kicker="Get in touch"
-          title={<>Let's plot the course to <span className="text-brand-300">your next address</span></>}
-          sub="Fill out the form and a licensed navigator replies within 24 hours. Your inquiry lands straight in our CRM — nothing gets lost."
+          title={<>Send an <span className="text-brand-300">inquiry</span> or talk to the team</>}
+          sub="Send a general property inquiry or reach the team directly by call, text or Messenger."
         />
 
         <div className="mt-14 grid gap-8 lg:grid-cols-5">
@@ -130,34 +130,35 @@ export default function Contact({
             {[
               {
                 icon: "fa-phone-volume",
-                title: "Call or Viber",
+                title: "Call or text",
                 line1: CONTACT.phone,
-                line2: CONTACT.hours,
+                line2: "Available for calls & SMS inquiries",
                 href: CONTACT.phoneHref,
                 cta: "Call now",
               },
               {
                 icon: "fa-brands fa-facebook-messenger",
-                title: "Messenger — fastest",
-                line1: "m.me/dreamhomenavigators01",
-                line2: "Typically replies within minutes",
+                title: "Messenger",
+                line1: "dreamhomenavigators01",
+                line2: "Direct messaging with our team",
                 href: CONTACT.messenger,
-                cta: "Open chat",
+                cta: "Message on Messenger",
                 external: true,
               },
               {
-                icon: "fa-envelope-open-text",
-                title: "Official email",
-                line1: CONTACT.email,
-                line2: "For contracts & formal documents",
-                href: CONTACT.emailHref,
-                cta: "Write to us",
+                icon: "fa-brands fa-facebook",
+                title: "Facebook page",
+                line1: "dreamhomenavigators01",
+                line2: "Official page & updates",
+                href: CONTACT.facebook,
+                cta: "Visit Facebook page",
+                external: true,
               },
               {
-                icon: "fa-building",
-                title: "Head office",
-                line1: CONTACT.address,
-                line2: "Satellite meetups in all 5 territories",
+                icon: "fa-location-dot",
+                title: "Areas served",
+                line1: CONTACT.areasServed,
+                line2: CONTACT.responseNote,
                 href: undefined,
                 cta: undefined,
               },

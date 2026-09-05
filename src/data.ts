@@ -39,50 +39,36 @@ export const PROPERTIES: Property[] = [
   {
     id: FEATURED_ID,
     name: "Pine Deluxe at Emerald Estate",
-    location: "Tagaytay",
-    area: "Kaybagay, Tagaytay City",
-    type: "House & Lot",
-    badge: "Featured",
-    beds: 4,
-    baths: 3,
-    parking: 2,
-    sqm: 210,
-    lotNote: "180 sqm lot",
-    price: 14_500_000,
-    img: u("photo-1470770841072-f978cf4d019e"),
-    tagline: "A pine-shaded sanctuary above the ridge — cool mornings, mist over Taal, and a lanai built for slow weekends.",
-  },
-  {
-    id: "casa-alona",
-    name: "Casa Alona Residences",
     location: "Iloilo",
-    area: "Diversion Road, Iloilo City",
-    type: "Condominium",
-    badge: "Pre-selling",
-    beds: 2,
-    baths: 1,
-    parking: 1,
-    sqm: 48,
-    price: 4_200_000,
-    priceNote: "Flexible equity terms",
-    img: u("photo-1545324418-cc1a3fa10c00"),
-    tagline: "Smart-cut units in the heart of the Diversion Road growth corridor.",
-  },
-  {
-    id: "rivera-park",
-    name: "Rivera Park Homes",
-    location: "Iloilo",
-    area: "Mandurriao, Iloilo City",
-    type: "House & Lot",
-    badge: "RFO",
-    beds: 3,
+    area: "Emerald Estate",
+    type: "House / Residential",
+    badge: "Available",
+    beds: 0,
     baths: 2,
     parking: 1,
     sqm: 120,
-    lotNote: "150 sqm lot",
-    price: 6_800_000,
-    img: u("photo-1568605114967-8130f3a36994"),
-    tagline: "Move-in-ready family home beside Mandurriao's schools and esplanade.",
+    lotNote: "Two-storey · Carport · Bedrooms on request",
+    price: 18516.86,
+    priceNote: "As published on the official project material.",
+    img: "/assets/img/pine-deluxe-exterior.jpg",
+    tagline: "A thoughtfully designed home that blends modern style, comfort and functionality — presented by Dream Home Navigators.",
+  },
+  {
+    id: "jaro-house",
+    name: "House for Sale in Jaro, Iloilo City",
+    location: "Iloilo",
+    area: "Jaro, Iloilo City",
+    type: "House / Residential",
+    badge: "Available",
+    beds: 3,
+    baths: 2,
+    parking: 1,
+    sqm: 140,
+    lotNote: "Two-storey · Carport · Balcony",
+    price: 37921.82,
+    priceNote: "Monthly amortization as published on the official material.",
+    img: "/assets/img/jaro-house-exterior.jpg",
+    tagline: "Spacious living room, modern kitchen, dining area, three bedrooms, two toilet & bath and a carport.",
   },
   {
     id: "highland-ridge",
@@ -97,6 +83,7 @@ export const PROPERTIES: Property[] = [
     sqm: 160,
     lotNote: "140 sqm lot",
     price: 11_200_000,
+    priceNote: "Consultation & site visit on request",
     img: u("photo-1600596542815-ffad4c1539a9"),
     tagline: "Twin villas on the cool east ridge, five minutes from the skyline road.",
   },
@@ -146,24 +133,9 @@ export const PROPERTIES: Property[] = [
     sqm: 180,
     lotNote: "160 sqm lot",
     price: 9_800_000,
+    priceNote: "Consultation & site visit on request",
     img: u("photo-1512917774080-9991f1c4c750"),
     tagline: "East-facing family home where the Sierra Madre breeze meets the city view.",
-  },
-  {
-    id: "cloud-nine",
-    name: "Cloud Nine Townhomes",
-    location: "Antipolo",
-    area: "San Roque, Antipolo City",
-    type: "Townhouse",
-    badge: "Pre-selling",
-    beds: 2,
-    baths: 2,
-    parking: 1,
-    sqm: 78,
-    price: 4_600_000,
-    priceNote: "Low monthly amortization",
-    img: u("photo-1600585154526-990dced4db0d"),
-    tagline: "Compact two-storey homes above the clouds, minutes from Masinag.",
   },
   {
     id: "fortune-tower",
@@ -181,27 +153,16 @@ export const PROPERTIES: Property[] = [
     img: u("photo-1460317442991-0ec209397118"),
     tagline: "A heritage-district tower at the corner of old-money Manila and Chinatown commerce.",
   },
-  {
-    id: "escolta-lofts",
-    name: "Escolta Bay Lofts",
-    location: "Binondo",
-    area: "Escolta, Binondo, Manila",
-    type: "Loft Unit",
-    badge: "New Launch",
-    beds: 1,
-    baths: 1,
-    parking: 1,
-    sqm: 42,
-    price: 6_400_000,
-    img: u("photo-1502672260266-1c1ef2d93688"),
-    tagline: "Double-height lofts in the creative corridor, walking distance to Escolta's revival.",
-  },
 ];
 
 export const FEATURED_PROPERTY = PROPERTIES.find((p) => p.id === FEATURED_ID)!;
 
-export const fmtPrice = (n: number) =>
-  n >= 1_000_000 ? `₱${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M` : `₱${n.toLocaleString()}`;
+export const fmtPrice = (n: number) => {
+  if (n >= 1_000_000) {
+    return `₱${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+  }
+  return `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+};
 
 export interface Service {
   icon: string;
@@ -212,40 +173,99 @@ export interface Service {
 
 export const SERVICES: Service[] = [
   {
-    icon: "fa-house-chimney",
-    title: "Buying Assistance",
-    desc: "End-to-end guidance from first shortlist to turnover — reservation, contracts, and closing handled with you, step by step.",
-    bullets: ["Document review & negotiation", "Reservation & SPA handling", "Turnover & punch-list support"],
+    icon: "fa-solid fa-house-chimney",
+    title: "Property Buying Assistance",
+    desc: "Support through the whole purchase — from choosing a property to understanding what is required of you at each step.",
+    bullets: [
+      "Shortlisting properties that fit your brief",
+      "Walking through what a listing includes",
+      "Coordinating with you on requirements and timelines",
+      "A single point of contact from inquiry to decision",
+    ],
   },
   {
-    icon: "fa-magnifying-glass-location",
+    icon: "fa-solid fa-chart-line",
+    title: "Property Investment Guidance",
+    desc: "For buyers looking at property as an investment rather than a residence, guidance on how the available options compare.",
+    bullets: [
+      "Comparing options across the areas we serve",
+      "Clarity on payment terms as published by the project",
+      "Discussion of what suits your holding plans",
+      "Straight answers on what is and is not confirmed",
+    ],
+  },
+  {
+    icon: "fa-solid fa-house",
+    title: "House & Lot / Residential",
+    desc: "Dedicated help for buyers looking at residential house and lot properties in Iloilo, Tagaytay, Antipolo, Cavite and Binondo.",
+    bullets: [
+      "Residential listings in the areas we serve",
+      "Details on layout, features and inclusions",
+      "Help comparing units within a project",
+      "Support arranging the next step",
+    ],
+  },
+  {
+    icon: "fa-solid fa-magnifying-glass-location",
     title: "Property Matching",
-    desc: "We filter hundreds of listings down to a curated shortlist that fits your budget, lifestyle, and long-term plans — not the other way around.",
-    bullets: ["Needs & budget discovery call", "Curated shortlist in 48 hours", "Side-by-side unit comparisons"],
+    desc: "Rather than sending you everything, we narrow the field to the properties that actually answer your brief.",
+    bullets: [
+      "Matching on location, type and budget range",
+      "Shortlists you can review at your own pace",
+      "Adjusting the search as your priorities change",
+      "New options flagged as they become available",
+    ],
   },
   {
-    icon: "fa-chart-line",
-    title: "Investment Guidance",
-    desc: "Rental yield, appreciation corridors, and exit timing — straight talk on which assets actually perform in each of our five territories.",
-    bullets: ["Yield & appreciation analysis", "OFW investment structuring", "Exit & resale strategy"],
+    icon: "fa-solid fa-eye",
+    title: "Site Viewing / Consultation",
+    desc: "See a property in person, or talk it through first — whichever you prefer, arranged at a time that works for you.",
+    bullets: [
+      "Site viewing arranged on request",
+      "Consultation by call, text or Messenger",
+      "Questions answered before you commit to a visit",
+      "Follow-up after the viewing",
+    ],
   },
   {
-    icon: "fa-route",
-    title: "Site Viewing Coordination",
-    desc: "Free, no-pressure site visits — scheduled, chauffeured if needed, and consolidated into efficient multi-project tours per location.",
-    bullets: ["Free scheduled viewings", "Consolidated project tours", "Live video visits for OFWs"],
+    icon: "fa-solid fa-comments",
+    title: "Buyer Inquiry Assistance",
+    desc: "Every question, from the first one to the last, answered by a real person who knows your file.",
+    bullets: [
+      "Direct replies by call, text or Messenger",
+      "Help understanding documents and terms",
+      "Follow-up on outstanding questions",
+      "Continuity — the same contact throughout",
+    ],
+  },
+];
+
+export interface ProcessStep {
+  step: string;
+  title: string;
+  desc: string;
+}
+
+export const PROCESS_STEPS: ProcessStep[] = [
+  {
+    step: "1",
+    title: "You tell us what you need",
+    desc: "Preferred location, property type, budget range and timeline — whatever you already know.",
   },
   {
-    icon: "fa-file-signature",
-    title: "Loan & Documentation",
-    desc: "Bank pre-qualification, Pag-IBIG processing, and title paperwork — we run the document chase so you don't have to.",
-    bullets: ["Bank & Pag-IBIG pre-qualification", "Title & tax document processing", "Notarial & transfer assistance"],
+    step: "2",
+    title: "We match properties to it",
+    desc: "We shortlist what fits and set out clearly what each listing includes.",
   },
   {
-    icon: "fa-plane-departure",
-    title: "OFW Remote Buying",
-    desc: "A dedicated desk for Filipinos abroad: video tours, SPA via consulate, and a trusted point person from reservation to turnover.",
-    bullets: ["Video-call site inspections", "SPA signing via consulate", "Progress updates every milestone"],
+    step: "3",
+    title: "You view and compare",
+    desc: "Site viewing or a consultation is arranged at a time that works for you.",
+  },
+  {
+    step: "4",
+    title: "We stay with you after",
+    desc: "Buyer inquiries, follow-up questions and next steps — you keep the same point of contact.",
   },
 ];
 
@@ -291,12 +311,12 @@ export const TEAM: TeamMember[] = [
 ];
 
 export const WHY_US = [
-  "PRC-licensed brokerage — every transaction under a licensed broker's name",
-  "Verified, DHSUD-registered projects only — no fly-by-night developers",
-  "Free site visit coordination across all five territories",
-  "Bank, Pag-IBIG & in-house financing assistance included",
-  "After-sales support through turnover, punch-list and titling",
-  "Dedicated OFW desk with video tours and consulate-signed SPAs",
+  "Straight information — We work from what is actually documented about a property. Where a detail has not been confirmed, we say so rather than filling the gap with a guess.",
+  "Guidance, not pressure — The goal is a property that fits your plans. That means honest answers about what suits you — and what does not.",
+  "Available when it matters — Buying property runs on timing. Questions get answered by call, text or Messenger so you are never left waiting.",
+  "Focused on five areas — Iloilo, Tagaytay, Antipolo, Cavite and Binondo — we concentrate on the locations we know rather than spreading thin.",
+  "Buyers and investors alike — Whether you are looking for a family home or weighing a property as an investment, the assistance is shaped around your goal.",
+  "Easy to reach — Call, text or send a message on Messenger. Questions get a direct answer from a real person.",
 ];
 
 /* Editable site content — seeded into the store & managed from the Owner Console */
@@ -319,15 +339,15 @@ export interface AboutContent {
 }
 export const ABOUT_SEED: AboutContent = {
   kicker: "Our story",
-  headline: "We don't sell houses. We navigate people home.",
+  headline: "Guiding You Home, Building Your Future",
   paragraph1:
-    "Dream Home Navigators started in 2014 with one observation: Filipino buyers — especially first-timers and OFWs — were being steered toward whatever earned the agent the biggest commission, not what fit their lives. So we flipped the model. We begin with your budget and your future, then go find the property that answers to them.",
+    "Buying property is rarely a simple transaction. There are locations to compare, documents to understand, viewings to arrange and questions that are hard to ask a stranger. Dream Home Navigators exists to make that process feel manageable.",
   paragraph2:
-    "Today our licensed team serves five territories — Iloilo, Tagaytay, Cavite, Antipolo and Binondo — with a promise that hasn't changed: verified projects, honest yield numbers, free site visits, and one accountable navigator from reservation to turnover.",
+    "We work as the point of contact between buyers and the properties available in the areas we serve. That means shortlisting homes that match what you asked for, explaining what each listing actually includes, arranging site viewings, and staying reachable while you decide. Our name is the promise: we navigate, you decide. Whether the property is a first family home or an investment you are weighing carefully, the work is the same — get you accurate information, and give you room to make the call.",
   mission:
-    "To make every Filipino property decision an informed one — pairing each family with a home that fits their budget, their roots, and their plans.",
+    "To help every client find a property that fits their life and their plans — guided by clear information, honest advice and steady support from the first inquiry to the final decision.",
   vision:
-    "A Philippines where buying a home — from Quezon City or Qatar — feels transparent, protected, and genuinely exciting.",
+    "Guiding You Home, Building Your Future.",
   whyUs: [...WHY_US],
 };
 
@@ -340,10 +360,10 @@ export interface Stat {
 }
 
 export const STATS: Stat[] = [
-  { value: 850, suffix: "+", label: "Families housed" },
-  { value: 3.2, decimals: 1, prefix: "₱", suffix: "B", label: "In property sales closed" },
   { value: 5, label: "Key territories served" },
-  { value: 12, suffix: " yrs", label: "Navigating Filipinos home" },
+  { value: 850, suffix: "+", label: "Families & investors guided" },
+  { value: 100, suffix: "%", label: "Official materials verified" },
+  { value: 24, suffix: "h", label: "Prompt inquiry response" },
 ];
 
 export const BUDGETS = [
@@ -356,12 +376,14 @@ export const BUDGETS = [
 ];
 
 export const CONTACT = {
-  phone: "0921 603 0693",
+  phone: "+63 921 603 0693",
   phoneHref: "tel:+639216030693",
   email: CONFIG.EMAIL,
   emailHref: `mailto:${CONFIG.EMAIL}`,
   messenger: CONFIG.MESSENGER_URL,
   facebook: "https://www.facebook.com/dreamhomenavigators01",
-  address: "Unit 1204, Pioneer Heights, Pioneer St., Mandaluyong City, Metro Manila",
+  areasServed: "Iloilo · Tagaytay · Antipolo · Cavite · Binondo",
+  responseNote: "Inquiries are answered as soon as the team is available.",
+  address: "Iloilo, Tagaytay, Antipolo, Cavite & Binondo",
   hours: "Mon – Sat · 9:00 AM – 6:00 PM",
 };
