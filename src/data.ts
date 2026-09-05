@@ -31,16 +31,54 @@ export interface Property {
   gallery?: string[];
   tagline: string;
   highlights?: string[];
+  videoUrl?: string;
+  videoId?: string;
+  developer?: string;
+  websiteUrl?: string;
 }
 
 const u = (id: string, w = 1000) =>
   `https://images.unsplash.com/${id}?q=80&w=${w}&auto=format&fit=crop`;
 
-export const FEATURED_ID = "pine-deluxe";
+export const FEATURED_ID = "ongpin-tower";
 
 export const PROPERTIES: Property[] = [
   {
     id: FEATURED_ID,
+    name: "The Ongpin Tower",
+    location: "Binondo",
+    area: "Ongpin St., Binondo, Manila",
+    type: "Luxury High-Rise Condominium",
+    badge: "Featured",
+    beds: 3,
+    baths: 3,
+    parking: 2,
+    sqm: 155.55,
+    lotNote: "57 Storeys · 2–5 Bedrooms · 99–480 sqm",
+    price: 18_800_000,
+    priceLabel: "Price starts at",
+    priceNote: "Residences, Estates & Penthouses available upon inquiry.",
+    img: "/assets/img/ongpin-tower-video.jpg",
+    gallery: [
+      "/assets/img/ongpin-tower-video.jpg",
+      "/assets/img/ongpin-tower-render.png",
+      "/assets/img/ongpin-tower-bg.jpg",
+    ],
+    videoUrl: "https://www.youtube.com/watch?v=WDHA59pcW4Y&t=5s",
+    videoId: "WDHA59pcW4Y",
+    developer: "Keen and Worth Property Developers, Inc.",
+    websiteUrl: "https://ongpintower.com/",
+    tagline: "A sustainable home for generations in the heart of historic Chinatown — where rich heritage meets contemporary luxury living.",
+    highlights: [
+      "Heart of the world's oldest Chinatown (Binondo, Manila)",
+      "Walking distance to Arranque Market, Binondo Church & Lucky Chinatown Mall",
+      "Spacious residences (99–155 sqm), estates (205–243 sqm) & penthouses (461–480 sqm)",
+      "Family-oriented amenities: gardens, playgrounds, sports club & rooftop recreation patios",
+      "Sustainable eco-conscious development by Keen and Worth Property Developers",
+    ],
+  },
+  {
+    id: "pine-deluxe",
     name: "Pine Deluxe at Emerald Estate",
     location: "Iloilo",
     area: "Emerald Estate, Iloilo",
@@ -161,22 +199,6 @@ export const PROPERTIES: Property[] = [
     priceNote: "Consultation & site visit on request",
     img: u("photo-1512917774080-9991f1c4c750"),
     tagline: "East-facing family home where the Sierra Madre breeze meets the city view.",
-  },
-  {
-    id: "fortune-tower",
-    name: "Fortune Tower Residences",
-    location: "Binondo",
-    area: "Ongpin St., Binondo, Manila",
-    type: "Condominium",
-    badge: "RFO",
-    beds: 1,
-    baths: 1,
-    parking: 0,
-    sqm: 36,
-    price: 5_900_000,
-    priceNote: "High rental demand",
-    img: u("photo-1460317442991-0ec209397118"),
-    tagline: "A heritage-district tower at the corner of old-money Manila and Chinatown commerce.",
   },
 ];
 

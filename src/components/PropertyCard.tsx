@@ -13,8 +13,14 @@ export default function PropertyCard({
   const images = p.gallery && p.gallery.length > 0 ? p.gallery : [p.img];
   const [activeIdx, setActiveIdx] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
 
   const currentImg = images[activeIdx] || p.img;
+
+  const openLightbox = (withVideo = false) => {
+    setShowVideo(withVideo && Boolean(p.videoId));
+    setLightboxOpen(true);
+  };
 
   return (
     <>
@@ -28,7 +34,7 @@ export default function PropertyCard({
             alt={`${p.name} - Photo ${activeIdx + 1}`}
             loading="lazy"
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:transition-none cursor-pointer"
-            onClick={() => setLightboxOpen(true)}
+            onClick={() => openLightbox(false)}
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-brand-950/75 via-transparent to-brand-950/15" />
 
@@ -50,6 +56,21 @@ export default function PropertyCard({
             {p.location}
           </span>
 
+          {/* Video Tour Play Icon if video exists */}
+          {p.videoId && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                openLightbox(true);
+              }}
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center gap-2 rounded-full bg-brand-600/90 px-4 py-2 text-xs font-extrabold text-white shadow-xl backdrop-blur transition hover:scale-105 hover:bg-brand-500"
+            >
+              <i className="fa-solid fa-play text-xs text-white" />
+              Watch Video
+            </button>
+          )}
+
           {/* Photo Switcher Dots if multi-photo */}
           {images.length > 1 && (
             <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 rounded-full bg-ink-950/70 px-2.5 py-1 backdrop-blur-sm">
@@ -57,7 +78,7 @@ export default function PropertyCard({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setLightboxOpen(true);
+                  openLightbox(false);
                 }}
                 className="mr-1 text-[11px] font-bold text-brand-200 transition hover:text-white"
                 title="View photo fullscreen"
@@ -71,9 +92,10 @@ export default function PropertyCard({
                   onClick={(e) => {
                     e.stopPropagation();
                     setActiveIdx(i);
+                    setShowVideo(false);
                   }}
                   className={`h-2 rounded-full transition-all ${
-                    activeIdx === i
+                    activeIdx === i && !showVideo
                       ? "w-4 bg-brand-400"
                       : "w-2 bg-white/50 hover:bg-white/80"
                   }`}
@@ -103,7 +125,22 @@ export default function PropertyCard({
 
           {/* Specs */}
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-slate-200/90 py-3 text-[12.5px] font-semibold text-slate-700">
-            {p.id === "pine-deluxe" ? (
+            {p.id === "ongpin-tower" ? (
+              <>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-building text-brand-600" /> 57 Storeys
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-bed text-brand-600" /> 2–5 Bedrooms
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-ruler-combined text-brand-600" /> 99–480 sqm
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-seedling text-brand-600" /> Sustainable Design
+                </span>
+              </>
+            ) : p.id === "pine-deluxe" ? (
               <>
                 <span className="inline-flex items-center gap-1.5">
                   <i className="fa-solid fa-layer-group text-brand-600" /> Two-storey
@@ -182,10 +219,20 @@ export default function PropertyCard({
               <i className="fa-regular fa-paper-plane" />
               Ask About This Property
             </button>
-            {images.length > 1 && (
+            {p.videoId && (
               <button
                 type="button"
-                onClick={() => setLightboxOpen(true)}
+                onClick={() => openLightbox(true)}
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-500 bg-brand-50 text-brand-600 transition hover:bg-brand-600 hover:text-white"
+                title="Watch Video Tour"
+              >
+                <i className="fa-solid fa-play text-xs" />
+              </button>
+            )}
+            {images.length > 1 && !p.videoId && (
+              <button
+                type="button"
+                onClick={() => openLightbox(false)}
                 className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 transition hover:border-brand-500 hover:text-brand-600"
                 title="View photo gallery"
               >
@@ -196,16 +243,16 @@ export default function PropertyCard({
         </div>
       </article>
 
-      {/* Lightbox Modal */}
+      {/* Lightbox / Video Modal */}
       {lightboxOpen && (
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md animate-card-in"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-md animate-card-in"
           onClick={() => setLightboxOpen(false)}
         >
           <div
-            className="relative max-h-[90vh] max-w-4xl overflow-hidden rounded-2xl border border-white/20 bg-ink-950 p-4 shadow-2xl"
+            className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-3xl border border-white/20 bg-ink-950 p-4 shadow-2xl sm:p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-3">
@@ -214,59 +261,110 @@ export default function PropertyCard({
                   {p.name}
                 </h4>
                 <p className="text-xs text-brand-300">
-                  {images.length > 1 ? `Photo ${activeIdx + 1} of ${images.length}` : p.area}
+                  {p.area} {p.developer ? `· ${p.developer}` : ""}
                 </p>
               </div>
               <button
                 onClick={() => setLightboxOpen(false)}
                 className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
-                aria-label="Close photo preview"
+                aria-label="Close preview"
               >
                 <i className="fa-solid fa-xmark text-lg" />
               </button>
             </div>
 
-            <div className="relative max-h-[65vh] overflow-auto rounded-xl">
-              <img
-                src={currentImg}
-                alt={p.name}
-                className="h-auto max-h-[65vh] w-full rounded-xl object-contain"
-              />
-            </div>
-
-            {images.length > 1 && (
-              <div className="mt-4 flex items-center justify-center gap-3">
-                {images.map((img, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveIdx(i)}
-                    className={`overflow-hidden rounded-lg border-2 transition ${
-                      activeIdx === i ? "border-brand-400 scale-105" : "border-transparent opacity-60 hover:opacity-100"
-                    }`}
-                  >
-                    <img
-                      src={img}
-                      alt={`Thumbnail ${i + 1}`}
-                      className="h-12 w-16 object-cover"
-                    />
-                  </button>
-                ))}
+            {/* Media Content: Video or Image */}
+            {p.videoId && showVideo ? (
+              <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black">
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${p.videoId}?autoplay=1&rel=0`}
+                  title={`${p.name} Video Tour`}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="h-full w-full border-0"
+                />
+              </div>
+            ) : (
+              <div className="relative max-h-[62vh] overflow-auto rounded-2xl bg-black/40">
+                <img
+                  src={currentImg}
+                  alt={p.name}
+                  className="h-auto max-h-[62vh] w-full rounded-2xl object-contain"
+                />
               </div>
             )}
 
-            <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3">
-              <span className="font-display text-lg font-bold text-brand-300">
-                {fmtPrice(p.price)}
-              </span>
-              <button
-                onClick={() => {
-                  setLightboxOpen(false);
-                  onInquire(p.name);
-                }}
-                className="btn btn-primary !py-2 !px-4 text-xs"
-              >
-                Inquire About This Unit
-              </button>
+            {/* Switch between Video and Photos if both exist */}
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-3">
+              <div className="flex items-center gap-2">
+                {p.videoId && (
+                  <button
+                    onClick={() => setShowVideo(true)}
+                    className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                      showVideo ? "bg-brand-600 text-white" : "bg-white/10 text-slate-300 hover:bg-white/20"
+                    }`}
+                  >
+                    <i className="fa-solid fa-film" />
+                    Video Tour
+                  </button>
+                )}
+                {images.length > 0 && (
+                  <button
+                    onClick={() => setShowVideo(false)}
+                    className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                      !showVideo ? "bg-brand-600 text-white" : "bg-white/10 text-slate-300 hover:bg-white/20"
+                    }`}
+                  >
+                    <i className="fa-solid fa-images" />
+                    Photos ({images.length})
+                  </button>
+                )}
+                {images.length > 1 && !showVideo && (
+                  <div className="flex items-center gap-1.5 ml-2">
+                    {images.map((img, i) => (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          setShowVideo(false);
+                          setActiveIdx(i);
+                        }}
+                        className={`overflow-hidden rounded-md border-2 transition ${
+                          activeIdx === i ? "border-brand-400 scale-105" : "border-transparent opacity-60 hover:opacity-100"
+                        }`}
+                      >
+                        <img
+                          src={img}
+                          alt={`Thumb ${i + 1}`}
+                          className="h-9 w-12 object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3">
+                {p.websiteUrl && (
+                  <a
+                    href={p.websiteUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-300 hover:underline"
+                  >
+                    <i className="fa-solid fa-arrow-up-right-from-square" />
+                    Official Website
+                  </a>
+                )}
+                <button
+                  onClick={() => {
+                    setLightboxOpen(false);
+                    onInquire(p.name);
+                  }}
+                  className="btn btn-primary !py-2 !px-4 text-xs"
+                >
+                  Inquire About This Unit
+                </button>
+              </div>
             </div>
           </div>
         </div>
