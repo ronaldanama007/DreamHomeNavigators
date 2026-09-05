@@ -51,8 +51,9 @@ export const CONFIG = {
   EMAIL: "support@dreamhomenavigators.com",
 
   /**
-   * Brand logo shown in the header, footer and console.
-   * Local official logo asset from client materials.
+   * Brand logos shown in header, footer and console.
+   * Local official logo assets from client materials.
    */
+  LOGO_MARK_URL: "/assets/img/logo-mark-light.png",
   LOGO_URL: "/assets/img/logo-full-light.png",
 };

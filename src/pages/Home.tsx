@@ -290,12 +290,26 @@ export default function Home({ go, inquire, browseLocation }: Props) {
         <div className="grid items-center gap-12 lg:grid-cols-12">
           <div className="order-2 lg:order-1 lg:col-span-6">
             <Reveal>
-              <div className="relative overflow-hidden rounded-2xl glass-panel p-2">
-                <img
-                  src="/assets/img/pine-deluxe-living.jpg"
-                  alt="Living area of the Pine Deluxe unit with sofa, centre table and dining space beyond"
-                  className="w-full rounded-xl object-cover shadow-2xl"
-                />
+              <div className="relative overflow-hidden rounded-3xl glass-panel p-2.5">
+                <div className="overflow-hidden rounded-2xl">
+                  <img
+                    src="/assets/img/pine-deluxe-living.jpg"
+                    alt="Living area of the Pine Deluxe unit with sofa, centre table and dining space beyond"
+                    className="w-full rounded-2xl object-cover shadow-2xl transition-transform duration-700 hover:scale-105"
+                  />
+                </div>
+                <div className="absolute bottom-5 left-5 right-5 flex items-center justify-between rounded-xl bg-ink-950/80 p-3.5 backdrop-blur-md border border-white/10 shadow-xl">
+                  <div>
+                    <strong className="block text-sm font-semibold text-white">Pine Deluxe Interior</strong>
+                    <span className="text-xs text-brand-200">Open-concept living, dining &amp; kitchen</span>
+                  </div>
+                  <button
+                    onClick={() => inquire("Pine Deluxe at Emerald Estate")}
+                    className="btn btn-primary !px-3.5 !py-1.5 text-xs"
+                  >
+                    Inquire Unit
+                  </button>
+                </div>
               </div>
             </Reveal>
           </div>
@@ -347,15 +361,31 @@ export default function Home({ go, inquire, browseLocation }: Props) {
           <div className="glass-panel-deep relative overflow-hidden rounded-3xl p-6 sm:p-10">
             <div className="grid items-center gap-8 lg:grid-cols-12">
               <div className="lg:col-span-7">
-                <div className="relative overflow-hidden rounded-2xl">
-                  <span className="absolute left-3 top-3 z-10 rounded-full bg-brand-600 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-lg">
+                <div className="group relative overflow-hidden rounded-2xl bg-ink-950/40">
+                  <span className="absolute left-3.5 top-3.5 z-10 rounded-full bg-brand-600 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-lg">
                     Property Spotlight
                   </span>
                   <img
                     src="/assets/img/jaro-house-exterior.jpg"
                     alt="Facade of the two-storey house for sale in Jaro, Iloilo City with balcony"
-                    className="h-80 w-full object-cover sm:h-96"
+                    className="h-80 w-full object-cover transition-transform duration-700 group-hover:scale-105 sm:h-96"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-ink-950/80 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute bottom-3 left-3.5 right-3.5 flex items-center justify-between">
+                    <span className="glass-chip !bg-ink-950/70 px-3 py-1 text-xs font-semibold text-brand-200">
+                      <i className="fa-solid fa-location-dot mr-1.5" />
+                      Jaro, Iloilo City
+                    </span>
+                    <a
+                      href="/assets/img/flyer-house-for-sale.jpg"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="glass-chip !bg-brand-600/80 px-3 py-1 text-xs font-bold text-white transition hover:bg-brand-500"
+                    >
+                      <i className="fa-solid fa-file-lines mr-1.5" />
+                      View Official Flyer
+                    </a>
+                  </div>
                 </div>
               </div>
               <div className="lg:col-span-5">
@@ -368,20 +398,20 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                 </p>
                 <div className="mt-6 grid grid-cols-2 gap-3 border-y border-white/10 py-4 text-xs">
                   <div>
-                    <span className="block text-slate-400">Monthly amortization</span>
-                    <span className="text-base font-bold text-brand-300">₱37,921.82</span>
+                    <span className="block text-slate-400 font-medium">Monthly amortization</span>
+                    <span className="text-lg font-bold text-brand-300">₱37,921.82</span>
                   </div>
                   <div>
-                    <span className="block text-slate-400">Bedrooms</span>
+                    <span className="block text-slate-400 font-medium">Bedrooms</span>
                     <span className="text-base font-bold text-white">3 Bedrooms</span>
                   </div>
                   <div>
-                    <span className="block text-slate-400">Toilet &amp; bath</span>
+                    <span className="block text-slate-400 font-medium">Toilet &amp; bath</span>
                     <span className="text-base font-bold text-white">2 Toilet &amp; Bath</span>
                   </div>
                   <div>
-                    <span className="block text-slate-400">Parking</span>
-                    <span className="text-base font-bold text-white">Carport</span>
+                    <span className="block text-slate-400 font-medium">Parking</span>
+                    <span className="text-base font-bold text-white">Covered Carport</span>
                   </div>
                 </div>
                 <div className="mt-6 flex flex-wrap gap-3">
@@ -389,8 +419,18 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                     View Properties
                   </button>
                   <button onClick={() => inquire("House for Sale in Jaro, Iloilo City")} className="btn btn-ghost">
+                    <i className="fa-regular fa-paper-plane text-brand-300" />
                     Inquire now
                   </button>
+                  <a
+                    href="/assets/img/flyer-house-for-sale.jpg"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-ghost text-xs"
+                  >
+                    <i className="fa-solid fa-file-pdf text-brand-300" />
+                    Brochure Flyer
+                  </a>
                 </div>
               </div>
             </div>
