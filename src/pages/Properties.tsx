@@ -78,7 +78,7 @@ export default function Properties({ filter, onFilter, inquire, go }: Props) {
           )}
         </div>
 
-        {/* Grid */}
+        {/* Grid or Concierge Sourcing Card */}
         {filtered.length > 0 ? (
           <div className="mt-7 grid gap-7 sm:grid-cols-2 xl:grid-cols-3">
             {filtered.map((p, i) => (
@@ -86,20 +86,32 @@ export default function Properties({ filter, onFilter, inquire, go }: Props) {
             ))}
           </div>
         ) : (
-          <div className="glass-panel mt-7 flex flex-col items-center rounded-2xl px-6 py-16 text-center">
-            <span className="grid h-16 w-16 place-items-center rounded-full border border-brand-400/30 bg-brand-500/10 text-2xl text-brand-300">
-              <i className="fa-solid fa-house-circle-xmark" />
+          <div className="glass-panel mt-7 flex flex-col items-center rounded-3xl p-8 sm:p-12 text-center max-w-3xl mx-auto border border-brand-400/25">
+            <span className="grid h-16 w-16 place-items-center rounded-2xl bg-brand-500/20 text-2xl text-brand-300">
+              <i className="fa-solid fa-compass" />
             </span>
-            <h3 className="font-display mt-5 text-xl font-semibold text-white">
-              No listings match those filters
+            <span className="mt-4 kicker justify-center">On-Demand Sourcing</span>
+            <h3 className="font-display mt-2 text-2xl font-semibold text-white sm:text-3xl">
+              Properties in {filter} are Curated on Request
             </h3>
-            <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-slate-400">
-              Try widening your search — or tell us what you are looking for and we will check what is available.
+            <p className="mt-3 max-w-lg text-[14.5px] leading-relaxed text-slate-300">
+              We actively source, inspect, and verify residential and investment properties across {filter}. Tell us your budget, preferred area, and must-haves — our licensed team will present verified matching options within 24–48 hours.
             </p>
-            <button onClick={() => go("contact")} className="btn btn-primary mt-6">
-              <i className="fa-regular fa-paper-plane" />
-              Send an Inquiry
-            </button>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-slate-300">
+              <span className="inline-flex items-center gap-1.5"><i className="fa-solid fa-circle-check text-brand-300" /> Title verification</span>
+              <span className="inline-flex items-center gap-1.5"><i className="fa-solid fa-circle-check text-brand-300" /> Developer vetting</span>
+              <span className="inline-flex items-center gap-1.5"><i className="fa-solid fa-circle-check text-brand-300" /> Site viewing coordination</span>
+            </div>
+            <div className="mt-8 flex flex-wrap gap-3.5 justify-center">
+              <button onClick={() => inquire(`${filter} Property Search`)} className="btn btn-primary">
+                <i className="fa-regular fa-paper-plane" />
+                Request {filter} Property Match
+              </button>
+              <a href="https://m.me/dreamhomenavigators01" target="_blank" rel="noreferrer" className="btn btn-ghost">
+                <i className="fa-brands fa-facebook-messenger text-brand-300" />
+                Ask on Messenger
+              </a>
+            </div>
           </div>
         )}
 

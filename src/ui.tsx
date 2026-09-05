@@ -151,18 +151,35 @@ export function SectionHead({
    Renders the client's custom logo (LOGO_URL in src/config.ts). If the image
    ever fails to load (Drive link not public, rate-limited, offline), it falls
    back to the built-in compass mark so the brand block never breaks.        */
-export function Logo({ size = 42 }: { size?: number }) {
+export function Logo({
+  size = 42,
+  variant = "mark",
+}: {
+  size?: number;
+  variant?: "mark" | "full";
+}) {
   const [failed, setFailed] = useState(false);
+  const src = variant === "full" ? CONFIG.LOGO_URL : (CONFIG.LOGO_MARK_URL || CONFIG.LOGO_URL);
 
-  if (CONFIG.LOGO_URL && !failed) {
+  if (src && !failed) {
+    if (variant === "full") {
+      return (
+        <img
+          src={src}
+          alt="Dream Home Navigators logo"
+          className="h-10 w-auto object-contain"
+          onError={() => setFailed(true)}
+        />
+      );
+    }
     return (
       <img
-        src={CONFIG.LOGO_URL}
-        alt="Dream Home Navigators logo"
+        src={src}
+        alt="Dream Home Navigators mark"
         width={size}
-        height={size}
-        style={{ width: size, height: size }}
-        className="shrink-0 rounded-lg object-contain"
+        height={Math.round(size * 0.7)}
+        style={{ width: size, height: "auto" }}
+        className="shrink-0 object-contain drop-shadow-sm"
         onError={() => setFailed(true)}
       />
     );

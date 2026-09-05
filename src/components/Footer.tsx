@@ -13,16 +13,14 @@ export default function Footer({
       <div className="glass-panel-deep !rounded-none border-x-0 border-b-0">
         <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-12">
           <div className="md:col-span-4">
-            <div className="flex items-center gap-3">
-              <Logo size={44} />
-              <div className="leading-tight">
-                <p className="font-display text-lg font-semibold text-slate-50">Dream Home Navigators</p>
-                <p className="text-[10.5px] font-medium text-brand-300">
-                  Guiding You Home, Building Your Future
-                </p>
-              </div>
+            <div className="mb-4">
+              <img
+                src="/assets/img/logo-full-light.png"
+                alt="Dream Home Navigators — Guiding You Home, Building Your Future"
+                className="w-48 h-auto object-contain drop-shadow"
+              />
             </div>
-            <p className="mt-5 max-w-xs text-sm leading-relaxed text-slate-300/85">
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-300/85">
               A client-focused real estate team helping buyers and investors find suitable properties across Iloilo, Tagaytay, Antipolo, Cavite and Binondo.
             </p>
             <div className="mt-6 flex gap-3">

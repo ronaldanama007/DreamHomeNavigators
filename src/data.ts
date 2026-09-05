@@ -26,8 +26,11 @@ export interface Property {
   lotNote?: string;
   price: number;
   priceNote?: string;
+  priceLabel?: string;
   img: string;
+  gallery?: string[];
   tagline: string;
+  highlights?: string[];
 }
 
 const u = (id: string, w = 1000) =>
@@ -40,7 +43,7 @@ export const PROPERTIES: Property[] = [
     id: FEATURED_ID,
     name: "Pine Deluxe at Emerald Estate",
     location: "Iloilo",
-    area: "Emerald Estate",
+    area: "Emerald Estate, Iloilo",
     type: "House / Residential",
     badge: "Available",
     beds: 0,
@@ -49,9 +52,20 @@ export const PROPERTIES: Property[] = [
     sqm: 120,
     lotNote: "Two-storey · Carport · Bedrooms on request",
     price: 18516.86,
+    priceLabel: "Price starts at",
     priceNote: "As published on the official project material.",
     img: "/assets/img/pine-deluxe-exterior.jpg",
+    gallery: [
+      "/assets/img/pine-deluxe-exterior.jpg",
+      "/assets/img/pine-deluxe-living.jpg",
+    ],
     tagline: "A thoughtfully designed home that blends modern style, comfort and functionality — presented by Dream Home Navigators.",
+    highlights: [
+      "Two-storey architectural design",
+      "Spacious covered carport",
+      "Customizable bedroom layouts on request",
+      "Emerald Estate 24/7 guarded community",
+    ],
   },
   {
     id: "jaro-house",
@@ -66,9 +80,20 @@ export const PROPERTIES: Property[] = [
     sqm: 140,
     lotNote: "Two-storey · Carport · Balcony",
     price: 37921.82,
+    priceLabel: "Monthly amortization",
     priceNote: "Monthly amortization as published on the official material.",
     img: "/assets/img/jaro-house-exterior.jpg",
+    gallery: [
+      "/assets/img/jaro-house-exterior.jpg",
+      "/assets/img/flyer-house-for-sale.jpg",
+    ],
     tagline: "Spacious living room, modern kitchen, dining area, three bedrooms, two toilet & bath and a carport.",
+    highlights: [
+      "Spacious living room & modern kitchen",
+      "3 Bedrooms & 2 Toilet and Bath",
+      "Private balcony with neighborhood views",
+      "Covered driveway & secure gate",
+    ],
   },
   {
     id: "highland-ridge",
