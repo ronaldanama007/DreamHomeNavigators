@@ -285,6 +285,7 @@ export interface TeamMember {
 
 export const TEAM: TeamMember[] = [
   { name: "Maria Luisa Fernandez", role: "Managing Broker · Founder", note: "15 years across primary & secondary markets.", initials: "MF" },
+  { name: "Angelo Remigio", role: "Managing Broker · Founder", note: "Helping People build wealth through smart real estate investments", initials: "AR" },
   { name: "Daniel Reyes", role: "Head of Sales · Visayas", note: "Iloilo market specialist, 400+ closings.", initials: "DR" },
   { name: "Grace Villanueva", role: "Client Success · OFW Desk", note: "Your point person from Dubai to Davao.", initials: "GV" },
   { name: "Paolo Mendoza", role: "Investment Advisory", note: "Yield modeling & portfolio property strategy.", initials: "PM" },
