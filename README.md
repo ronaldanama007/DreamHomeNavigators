@@ -1,7 +1,7 @@
 # Dream Home Navigators — Website & Configuration Guide
 
 A 5-page blue-glassmorphism real estate website (Home, Properties, Services, About, Contact)
-plus a built-in **Admin Console** (Leads Dashboard + Property Manager + Setup Guide).
+plus a hidden, passcode-locked **Owner Console** (Leads Dashboard + Property Manager + Setup Guide).
 
 All client-configurable settings live in **one file: `src/config.ts`**.
 
@@ -123,21 +123,44 @@ MESSENGER_QUICK_REPLIES: [
 
 ---
 
-## 3. Admin Console (`Admin Console` link in the footer)
+## 3. Owner Console — hidden from the public site
 
-Protected by a passcode (default: **`DHN2026`** — change `ADMIN_PASSCODE` in `src/config.ts`).
+> 🔒 **There is no link to the console anywhere on the website.** It renders in a
+> standalone view (no public header, footer, or Messenger widget) and is reachable
+> only by typing the secret route into the browser address bar:
+>
+> ```
+> https://yoursite.com/#/dhn-owner
+> ```
+>
+> - **Hidden route** — change it via `ADMIN_ROUTE_HASH` in `src/config.ts`
+>   (keep the leading `#/`). The browser tab title shows only "Owner Console".
+> - **Passcode** — default `DHN2026`; change `ADMIN_PASSCODE` before launch.
+> - **Lockout** — after `ADMIN_MAX_ATTEMPTS` (5) wrong codes the gate locks for
+>   `ADMIN_LOCK_SECONDS` (60 s). The lock persists across page reloads.
+> - **Session** — unlocking lasts only for the current browser tab; closing the
+>   tab or pressing **Lock** ends the session.
+> - **Honest note** — this is a static site, so the gate deters casual visitors
+>   but a developer could inspect the bundle. For truly private data, also
+>   protect the route at the host level (Cloudflare Access, Netlify password
+>   protection, `.htpasswd`) and keep the Google Sheet as the only sensitive record.
 
 ### Leads Dashboard
 - Stat chips: total leads, last 7 days, top location, most-requested property.
 - Full lead table with click-to-call phone links, per-row delete, and clear-all (with confirm).
 - **Sync from Sheet** (requires `SHEET_READ_URL`) and **Export CSV**.
 
-### Properties tab — add & delete listings with no code
-- **Add:** name, location, area, price (PHP), beds/baths/parking, floor area, type,
-  badge, tagline, and a photo (pick a preset or paste any image URL).
-  New listings appear on the Properties page instantly (and on Home if badged "Featured").
-- **Delete:** trash icon on any listing (defaults are soft-deleted, custom ones removed).
-- **Restore defaults** brings back the original 10 listings.
+### Properties tab — add, edit & delete listings with no code
+- **Add:** name, location, area, price (PHP), price note, beds/baths/parking,
+  floor area, lot note (for lot-only listings), type, badge, tagline, and a photo
+  (pick a preset or paste any image URL). New listings appear on the Properties
+  page instantly (and on Home if badged "Featured").
+- **Edit:** pencil icon loads every detail of a listing into the form — price,
+  specs, badge, photo, tagline, everything — and "Save Changes" pushes it live.
+  Rows show **Added** / **Edited** status chips.
+- **Delete:** trash icon on any listing with a two-step confirm
+  (defaults are soft-deleted, custom ones removed).
+- **Restore defaults** brings back the original listings.
 - Changes persist in the browser's `localStorage`.
 
 > 📌 **Production note:** localStorage is per-browser. For a multi-user rollout, keep the
@@ -158,7 +181,10 @@ Script and live status badges showing which integrations are configured.
 | `SHEET_READ_URL` | Same URL — dashboard pulls leads (GET) |
 | `MESSENGER_URL` | Messenger widget target |
 | `MESSENGER_QUICK_REPLIES` | Widget quick-reply prompts |
-| `ADMIN_PASSCODE` | Admin Console passcode |
+| `ADMIN_ROUTE_HASH` | Hidden route that opens the Owner Console (default `#/dhn-owner`) |
+| `ADMIN_PASSCODE` | Owner Console passcode |
+| `ADMIN_MAX_ATTEMPTS` | Wrong-code attempts before lockout (default 5) |
+| `ADMIN_LOCK_SECONDS` | Lockout duration in seconds (default 60) |
 | `EMAIL` | Business email shown site-wide |
 
 ## 5. Run & deploy

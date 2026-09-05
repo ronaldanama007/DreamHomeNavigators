@@ -1,6 +1,6 @@
 import { CONFIG } from "./config";
 
-export type Page = "home" | "properties" | "services" | "about" | "contact" | "admin";
+export type Page = "home" | "properties" | "services" | "about" | "contact";
 
 export interface Prefill {
   property: string;
