@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
+import { CONFIG } from "./config";
 
 export const prefersReduced = () =>
   typeof window !== "undefined" &&
@@ -146,8 +147,27 @@ export function SectionHead({
   );
 }
 
-/* ---------- Brand logo (compass + roof) ---------- */
+/* ---------- Brand logo ----------------------------------------------------
+   Renders the client's custom logo (LOGO_URL in src/config.ts). If the image
+   ever fails to load (Drive link not public, rate-limited, offline), it falls
+   back to the built-in compass mark so the brand block never breaks.        */
 export function Logo({ size = 42 }: { size?: number }) {
+  const [failed, setFailed] = useState(false);
+
+  if (CONFIG.LOGO_URL && !failed) {
+    return (
+      <img
+        src={CONFIG.LOGO_URL}
+        alt="Dream Home Navigators logo"
+        width={size}
+        height={size}
+        style={{ width: size, height: size }}
+        className="shrink-0 rounded-lg object-contain"
+        onError={() => setFailed(true)}
+      />
+    );
+  }
+
   return (
     <svg
       width={size}
