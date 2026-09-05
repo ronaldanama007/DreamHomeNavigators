@@ -41,7 +41,7 @@ export interface Lead {
 const LS_CUSTOM = "dhn_custom_properties_v1";
 const LS_DELETED = "dhn_deleted_properties_v1";
 const LS_LEADS = "dhn_leads_v1";
-const LS_SERVICES = "dhn_services_v1";
+const LS_SERVICES = "dhn_services_v2";
 const LS_ABOUT = "dhn_about_v1";
 const LS_FEATURED = "dhn_featured_v1";
 
