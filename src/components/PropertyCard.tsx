@@ -71,37 +71,47 @@ export default function PropertyCard({
             </button>
           )}
 
-          {/* Photo Switcher Dots if multi-photo */}
+          {/* Photo Switcher on Card */}
           {images.length > 1 && (
-            <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 rounded-full bg-ink-950/70 px-2.5 py-1 backdrop-blur-sm">
+            <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1 rounded-full bg-ink-950/80 px-2.5 py-1 text-xs font-bold text-white shadow-md backdrop-blur-sm">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveIdx((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+                  setShowVideo(false);
+                }}
+                className="px-1 text-slate-300 transition hover:text-brand-300"
+                aria-label="Previous image"
+              >
+                <i className="fa-solid fa-chevron-left text-[10px]" />
+              </button>
+              <span className="px-1 text-[11px] font-mono text-slate-200">
+                {activeIdx + 1}/{images.length}
+              </span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveIdx((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+                  setShowVideo(false);
+                }}
+                className="px-1 text-slate-300 transition hover:text-brand-300"
+                aria-label="Next image"
+              >
+                <i className="fa-solid fa-chevron-right text-[10px]" />
+              </button>
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   openLightbox(false);
                 }}
-                className="mr-1 text-[11px] font-bold text-brand-200 transition hover:text-white"
+                className="ml-1 border-l border-white/20 pl-1.5 text-brand-300 transition hover:text-white"
                 title="View photo fullscreen"
               >
-                <i className="fa-solid fa-expand" />
+                <i className="fa-solid fa-expand text-[11px]" />
               </button>
-              {images.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveIdx(i);
-                    setShowVideo(false);
-                  }}
-                  className={`h-2 rounded-full transition-all ${
-                    activeIdx === i && !showVideo
-                      ? "w-4 bg-brand-400"
-                      : "w-2 bg-white/50 hover:bg-white/80"
-                  }`}
-                  aria-label={`Photo ${i + 1}`}
-                />
-              ))}
             </div>
           )}
 
@@ -143,13 +153,19 @@ export default function PropertyCard({
             ) : p.id === "pine-deluxe" ? (
               <>
                 <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-layer-group text-brand-600" /> Two-storey
+                  <i className="fa-solid fa-bed text-brand-600" /> 4 Bedrooms
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-car text-brand-600" /> Carport
+                  <i className="fa-solid fa-bath text-brand-600" /> 3 T&amp;B
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-bed text-brand-600" /> Bedrooms on request
+                  <i className="fa-solid fa-car text-brand-600" /> 2 Carports
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-ruler-combined text-brand-600" /> Approx. 90 sqm
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-door-open text-brand-600" /> Balcony &amp; High Ceiling
                 </span>
               </>
             ) : p.id === "jaro-house" ? (
@@ -285,22 +301,45 @@ export default function PropertyCard({
                 />
               </div>
             ) : (
-              <div className="relative max-h-[62vh] overflow-auto rounded-2xl bg-black/40">
+              <div className="relative max-h-[62vh] overflow-hidden rounded-2xl bg-black/50 flex items-center justify-center">
                 <img
                   src={currentImg}
                   alt={p.name}
                   className="h-auto max-h-[62vh] w-full rounded-2xl object-contain"
                 />
+                {images.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setActiveIdx((prev) => (prev > 0 ? prev - 1 : images.length - 1))}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 z-10 grid h-10 w-10 place-items-center rounded-full bg-black/60 text-white backdrop-blur-sm transition hover:bg-black/90 hover:scale-110"
+                      aria-label="Previous photo"
+                    >
+                      <i className="fa-solid fa-chevron-left text-base" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveIdx((prev) => (prev < images.length - 1 ? prev + 1 : 0))}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 z-10 grid h-10 w-10 place-items-center rounded-full bg-black/60 text-white backdrop-blur-sm transition hover:bg-black/90 hover:scale-110"
+                      aria-label="Next photo"
+                    >
+                      <i className="fa-solid fa-chevron-right text-base" />
+                    </button>
+                    <span className="absolute bottom-3 left-3 z-10 rounded-full bg-black/70 px-3 py-1 text-xs font-mono font-bold text-white backdrop-blur-sm">
+                      {activeIdx + 1} / {images.length}
+                    </span>
+                  </>
+                )}
               </div>
             )}
 
             {/* Switch between Video and Photos if both exist */}
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-3">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 max-w-full overflow-hidden">
                 {p.videoId && (
                   <button
                     onClick={() => setShowVideo(true)}
-                    className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                    className={`inline-flex items-center gap-1.5 shrink-0 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
                       showVideo ? "bg-brand-600 text-white" : "bg-white/10 text-slate-300 hover:bg-white/20"
                     }`}
                   >
@@ -311,7 +350,7 @@ export default function PropertyCard({
                 {images.length > 0 && (
                   <button
                     onClick={() => setShowVideo(false)}
-                    className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                    className={`inline-flex items-center gap-1.5 shrink-0 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
                       !showVideo ? "bg-brand-600 text-white" : "bg-white/10 text-slate-300 hover:bg-white/20"
                     }`}
                   >
@@ -320,7 +359,7 @@ export default function PropertyCard({
                   </button>
                 )}
                 {images.length > 1 && !showVideo && (
-                  <div className="flex items-center gap-1.5 ml-2">
+                  <div className="flex items-center gap-1.5 ml-2 overflow-x-auto max-w-[280px] sm:max-w-md md:max-w-lg py-1 scrollbar-thin">
                     {images.map((img, i) => (
                       <button
                         key={i}
@@ -328,7 +367,7 @@ export default function PropertyCard({
                           setShowVideo(false);
                           setActiveIdx(i);
                         }}
-                        className={`overflow-hidden rounded-md border-2 transition ${
+                        className={`overflow-hidden rounded-md border-2 shrink-0 transition ${
                           activeIdx === i ? "border-brand-400 scale-105" : "border-transparent opacity-60 hover:opacity-100"
                         }`}
                       >
