@@ -34,7 +34,6 @@ export interface Property {
   videoUrl?: string;
   videoId?: string;
   developer?: string;
-  websiteUrl?: string;
 }
 
 const u = (id: string, w = 1000) =>
@@ -67,7 +66,6 @@ export const PROPERTIES: Property[] = [
     videoUrl: "https://www.youtube.com/watch?v=WDHA59pcW4Y&t=5s",
     videoId: "WDHA59pcW4Y",
     developer: "Keen and Worth Property Developers, Inc.",
-    websiteUrl: "https://ongpintower.com/",
     tagline: "A sustainable home for generations in the heart of historic Chinatown — where rich heritage meets contemporary luxury living.",
     highlights: [
       "Heart of the world's oldest Chinatown (Binondo, Manila)",
@@ -124,7 +122,6 @@ export const PROPERTIES: Property[] = [
       "Approx. 90 sqm floor area on approx. 100 sqm lot",
       "Gated community in Brgy. Cagbang, Oton with 24/7 security, clubhouse & pool",
     ],
-    websiteUrl: "https://onepropertee.com/house-lot-sale-pine-deluxe-model-unit-property",
   },
   {
     id: "jaro-house",
