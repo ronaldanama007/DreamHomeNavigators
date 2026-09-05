@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   CONTACT,
   FEATURED_PROPERTY,
@@ -26,6 +27,7 @@ const STEPS = [
 
 export default function Home({ go, inquire, browseLocation }: Props) {
   const { properties, featuredId, services } = useStore();
+  const [videoPlaying, setVideoPlaying] = useState(false);
   /* Featured on Home: explicit owner pick → first "Featured" badge → first listing */
   const f =
     properties.find((p) => p.id === featuredId) ??
@@ -108,52 +110,99 @@ export default function Home({ go, inquire, browseLocation }: Props) {
             </Reveal>
           </div>
 
-          {/* Featured property card */}
+          {/* Featured property card with Video Tour */}
           <div className="lg:col-span-5">
             <Reveal delay={250}>
-              <div className="glass-panel group relative overflow-hidden rounded-2xl">
-                <div className="absolute right-4 top-4 z-10 flex items-center gap-1.5 rounded-full bg-brass-400 px-3 py-1 text-[10.5px] font-extrabold uppercase tracking-[0.18em] text-brand-950 shadow-lg">
+              <div className="glass-panel group relative overflow-hidden rounded-3xl border border-white/20 shadow-2xl">
+                <div className="absolute right-4 top-4 z-20 flex items-center gap-1.5 rounded-full bg-brass-400 px-3 py-1 text-[10.5px] font-extrabold uppercase tracking-[0.18em] text-brand-950 shadow-lg">
                   <i className="fa-solid fa-star text-[9px]" />
-                  Featured Listing
+                  Featured Video Tour
                 </div>
-                <div className="relative h-60 overflow-hidden sm:h-72">
-                  <img
-                    src={f.img}
-                    alt={f.name}
-                    className="h-full w-full object-cover animate-kenburns"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-ink-950/85 via-ink-950/15 to-transparent" />
-                  <div className="absolute bottom-4 left-5 right-5">
-                    <p className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-200">
-                      <i className="fa-solid fa-location-dot" />
-                      {f.area}
-                    </p>
-                    <h2 className="font-display mt-1.5 text-2xl font-semibold text-white">
-                      {f.name}
-                    </h2>
+
+                {f.videoId && videoPlaying ? (
+                  <div className="relative aspect-video w-full overflow-hidden bg-ink-950 sm:h-72">
+                    <iframe
+                      src={`https://www.youtube-nocookie.com/embed/${f.videoId}?autoplay=1&rel=0`}
+                      title={`${f.name} Video Tour`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      className="h-full w-full border-0"
+                    />
+                    <button
+                      onClick={() => setVideoPlaying(false)}
+                      className="absolute top-3 left-3 z-30 flex items-center gap-1.5 rounded-full bg-ink-950/85 px-3 py-1 text-[11px] font-bold text-white backdrop-blur border border-white/20 transition hover:bg-black"
+                    >
+                      <i className="fa-solid fa-xmark" /> Close Player
+                    </button>
                   </div>
-                </div>
-                <div className="p-5">
+                ) : (
+                  <div
+                    className="group/media relative h-64 overflow-hidden sm:h-72 cursor-pointer"
+                    onClick={() => f.videoId && setVideoPlaying(true)}
+                  >
+                    <img
+                      src={f.img}
+                      alt={f.name}
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover/media:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-ink-950/90 via-ink-950/30 to-black/20" />
+
+                    {/* Play Button Overlay */}
+                    {f.videoId && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2.5 transition-transform duration-300 group-hover/media:scale-105">
+                        <span className="grid h-16 w-16 place-items-center rounded-full bg-gradient-to-tr from-brand-600 to-blue-400 text-2xl text-white shadow-[0_0_35px_rgba(59,130,246,0.85)] border border-white/40 animate-glow">
+                          <i className="fa-solid fa-play ml-1 text-xl text-white" />
+                        </span>
+                        <span className="rounded-full bg-ink-950/80 px-3.5 py-1 text-[11.5px] font-extrabold uppercase tracking-wider text-brand-200 backdrop-blur-md border border-brand-400/30">
+                          <i className="fa-solid fa-film mr-1.5 text-brand-300" /> Watch Property Video Tour
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="absolute bottom-4 left-5 right-5">
+                      <p className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-200 drop-shadow">
+                        <i className="fa-solid fa-location-dot" />
+                        {f.area}
+                      </p>
+                      <h2 className="font-display mt-1 text-2xl font-semibold text-white drop-shadow">
+                        {f.name}
+                      </h2>
+                    </div>
+                  </div>
+                )}
+
+                <div className="p-5 sm:p-6">
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] font-semibold text-slate-200">
-                    {f.beds > 0 ? (
-                      <>
-                        <span><i className="fa-solid fa-bed mr-1.5 text-brand-300" />{f.beds} Beds</span>
-                        <span><i className="fa-solid fa-bath mr-1.5 text-brand-300" />{f.baths} Baths</span>
-                        <span><i className="fa-solid fa-ruler-combined mr-1.5 text-brand-300" />{f.sqm} sqm</span>
-                      </>
-                    ) : (
-                      <span><i className="fa-solid fa-house mr-1.5 text-brand-300" />{f.lotNote ?? "House / Residential"}</span>
+                    {f.beds > 0 && (
+                      <span><i className="fa-solid fa-bed mr-1.5 text-brand-300" />{f.beds} Beds</span>
                     )}
-                    {f.parking > 0 && (
-                      <span><i className="fa-solid fa-car mr-1.5 text-brand-300" />Carport</span>
+                    {f.baths > 0 && (
+                      <span><i className="fa-solid fa-bath mr-1.5 text-brand-300" />{f.baths} Baths</span>
+                    )}
+                    {f.sqm > 0 && (
+                      <span><i className="fa-solid fa-ruler-combined mr-1.5 text-brand-300" />{f.sqm} sqm</span>
+                    )}
+                    {f.lotNote && (
+                      <span className="text-xs text-brand-200"><i className="fa-solid fa-building mr-1.5 text-brand-300" />{f.lotNote}</span>
                     )}
                   </div>
-                  <div className="mt-4 flex items-center justify-between gap-3">
+
+                  {f.developer && (
+                    <p className="mt-2.5 text-[11.5px] font-semibold text-slate-400">
+                      Developer: <span className="text-slate-200">{f.developer}</span>
+                    </p>
+                  )}
+
+                  <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-slate-300">
+                    {f.tagline}
+                  </p>
+
+                  <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
                     <div>
                       <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                        {f.price < 100_000 ? "Price starts at" : "Starting at"}
+                        {f.priceLabel || "Price starts at"}
                       </p>
-                      <p className="font-display text-3xl font-semibold text-brand-300">
+                      <p className="font-display text-2xl font-semibold text-brand-300">
                         {fmtPrice(f.price)}
                       </p>
                       {f.priceNote && (
@@ -162,13 +211,27 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                         </p>
                       )}
                     </div>
-                    <button
-                      onClick={() => inquire(f.name)}
-                      className="btn btn-primary btn-glow !px-5"
-                    >
-                      Inquire
-                      <i className="fa-solid fa-arrow-right" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {f.websiteUrl && (
+                        <a
+                          href={f.websiteUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn btn-ghost !px-3 !py-2 text-xs"
+                          title="View Official Project Materials"
+                        >
+                          <i className="fa-solid fa-arrow-up-right-from-square text-brand-300" />
+                          <span className="hidden sm:inline">Official Site</span>
+                        </a>
+                      )}
+                      <button
+                        onClick={() => inquire(f.name)}
+                        className="btn btn-primary btn-glow !px-4 !py-2 text-xs"
+                      >
+                        Inquire
+                        <i className="fa-solid fa-arrow-right" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
