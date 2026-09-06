@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Project Handover Document: Dream Home Navigators Website</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 860px; margin: 40px auto; padding: 0 20px; }
+h1 { color: #1e40af; font-family: Georgia, serif; font-size: 26px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 16px; }
+h2 { color: #0f172a; font-family: Georgia, serif; font-size: 19px; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; margin-top: 32px; }
+h3 { color: #1e40af; font-size: 15px; margin-top: 20px; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13.5px; }
+th, td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: left; }
+th { background-color: #1e40af; color: #ffffff; font-weight: bold; }
+tr:nth-child(even) { background-color: #f8fafc; }
+pre { background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 12px 16px; border-radius: 6px; font-family: Consolas, Monaco, monospace; font-size: 12px; overflow-x: auto; line-height: 1.45; }
+code { font-family: Consolas, Monaco, monospace; background-color: #f1f5f9; padding: 2px 5px; border-radius: 4px; font-size: 12.5px; color: #0f172a; }
+ul { padding-left: 24px; margin: 8px 0; }
+li { margin-bottom: 6px; }
+p { margin: 8px 0; }
+.meta-table td:first-child { font-weight: bold; color: #1e40af; width: 180px; }
+</style>
+</head>
+<body>
+<h1>Project Handover Document: Dream Home Navigators Website</h1>
+<p><strong>Client / Brand:</strong> Dream Home Navigators (Philippines)  </p>
+<p><strong>Project:</strong> 5-Page Modern Real Estate Web Application + Standalone Owner Console  </p>
+<p><strong>Delivery Date:</strong> September 6, 2026  </p>
+<p><strong>Repository:</strong> <code>https://github.com/ronaldanama007/DreamHomeNavigators.git</code>  </p>
+<p><strong>Target Branches:</strong> <code>main</code> (Production) & <code>AntiGravity-Model</code> (Staging/Dev)  </p>
+<p><strong>Status:</strong> <strong>Finished & Production Ready</strong></p>
+<hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;'>
+<h2>1. Executive Summary</h2>
+<p>This project delivers a bespoke, production-ready real estate brokerage web application for <strong>Dream Home Navigators</strong>. The platform combines a consumer-facing marketing and property discovery website with an administrative <strong>Owner Console</strong> for lead management, listing updates, and content editing.</p>
+<h3>Key Deliverables:</h3>
+<ul><li><strong>5 Public Pages:</strong></li></ul>
+<ol><li><strong>Home:</strong> Dynamic video hero showcase, interactive location quick-filter pills, animated statistics counters, featured properties grid, buyers & investors guides, property spotlight, and quick consultation CTA.</li></ol>
+<ol><li><strong>Properties:</strong> Comprehensive listings catalog with smart location filtering (Iloilo, Tagaytay, Cavite, Antipolo, Binondo), dynamic badge indicators (Featured, RFO, Available), smart grid alignment (centering solitary listings on the last row), and direct inquiry triggers.</li></ol>
+<ol><li><strong>Services:</strong> 6 core brokerage service packages, detailed 4-step buyer roadmap timeline, OFW-tailored consultation highlights, and consultation booking CTAs.</li></ol>
+<ol><li><strong>About Us:</strong> Brand narrative, leadership vision and mission, 3 core operating principles, team roster, and client assurance badges.</li></ol>
+<ol><li><strong>Contact:</strong> Interactive contact channels (Call, SMS, Messenger, Facebook), official office coordinates, service territories, and direct lead generation form with 1-click property pre-fill.</li></ol>
+<ul><li><strong>Hidden Owner Console (<code>#/dhn-owner</code>):</strong></li></ul>
+<ul><li>Gated by a security passcode with persistent failed-attempt lockout protection.</li></ul>
+<ul><li><strong>Leads Dashboard:</strong> Real-time inquiry log, stats overview, phone click-to-call, CSV export, and two-way Google Sheet synchronization.</li></ul>
+<ul><li><strong>Property Manager:</strong> Add, edit, delete, and feature property listings with instant preview and localStorage persistence.</li></ul>
+<ul><li><strong>Services & About Editors:</strong> Live copy and feature editors updating public pages without code modification.</li></ul>
+<ul><li><strong>Setup Guide:</strong> In-app setup instructions and one-click copyable Google Apps Script code.</li></ul>
+<ul><li><strong>Embedded Floating Messenger Widget:</strong></li></ul>
+<ul><li>One-tap Messenger launcher connected to <code>https://m.me/dreamhomenavigators01</code>.</li></ul>
+<ul><li>Built-in quick reply prompts, tap-outside dismiss backdrop, and isolated touch events.</li></ul>
+<ul><li><strong>Full-Viewport Cinema Lightbox:</strong></li></ul>
+<ul><li>High-definition property photo and video tour viewer with filmstrip navigation, mobile swipe gestures, and strict escape controls (via 'X' button or keyboard <code>Esc</code>).</li></ul>
+<hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;'>
+<h2>2. Technical Stack & Specifications</h2>
+<table>
+  <tr><th>Layer</th><th>Technology / Tool</th><th>Purpose</th></tr>
+  <tr><td>**Frontend Framework**</td><td>React 19 + TypeScript (Strict mode)</td><td>Type-safe, high-performance UI component rendering</td></tr>
+  <tr><td>**Build & Bundling**</td><td>Vite 6</td><td>Rapid Hot Module Replacement and optimized production bundling</td></tr>
+  <tr><td>**CSS Architecture**</td><td>Tailwind CSS v4 (CSS-first engine)</td><td>Custom glassmorphism design tokens and mobile-first responsive utility layers</td></tr>
+  <tr><td>**Typography**</td><td>Google Fonts: Fraunces & Plus Jakarta Sans</td><td>Editorial display serif titles + clean, highly legible modern body sans-serif</td></tr>
+  <tr><td>**Iconography**</td><td>FontAwesome 6/7 CDN</td><td>Unified iconography across cards, features, and navigation</td></tr>
+  <tr><td>**State & Persistence**</td><td>React Context + LocalStorage</td><td>Client-side reactive store powering dynamic listings and lead caching</td></tr>
+  <tr><td>**CRM Integration**</td><td>Google Apps Script Web App (JSON POST/GET)</td><td>Free, automated lead capture directly to Google Sheets</td></tr>
+</table>
+<hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;'>
+<h2>3. Architecture & Codebase Map</h2>
+<pre>
+c:\Users\nhads\AntiGravity\
+├── index.html                   # HTML entry point, Google Fonts, FontAwesome CDN, metadata
+├── package.json                 # Project scripts and dependencies
+├── vite.config.ts               # Vite bundler configuration
+├── src/
+│   ├── main.tsx                 # React application mounting point
+│   ├── App.tsx                  # Core state-based router, ambient backdrops, owner route handler
+│   ├── config.ts                # Single source of truth for all client configuration (URLs, passcodes, etc.)
+│   ├── data.ts                  # Static seeds, mock listings, team roster, contact details, price formatters
+│   ├── store.tsx                # Context provider managing editable properties, leads, services, and copy
+│   ├── ui.tsx                   # Reusable UI primitives: Reveal, CountUp, SectionHead, Logo, Diamond
+│   ├── index.css                # Tailwind v4 theme tokens, glass panels, button styles, animations
+│   ├── components/
+│   │   ├── Nav.tsx              # Sticky glass navbar, mobile hamburger drawer, touch passthrough
+│   │   ├── Footer.tsx           # Multi-column site footer with quick links, contacts, and copyright
+│   │   ├── MessengerFab.tsx     # Floating Facebook Messenger widget with touch isolation &amp; backdrop
+│   │   └── PropertyCard.tsx     # Property card component with cinema photo/video lightbox portal
+│   └── pages/
+│       ├── Home.tsx             # Homepage showcase and featured listings
+│       ├── Properties.tsx       # Property catalog with location filters and centered grid alignment
+│       ├── Services.tsx         # Comprehensive services overview and buyer roadmap
+│       ├── About.tsx            # Company story, mission, core principles, and team
+│       ├── Contact.tsx          # Contact channels and lead generation form with auto-prefill
+│       └── Admin.tsx            # Passcode-protected Owner Console (Leads, Properties, Content, Setup)
+├── public/assets/               # Static assets, branding images, and property photography
+├── README.md                    # Setup and integration documentation for administrators
+└── GEMINI.md                    # Architectural reference rules and developer handover guidelines
+</pre>
+<hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;'>
+<h2>4. Key Behaviors & Business Logic</h2>
+<h3>1. Smart Grid Alignment (Lone Listing Centering)</h3>
+<p>When filtering properties (e.g., Iloilo's 4 model units: Samantha, Janella, Natalia, Rosanna):</p>
+<ul><li><strong>Desktop (3-column view):</strong> If the final row has only one property (<code>length % 3 === 1</code>), the solitary card automatically receives <code>xl:col-start-2 xl:col-span-1</code>, centering it in column 2 rather than leaving an empty gap on the right.</li></ul>
+<ul><li><strong>Tablet (2-column view):</strong> If an odd number of cards leaves a solitary card (<code>length % 2 === 1</code>), it receives <code>sm:col-span-2 sm:max-w-md sm:mx-auto</code>, keeping the layout balanced.</li></ul>
+<h3>2. One-Click Unit Inquiry</h3>
+<p>Clicking "Inquire" on any property card or featured showcase:</p>
+<ol><li>Automatically switches to the <code>Contact</code> page.</li></ol>
+<ol><li>Pre-fills <code>propertyInterest</code> with the exact property name.</li></ol>
+<ol><li>Pre-fills the message box with: <code>"Hello, I am interested in inquiring about this unit: [Property Name]. Please provide more details and schedule a site visit."</code></li></ol>
+<ol><li>Smooth-scrolls the viewport to the inquiry form.</li></ol>
+<ol><li>Automatically focuses the "Full Name" input field after a ~140ms settling timeout.</li></ol>
+<h3>3. Google Sheets CRM Integration</h3>
+<ul><li>The Contact form sends a <code>no-cors</code> HTTP POST request with <code>Content-Type: text/plain;charset=utf-8</code> to the Google Apps Script Web App.</li></ul>
+<ul><li>This bypasses standard browser CORS preflight restrictions, enabling static hosting to save leads directly to a Google Sheet.</li></ul>
+<ul><li>Leads are simultaneously written to the browser's <code>localStorage</code> (<code>dhn_leads_v1</code>), ensuring the Owner Console leads table remains functional even in demo mode or if offline.</li></ul>
+<ul><li>When <code>SHEET_READ_URL</code> is configured, clicking <strong>"Sync from Sheet"</strong> in the Owner Console performs a GET request to fetch remote leads and deduplicates records by <code>timestamp + phone</code>.</li></ul>
+<h3>4. Owner Console Security</h3>
+<ul><li>Reachable only via the secret hash route: <code>https://[domain]/#/dhn-owner</code> (no hyperlinks exist anywhere on the public site).</li></ul>
+<ul><li>Requires passcode <code>DHN2026</code> (configurable via <code>src/config.ts</code>).</li></ul>
+<ul><li>Failed attempts are tracked in <code>localStorage</code> (<code>dhn_admin_attempts</code>). After 5 consecutive failed entries, the gate is locked for 60 seconds (<code>dhn_admin_locked_until</code>), persisting across browser refreshes.</li></ul>
+<ul><li>Authorized session is stored in <code>sessionStorage</code> (<code>dhn_admin</code>), which expires automatically when the browser tab is closed.</li></ul>
+<h3>5. Mobile Touch & Interaction Isolation</h3>
+<ul><li>The floating Messenger widget wrapper uses <code>pointer-events-none</code> so inactive space never blocks background taps.</li></ul>
+<ul><li>The chat popup card is mounted only when <code>open === true</code>, with a full-screen tap-to-dismiss overlay (<code>bg-black/50 backdrop-blur-sm</code>).</li></ul>
+<ul><li>Nav mobile drawer is unmounted when closed, preventing invisible hit-testing boxes from intercepting hero buttons.</li></ul>
+<ul><li>Form inputs enforce a minimum font size of <code>16px</code> to prevent iOS Safari from automatically zooming in when fields are focused.</li></ul>
+<ul><li>All interactive elements strictly meet the WCAG touch target guideline of <code>≥ 44px</code>.</li></ul>
+<hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;'>
+<h2>5. Configuration & Credentials Reference (`src/config.ts`)</h2>
+<p>All operational configuration parameters are centralized in <code>src/config.ts</code>:</p>
+<table>
+  <tr><th>Configuration Key</th><th>Current Value</th><th>Description / Action Required</th></tr>
+  <tr><td>`GOOGLE_SCRIPT_URL`</td><td>`""`</td><td>Deploy Google Apps Script (code in `README.md`) and paste web app `/exec` URL here</td></tr>
+  <tr><td>`SHEET_READ_URL`</td><td>`""`</td><td>Same Web App `/exec` URL (powers "Sync from Sheet" in Admin Console)</td></tr>
+  <tr><td>`MESSENGER_URL`</td><td>`https://m.me/dreamhomenavigators01`</td><td>Official Facebook Messenger endpoint</td></tr>
+  <tr><td>`MESSENGER_QUICK_REPLIES`</td><td>4 Real Estate Prompts</td><td>Quick reply chips shown in the widget chat popup</td></tr>
+  <tr><td>`ADMIN_ROUTE_HASH`</td><td>`#/dhn-owner`</td><td>Secret URL hash route to access the Owner Console</td></tr>
+  <tr><td>`ADMIN_PASSCODE`</td><td>`DHN2026`</td><td>Console password (**Recommended to change prior to public launch**)</td></tr>
+  <tr><td>`ADMIN_MAX_ATTEMPTS`</td><td>`5`</td><td>Maximum failed attempts allowed before lockout</td></tr>
+  <tr><td>`ADMIN_LOCK_SECONDS`</td><td>`60`</td><td>Duration (in seconds) of temporary console lockout</td></tr>
+  <tr><td>`EMAIL`</td><td>`support@dreamhomenavigators.com`</td><td>Primary business email displayed across the site</td></tr>
+  <tr><td>`LOGO_URL`</td><td>Direct Drive CDN link</td><td>Direct brand logo image source (falls back to SVG if offline)</td></tr>
+</table>
+<hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;'>
+<h2>6. Deployment & Hosting Guide</h2>
+<p>The project compiles to pure static HTML/CSS/JS files (<code>dist/</code>), making it compatible with any modern static web host.</p>
+<h3>Production Build:</h3>
+<pre>
+npm install
+npm run build
+</pre>
+<p>The output files will be created in the <code>dist/</code> directory.</p>
+<h3>Recommended Hosting Options:</h3>
+<ol><li><strong>Cloudflare Pages (Recommended):</strong></li></ol>
+<ul><li>Connect GitHub repository <code>ronaldanama007/DreamHomeNavigators</code>.</li></ul>
+<ul><li>Build command: <code>npm run build</code></li></ul>
+<ul><li>Output directory: <code>dist</code></li></ul>
+<ul><li>Includes free SSL, global CDN, and DDoS mitigation.</li></ul>
+<ol><li><strong>Netlify / Vercel:</strong></li></ol>
+<ul><li>Framework preset: <code>Vite</code></li></ul>
+<ul><li>Build command: <code>npm run build</code></li></ul>
+<ul><li>Publish directory: <code>dist</code></li></ul>
+<hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;'>
+<h2>7. Client Pre-Launch Checklist</h2>
+<p>Before handing over to the marketing team for public promotion:</p>
+<ul><li>[ ] <strong>Deploy Google Sheet CRM:</strong> Follow instructions in <code>README.md</code> to deploy the Google Apps Script and update <code>GOOGLE_SCRIPT_URL</code> in <code>src/config.ts</code>.</li></ul>
+<ul><li>[ ] <strong>Update Owner Passcode:</strong> Change <code>ADMIN_PASSCODE</code> in <code>src/config.ts</code> from <code>DHN2026</code> to a secure client password.</li></ul>
+<ul><li>[ ] <strong>Custom Domain & SSL:</strong> Map the custom domain (e.g., <code>dreamhomenavigators.com</code>) to the hosting provider and confirm HTTPS is active.</li></ul>
+<ul><li>[ ] <strong>Verify Facebook Messenger:</strong> Confirm that messages sent to <code>https://m.me/dreamhomenavigators01</code> trigger notifications on the company's Meta Business Suite app.</li></ul>
+<ul><li>[ ] <strong>Test Form Submission:</strong> Submit a test lead through the Contact page and verify that it populates both the Google Sheet and the Owner Console dashboard.</li></ul>
+</body>
+</html>
