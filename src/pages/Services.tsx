@@ -15,7 +15,7 @@ export default function Services({ go }: { go: (p: Page) => void }) {
   return (
     <>
       {/* Page Hero */}
-      <section className="mx-auto max-w-7xl px-5 pt-32 sm:px-8 sm:pt-36">
+      <section className="mx-auto max-w-7xl px-4 pt-28 sm:px-8 sm:pt-36">
         <SectionHead
           align="center"
           kicker="Our services"

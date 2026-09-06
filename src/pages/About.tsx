@@ -10,7 +10,7 @@ export default function About({ go, inquire }: { go: (p: Page) => void; inquire:
   return (
     <>
       {/* Story */}
-      <section className="mx-auto max-w-7xl px-5 pt-32 sm:px-8 sm:pt-36">
+      <section className="mx-auto max-w-7xl px-4 pt-28 sm:px-8 sm:pt-36">
         <div className="grid items-center gap-12 lg:grid-cols-12">
           <Reveal className="lg:col-span-5">
             <div className="relative">
@@ -19,12 +19,12 @@ export default function About({ go, inquire }: { go: (p: Page) => void; inquire:
                   <img
                     src="/assets/img/pine-deluxe-exterior.jpg"
                     alt="Two-storey Pine Deluxe unit at Emerald Estate with covered carport and roof-deck balcony"
-                    className="h-[420px] w-full object-cover transition-transform duration-[1.4s] hover:scale-105 sm:h-[480px]"
+                    className="h-72 sm:h-[480px] w-full object-cover transition-transform duration-[1.4s] hover:scale-105"
                   />
                 </div>
               </div>
-              <div className="glass-panel-deep absolute -bottom-6 -right-3 rounded-2xl px-6 py-4 text-center shadow-2xl sm:-right-6">
-                <p className="font-display text-3xl font-semibold text-brand-300">
+              <div className="glass-panel-deep absolute bottom-3 right-3 sm:-bottom-6 sm:-right-6 rounded-2xl px-5 py-3 sm:px-6 sm:py-4 text-center shadow-2xl">
+                <p className="font-display text-2xl sm:text-3xl font-semibold text-brand-300">
                   <CountUp value={5} />
                 </p>
                 <p className="mt-0.5 text-[10.5px] font-extrabold uppercase tracking-[0.18em] text-slate-300">

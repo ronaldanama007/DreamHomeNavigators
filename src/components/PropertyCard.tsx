@@ -209,7 +209,7 @@ export default function PropertyCard({
           </div>
         </div>
 
-        <div className="flex flex-1 flex-col p-5 sm:p-6">
+        <div className="flex flex-1 flex-col p-4 sm:p-6">
           <h3 className="font-display text-[19px] font-semibold leading-snug text-slate-900 transition-colors group-hover:text-brand-700">
             {p.name}
           </h3>
@@ -378,51 +378,51 @@ export default function PropertyCard({
           )}
 
           {/* Price & CTA */}
-          <div className="mt-auto flex items-end justify-between pt-4">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+          <div className="mt-auto flex items-end justify-between pt-4 gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 truncate">
                 {p.priceLabel || "Price"}
               </p>
               <p className="font-display text-2xl font-bold tracking-tight text-brand-700">
                 {fmtPrice(p.price)}
               </p>
               {p.lotNote && (
-                <p className="mt-0.5 text-[11px] font-medium text-slate-500">
+                <p className="mt-0.5 text-[11px] font-medium text-slate-500 truncate">
                   {p.lotNote}
                 </p>
               )}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {p.videoId && (
                 <button
                   type="button"
                   onClick={() => openLightbox(true)}
-                  className="btn btn-ghost !px-3 !py-2 text-xs !border-brand-300 text-brand-700 hover:!bg-brand-50"
+                  className="btn btn-ghost !px-2.5 sm:!px-3 !py-2 text-xs !border-brand-300 text-brand-700 hover:!bg-brand-50"
                   title="Watch Video Tour"
                 >
                   <i className="fa-solid fa-play text-brand-600" />
-                  <span className="hidden sm:inline">Video</span>
+                  <span className="hidden xs:inline sm:inline">Video</span>
                 </button>
               )}
               {images.length > 1 && !p.videoId && (
                 <button
                   type="button"
                   onClick={() => openLightbox(false)}
-                  className="btn btn-ghost !px-3 !py-2 text-xs !border-slate-300 text-slate-700 hover:!bg-slate-100"
+                  className="btn btn-ghost !px-2.5 sm:!px-3 !py-2 text-xs !border-slate-300 text-slate-700 hover:!bg-slate-100"
                   title="View photo gallery"
                 >
                   <i className="fa-solid fa-images text-brand-600" />
-                  <span className="hidden sm:inline">Photos ({images.length})</span>
+                  <span className="hidden xs:inline sm:inline">Photos ({images.length})</span>
                 </button>
               )}
               <button
                 type="button"
                 onClick={() => onInquire(p.name)}
-                className="btn btn-primary !px-4 !py-2 text-xs font-bold"
+                className="btn btn-primary !px-3.5 sm:!px-4 !py-2 text-xs font-bold"
               >
                 Inquire
-                <i className="fa-solid fa-arrow-right" />
+                <i className="fa-solid fa-arrow-right text-[10px]" />
               </button>
             </div>
           </div>

@@ -11,14 +11,14 @@ export default function MessengerFab() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="fixed bottom-6 right-6 z-[60] flex flex-col items-end gap-3">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[60] flex flex-col items-end gap-3">
       {/* Chat card */}
       <div
         className={`origin-bottom-right transition-all duration-300 ${
           open ? "pointer-events-auto scale-100 opacity-100" : "pointer-events-none scale-90 opacity-0"
         }`}
       >
-        <div className="glass-panel-deep w-[300px] overflow-hidden rounded-2xl shadow-2xl">
+        <div className="glass-panel-deep w-[calc(100vw-2.5rem)] max-w-[310px] overflow-hidden rounded-2xl shadow-2xl border border-brand-400/20">
           <div className="flex items-center gap-3 bg-gradient-to-r from-brand-800 to-brand-600 px-4 py-3.5">
             <span className="relative grid h-10 w-10 place-items-center rounded-full bg-white/15 text-lg text-white">
               <i className="fa-brands fa-facebook-messenger" />
@@ -82,7 +82,7 @@ export default function MessengerFab() {
           onClick={() => setOpen((v) => !v)}
           aria-label={open ? "Close Messenger chat" : "Open Messenger chat"}
           aria-expanded={open}
-          className="relative grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-brand-800 text-[26px] text-white shadow-[0_12px_36px_-6px_rgba(37,99,235,0.75)] transition-transform duration-300 hover:scale-110"
+          className="relative grid h-14 w-14 sm:h-16 sm:w-16 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-brand-800 text-[22px] sm:text-[26px] text-white shadow-[0_12px_36px_-6px_rgba(37,99,235,0.75)] transition-transform duration-300 hover:scale-105 active:scale-95 touch-manipulation cursor-pointer"
         >
           <i
             className={`transition-transform duration-300 ${
