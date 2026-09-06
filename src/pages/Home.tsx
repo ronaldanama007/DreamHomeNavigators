@@ -99,7 +99,7 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                     <button
                       key={loc}
                       onClick={() => browseLocation(loc)}
-                      className="glass-chip group inline-flex items-center gap-2 px-4 py-2 text-[13px] font-bold text-slate-100 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-300/70 hover:bg-brand-500/20 hover:text-white"
+                      className="glass-chip group inline-flex items-center gap-2 px-4 py-2 text-[13px] font-bold text-slate-100 min-h-[42px] cursor-pointer touch-manipulation active:scale-95 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-300/70 hover:bg-brand-500/20 hover:text-white"
                     >
                       <i className="fa-solid fa-location-dot text-[11px] text-brand-400 transition group-hover:text-brand-200" />
                       {loc}

@@ -81,7 +81,7 @@ export default function App() {
     return (
       <StoreProvider>
         <div className="relative min-h-screen">
-          <div className="fixed inset-0 -z-10 bg-ink-950">
+          <div className="fixed inset-0 -z-10 bg-ink-950 pointer-events-none select-none">
             <div
               className="absolute inset-0 opacity-70"
               style={{
@@ -101,7 +101,7 @@ export default function App() {
     <StoreProvider>
     <div className="relative min-h-screen">
       {/* ---- Fixed ambient background ---- */}
-      <div className="fixed inset-0 -z-10 overflow-hidden bg-ink-950">
+      <div className="fixed inset-0 -z-10 overflow-hidden bg-ink-950 pointer-events-none select-none">
         <img
           src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop"
           alt=""
@@ -143,7 +143,7 @@ export default function App() {
 
       <Nav page={page} go={go} />
 
-      <main key={page} className="animate-card-in">
+      <main key={page} className="relative z-10 animate-card-in">
         {page === "home" && <Home go={go} inquire={inquire} browseLocation={browseLocation} />}
         {page === "properties" && (
           <Properties filter={locFilter} onFilter={setLocFilter} inquire={inquire} go={go} />
