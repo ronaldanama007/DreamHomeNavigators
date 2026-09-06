@@ -267,6 +267,24 @@ export default function PropertyCard({
                   <i className="fa-solid fa-door-open text-brand-600" /> Balcony
                 </span>
               </>
+            ) : p.id === "samantha-welford" ? (
+              <>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-bed text-brand-600" /> 4 Bedrooms
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-bath text-brand-600" /> 3 T&amp;B
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-car text-brand-600" /> Paved Carport
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-ruler-combined text-brand-600" /> 84 sqm Floor / 120 sqm Lot
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-door-open text-brand-600" /> Balcony &amp; Maid's Rm
+                </span>
+              </>
             ) : (
               <>
                 {p.beds > 0 && (
