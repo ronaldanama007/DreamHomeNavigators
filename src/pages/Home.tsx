@@ -329,7 +329,7 @@ export default function Home({ go, inquire, browseLocation }: Props) {
         </div>
         <div className="mt-12 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
           {properties.slice(0, 3).map((p, i) => (
-            <Reveal key={p.id} delay={i * 120}>
+            <Reveal key={p.id} delay={i * 120} className="h-full flex flex-col">
               <PropertyCard p={p} onInquire={inquire} index={i} />
             </Reveal>
           ))}

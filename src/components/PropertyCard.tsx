@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Property, fmtPrice } from "../data";
 
 export default function PropertyCard({
@@ -359,13 +360,15 @@ export default function PropertyCard({
       {/* ========================================================================= */}
       {/* IMMERSIVE FULL-VIEWPORT CINEMA LIGHTBOX (Exit via 'X' or 'Esc' Only)       */}
       {/* ========================================================================= */}
-      {lightboxOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label={`${p.name} Fullscreen Showcase`}
-          className="fixed inset-0 z-[9999] flex h-[100dvh] w-[100dvw] flex-col justify-between bg-black/98 text-white backdrop-blur-2xl select-none animate-card-in"
-        >
+      {lightboxOpen &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${p.name} Fullscreen Showcase`}
+            className="fixed inset-0 z-[999999] flex h-screen w-screen flex-col justify-between bg-black/98 text-white backdrop-blur-2xl select-none"
+          >
           {/* Top Bar: Clean, modern luxury real estate navigation */}
           <header className="flex shrink-0 items-center justify-between border-b border-white/10 bg-ink-950/85 px-4 py-3 sm:px-8 sm:py-3.5 backdrop-blur-md">
             <div className="flex items-center gap-3.5">
@@ -561,7 +564,8 @@ export default function PropertyCard({
               <i className="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1" />
             </button>
           </footer>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
