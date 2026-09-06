@@ -39,17 +39,17 @@ export default function Home({ go, inquire, browseLocation }: Props) {
   return (
     <>
       {/* ============ HERO ============ */}
-      <section className="relative mx-auto max-w-7xl px-5 pb-14 pt-32 sm:px-8 sm:pt-40">
-        <div className="grid items-center gap-12 lg:grid-cols-12">
+      <section className="relative mx-auto max-w-7xl px-4 pb-14 pt-28 sm:px-8 sm:pt-36">
+        <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-7">
             <Reveal>
-              <span className="glass-chip inline-flex items-center gap-2 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.22em] text-brand-200">
+              <span className="glass-chip inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 text-[10.5px] sm:text-[11px] font-extrabold uppercase tracking-[0.22em] text-brand-200">
                 <i className="fa-solid fa-compass text-brass-300" />
                 Guiding You Home, Building Your Future
               </span>
             </Reveal>
             <Reveal delay={100}>
-              <h1 className="font-display mt-7 text-[2.6rem] font-semibold leading-[1.06] text-slate-50 sm:text-6xl xl:text-[4.4rem]">
+              <h1 className="font-display mt-6 text-3xl font-semibold leading-[1.08] text-slate-50 sm:text-5xl md:text-6xl xl:text-[4.4rem]">
                 Find the Right Property.
                 <span className="mt-2 block text-brand-300">
                   Build the <em className="font-display italic text-brass-300">Future</em> You Envision.
@@ -57,19 +57,19 @@ export default function Home({ go, inquire, browseLocation }: Props) {
               </h1>
             </Reveal>
             <Reveal delay={200}>
-              <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-slate-300 sm:text-lg">
+              <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-slate-300 sm:text-lg">
                 Discover carefully selected homes and investment opportunities across
                 Iloilo, Tagaytay, Antipolo, Cavite, and Binondo — with guidance from first
                 inquiry to site viewing.
               </p>
             </Reveal>
             <Reveal delay={300}>
-              <div className="mt-8 flex flex-wrap gap-3.5">
-                <button onClick={() => go("properties")} className="btn btn-primary">
+              <div className="mt-8 flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-3.5">
+                <button onClick={() => go("properties")} className="btn btn-primary w-full sm:w-auto">
                   Explore Properties
                   <i className="fa-solid fa-arrow-right" />
                 </button>
-                <button onClick={() => go("contact")} className="btn btn-ghost">
+                <button onClick={() => go("contact")} className="btn btn-ghost w-full sm:w-auto">
                   <i className="fa-regular fa-paper-plane text-brand-300" />
                   Send an Inquiry
                 </button>
@@ -313,7 +313,7 @@ export default function Home({ go, inquire, browseLocation }: Props) {
       </section>
 
       {/* ============ FEATURED LISTINGS ============ */}
-      <section className="mx-auto max-w-7xl px-5 pt-24 sm:px-8">
+      <section className="mx-auto max-w-7xl px-4 pt-20 sm:px-8 sm:pt-24">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <SectionHead
             kicker="Featured listings"
@@ -321,18 +321,36 @@ export default function Home({ go, inquire, browseLocation }: Props) {
             sub="Every listing below comes straight from official Dream Home Navigators material — nothing is estimated or embellished."
           />
           <Reveal delay={150}>
-            <button onClick={() => go("properties")} className="btn btn-ghost">
+            <button onClick={() => go("properties")} className="btn btn-ghost w-full sm:w-auto">
               View all listings
               <i className="fa-solid fa-arrow-right" />
             </button>
           </Reveal>
         </div>
-        <div className="mt-12 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-          {properties.slice(0, 3).map((p, i) => (
-            <Reveal key={p.id} delay={i * 120} className="h-full flex flex-col">
-              <PropertyCard p={p} onInquire={inquire} index={i} />
-            </Reveal>
-          ))}
+        <div className="mt-10 sm:mt-12 grid gap-6 sm:gap-7 sm:grid-cols-2 lg:grid-cols-3">
+          {properties.slice(0, 3).map((p, i, arr) => {
+            const isLast = i === arr.length - 1;
+            const isSingleIn3Col = arr.length % 3 === 1 && isLast;
+            const isSingleIn2Col = arr.length % 2 === 1 && isLast;
+
+            return (
+              <Reveal
+                key={p.id}
+                delay={i * 120}
+                className={`h-full flex flex-col ${
+                  isSingleIn2Col ? "sm:col-span-2 sm:max-w-md sm:mx-auto w-full" : ""
+                } ${
+                  isSingleIn3Col
+                    ? "lg:col-span-1 lg:col-start-2 lg:max-w-none lg:mx-0"
+                    : isSingleIn2Col
+                    ? "lg:col-span-1 lg:col-start-auto"
+                    : ""
+                }`}
+              >
+                <PropertyCard p={p} onInquire={inquire} index={i} />
+              </Reveal>
+            );
+          })}
         </div>
       </section>
 

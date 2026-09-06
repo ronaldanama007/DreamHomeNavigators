@@ -43,14 +43,14 @@ export default function Nav({
       >
         <button
           onClick={() => nav("home")}
-          className="group flex items-center gap-3 text-left cursor-pointer active:scale-95"
+          className="group flex items-center gap-2.5 sm:gap-3 text-left cursor-pointer active:scale-95"
           aria-label="Dream Home Navigators — home"
         >
-          <span className="transition-transform duration-500 group-hover:rotate-12">
-            <Logo size={42} />
+          <span className="transition-transform duration-500 group-hover:rotate-12 shrink-0">
+            <Logo size={36} />
           </span>
           <span className="leading-tight">
-            <span className="block font-display text-[17px] font-semibold tracking-wide text-slate-50">
+            <span className="block font-display text-[15px] sm:text-[17px] font-semibold tracking-wide text-slate-50">
               Dream Home Navigators
             </span>
             <span className="hidden sm:block text-[10.5px] font-medium tracking-wide text-brand-200/80">
@@ -117,7 +117,7 @@ export default function Nav({
       <div
         className={`mx-auto max-w-7xl overflow-hidden transition-all duration-300 lg:hidden ${
           open
-            ? "mt-2.5 max-h-[460px] opacity-100 pointer-events-auto visible"
+            ? "mt-2.5 max-h-[calc(100vh-5.5rem)] overflow-y-auto opacity-100 pointer-events-auto visible"
             : "max-h-0 opacity-0 pointer-events-none invisible"
         }`}
       >

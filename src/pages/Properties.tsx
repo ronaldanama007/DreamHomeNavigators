@@ -17,14 +17,14 @@ export default function Properties({ filter, onFilter, inquire, go }: Props) {
 
   return (
     <>
-      <section className="mx-auto max-w-7xl px-5 pt-32 sm:px-8 sm:pt-36">
+      <section className="mx-auto max-w-7xl px-4 pt-28 sm:px-8 sm:pt-36">
         <Reveal>
           <span className="kicker">Property listings</span>
           <div className="mt-4 flex flex-wrap items-end justify-between gap-6">
-            <h1 className="font-display max-w-2xl text-4xl font-semibold leading-[1.08] text-slate-50 sm:text-5xl xl:text-6xl">
+            <h1 className="font-display max-w-2xl text-3xl font-semibold leading-tight text-slate-50 sm:text-5xl xl:text-6xl">
               Explore <span className="text-brand-300">selected properties</span>
             </h1>
-            <p className="max-w-md text-[15px] leading-relaxed text-slate-300/90">
+            <p className="max-w-md text-[14.5px] leading-relaxed text-slate-300/90">
               Browse a selection of current property materials and contact Dream Home Navigators for availability, pricing and viewing details.
             </p>
           </div>
@@ -32,7 +32,7 @@ export default function Properties({ filter, onFilter, inquire, go }: Props) {
 
         {/* Filter pills */}
         <Reveal delay={120}>
-          <div className="mt-10 flex flex-wrap items-center gap-2.5">
+          <div className="mt-8 sm:mt-10 flex flex-wrap items-center gap-2 sm:gap-2.5">
             <span className="mr-1 hidden items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.2em] text-slate-400 sm:inline-flex">
               <i className="fa-solid fa-filter text-brand-400" />
               Filter
@@ -44,7 +44,7 @@ export default function Properties({ filter, onFilter, inquire, go }: Props) {
                   key={loc}
                   onClick={() => onFilter(loc)}
                   aria-pressed={active}
-                  className={`inline-flex items-center gap-2 rounded-full px-4.5 py-2.5 text-[13px] font-bold transition-all duration-250 sm:px-5 min-h-[44px] cursor-pointer touch-manipulation active:scale-95 ${
+                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[12.5px] font-bold transition-all duration-250 sm:px-5 sm:py-2.5 sm:text-[13px] min-h-[44px] cursor-pointer touch-manipulation active:scale-95 ${
                     active
                       ? "bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-[0_8px_24px_-6px_rgba(37,99,235,0.7)] scale-[1.03]"
                       : "glass-chip text-slate-200 hover:-translate-y-0.5 hover:border-brand-300/60 hover:bg-white/10 hover:text-white"
@@ -68,7 +68,7 @@ export default function Properties({ filter, onFilter, inquire, go }: Props) {
         </Reveal>
 
         {/* Result meta */}
-        <div className="mt-8 flex items-center gap-3 text-[13px] font-semibold text-slate-400">
+        <div className="mt-6 sm:mt-8 flex items-center gap-3 text-[13px] font-semibold text-slate-400">
           <span className="h-px w-8 bg-brand-500/60" />
           Showing <strong className="text-brand-300">{filtered.length}</strong> of {properties.length} units
           {filter !== "All" && (
@@ -80,10 +80,29 @@ export default function Properties({ filter, onFilter, inquire, go }: Props) {
 
         {/* Grid or Concierge Sourcing Card */}
         {filtered.length > 0 ? (
-          <div className="mt-7 grid gap-7 sm:grid-cols-2 xl:grid-cols-3">
-            {filtered.map((p, i) => (
-              <PropertyCard key={`${filter}-${p.id}`} p={p} onInquire={inquire} index={i} />
-            ))}
+          <div className="mt-7 grid gap-6 sm:gap-7 sm:grid-cols-2 xl:grid-cols-3">
+            {filtered.map((p, i) => {
+              const isLast = i === filtered.length - 1;
+              const isSingleIn3Col = filtered.length % 3 === 1 && isLast;
+              const isSingleIn2Col = filtered.length % 2 === 1 && isLast;
+
+              return (
+                <div
+                  key={`${filter}-${p.id}`}
+                  className={`flex flex-col h-full ${
+                    isSingleIn2Col ? "sm:col-span-2 sm:max-w-md sm:mx-auto w-full" : ""
+                  } ${
+                    isSingleIn3Col
+                      ? "xl:col-span-1 xl:col-start-2 xl:max-w-none xl:mx-0"
+                      : isSingleIn2Col
+                      ? "xl:col-span-1 xl:col-start-auto"
+                      : ""
+                  }`}
+                >
+                  <PropertyCard p={p} onInquire={inquire} index={i} />
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="glass-panel mt-7 flex flex-col items-center rounded-3xl p-8 sm:p-12 text-center max-w-3xl mx-auto border border-brand-400/25">

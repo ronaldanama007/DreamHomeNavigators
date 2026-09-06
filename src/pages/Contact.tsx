@@ -116,7 +116,7 @@ export default function Contact({
 
   return (
     <>
-      <section className="mx-auto max-w-7xl px-5 pt-32 sm:px-8 sm:pt-36">
+      <section className="mx-auto max-w-7xl px-4 pt-28 sm:px-8 sm:pt-36">
         <SectionHead
           align="center"
           kicker="Get in touch"
@@ -219,7 +219,7 @@ export default function Contact({
               <div
                 ref={formRef}
                 key={flash || undefined}
-                className={`glass-panel-light scroll-mt-32 p-6 sm:p-8 ${flash > 0 ? "form-highlight" : ""}`}
+                className={`glass-panel-light scroll-mt-32 p-5 sm:p-8 ${flash > 0 ? "form-highlight" : ""}`}
               >
                 <div className="flex items-center justify-between gap-4">
                   <div>
