@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Property, fmtPrice } from "../data";
 
 export default function PropertyCard({
@@ -14,6 +14,9 @@ export default function PropertyCard({
   const [activeIdx, setActiveIdx] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
+  const filmstripRef = useRef<HTMLDivElement>(null);
 
   const currentImg = images[activeIdx] || p.img;
 
@@ -22,25 +25,85 @@ export default function PropertyCard({
     setLightboxOpen(true);
   };
 
+  const closeLightbox = () => {
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+    setLightboxOpen(false);
+  };
+
+  const toggleNativeFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+      setIsNativeFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+      setIsNativeFullscreen(false);
+    }
+  };
+
+  // Keyboard navigation & body scroll lock (Strict: only exits on Escape or X button)
   useEffect(() => {
     if (!lightboxOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setLightboxOpen(false);
+        closeLightbox();
       } else if (e.key === "ArrowLeft") {
         setActiveIdx((prev) => (prev > 0 ? prev - 1 : images.length - 1));
       } else if (e.key === "ArrowRight") {
         setActiveIdx((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+      } else if (e.key === "f" || e.key === "F") {
+        toggleNativeFullscreen();
       }
     };
+
+    const handleFsChange = () => {
+      setIsNativeFullscreen(Boolean(document.fullscreenElement));
+    };
+
     window.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("fullscreenchange", handleFsChange);
+
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("fullscreenchange", handleFsChange);
       document.body.style.overflow = prevOverflow;
     };
   }, [lightboxOpen, images.length]);
+
+  // Smoothly center the active thumbnail in the filmstrip
+  useEffect(() => {
+    if (!lightboxOpen || !filmstripRef.current) return;
+    const activeThumb = filmstripRef.current.children[activeIdx] as HTMLElement;
+    if (activeThumb) {
+      activeThumb.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    }
+  }, [activeIdx, lightboxOpen]);
+
+  // Touch swipe handlers for mobile devices
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    const diffX = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diffX) > 40) {
+      if (diffX > 0) {
+        // Swipe left -> next image
+        setActiveIdx((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+      } else {
+        // Swipe right -> previous image
+        setActiveIdx((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+      }
+    }
+    setTouchStartX(null);
+  };
 
   return (
     <>
@@ -229,132 +292,170 @@ export default function PropertyCard({
             )}
           </div>
 
-          {/* Pricing */}
-          <div className="mt-4">
-            <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              {p.priceLabel || (p.price < 100_000 ? "Price starts at" : "Starting at")}
-            </span>
-            <div className="mt-0.5 flex items-baseline justify-between gap-2">
-              <p className="font-display text-[24px] font-bold tracking-tight text-brand-900">
+          {/* Highlights */}
+          {p.highlights && p.highlights.length > 0 && (
+            <ul className="mt-3.5 space-y-1.5 border-b border-slate-100 pb-3.5 text-xs text-slate-600">
+              {p.highlights.slice(0, 3).map((h, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <i className="fa-solid fa-circle-check mt-0.5 text-brand-600 text-[11px]" />
+                  <span>{h}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Price & CTA */}
+          <div className="mt-auto flex items-end justify-between pt-4">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                {p.priceLabel || "Price"}
+              </p>
+              <p className="font-display text-2xl font-bold tracking-tight text-brand-700">
                 {fmtPrice(p.price)}
               </p>
+              {p.lotNote && (
+                <p className="mt-0.5 text-[11px] font-medium text-slate-500">
+                  {p.lotNote}
+                </p>
+              )}
             </div>
-            {p.priceNote && (
-              <p className="mt-1 text-[11.5px] italic text-slate-500">
-                {p.priceNote}
-              </p>
-            )}
-          </div>
 
-          {/* Actions */}
-          <div className="mt-5 flex items-center gap-2">
-            <button
-              onClick={() => onInquire(p.name)}
-              className="btn btn-primary flex-1 justify-center !py-2.5 text-[13px]"
-            >
-              <i className="fa-regular fa-paper-plane" />
-              Ask About This Property
-            </button>
-            {p.videoId && (
+            <div className="flex items-center gap-2">
+              {p.videoId && (
+                <button
+                  type="button"
+                  onClick={() => openLightbox(true)}
+                  className="btn btn-ghost !px-3 !py-2 text-xs !border-brand-300 text-brand-700 hover:!bg-brand-50"
+                  title="Watch Video Tour"
+                >
+                  <i className="fa-solid fa-play text-brand-600" />
+                  <span className="hidden sm:inline">Video</span>
+                </button>
+              )}
+              {images.length > 1 && !p.videoId && (
+                <button
+                  type="button"
+                  onClick={() => openLightbox(false)}
+                  className="btn btn-ghost !px-3 !py-2 text-xs !border-slate-300 text-slate-700 hover:!bg-slate-100"
+                  title="View photo gallery"
+                >
+                  <i className="fa-solid fa-images text-brand-600" />
+                  <span className="hidden sm:inline">Photos ({images.length})</span>
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => openLightbox(true)}
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-500 bg-brand-50 text-brand-600 transition hover:bg-brand-600 hover:text-white"
-                title="Watch Video Tour"
+                onClick={() => onInquire(p.name)}
+                className="btn btn-primary !px-4 !py-2 text-xs font-bold"
               >
-                <i className="fa-solid fa-play text-xs" />
+                Inquire
+                <i className="fa-solid fa-arrow-right" />
               </button>
-            )}
-            {images.length > 1 && !p.videoId && (
-              <button
-                type="button"
-                onClick={() => openLightbox(false)}
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 transition hover:border-brand-500 hover:text-brand-600"
-                title="View photo gallery"
-              >
-                <i className="fa-solid fa-images" />
-              </button>
-            )}
+            </div>
           </div>
         </div>
       </article>
 
-      {/* Lightbox / Video Modal (True Fullscreen) */}
+      {/* ========================================================================= */}
+      {/* IMMERSIVE FULL-VIEWPORT CINEMA LIGHTBOX (Exit via 'X' or 'Esc' Only)       */}
+      {/* ========================================================================= */}
       {lightboxOpen && (
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-[9999] flex flex-col justify-between bg-black/95 text-white backdrop-blur-xl animate-card-in select-none"
+          aria-label={`${p.name} Fullscreen Showcase`}
+          className="fixed inset-0 z-[9999] flex h-[100dvh] w-[100dvw] flex-col justify-between bg-black/98 text-white backdrop-blur-2xl select-none animate-card-in"
         >
-          {/* Top Bar */}
-          <div className="flex items-center justify-between border-b border-white/10 bg-ink-950/80 px-4 py-3 sm:px-8 sm:py-4">
-            <div className="flex items-center gap-3">
+          {/* Top Bar: Clean, modern luxury real estate navigation */}
+          <header className="flex shrink-0 items-center justify-between border-b border-white/10 bg-ink-950/85 px-4 py-3 sm:px-8 sm:py-3.5 backdrop-blur-md">
+            <div className="flex items-center gap-3.5">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-600/30 border border-brand-400/40 text-brand-300 shadow-sm">
+                <i className="fa-solid fa-compass text-base" />
+              </span>
               <div>
-                <div className="flex items-center gap-2">
-                  <h4 className="font-display text-base sm:text-xl font-semibold text-white">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="font-display text-base font-semibold leading-tight text-white sm:text-xl">
                     {p.name}
-                  </h4>
-                  <span className="rounded-full bg-brand-600/80 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                  </h3>
+                  <span className="rounded-full bg-brand-600/90 px-2.5 py-0.5 text-[10.5px] font-extrabold uppercase tracking-wider text-white shadow-sm">
                     {p.badge}
                   </span>
                 </div>
-                <p className="text-xs text-brand-300">
-                  <i className="fa-solid fa-location-dot mr-1" />
+                <p className="mt-0.5 text-xs text-slate-300/85">
+                  <i className="fa-solid fa-location-dot mr-1 text-brand-400" />
                   {p.area} {p.developer ? `· ${p.developer}` : ""}
                   {!showVideo && images.length > 1 && (
-                    <span className="ml-2 font-mono text-slate-400">
-                      (Photo {activeIdx + 1} of {images.length})
+                    <span className="ml-2 font-mono text-xs font-bold text-brand-200">
+                      Photo {String(activeIdx + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
                     </span>
                   )}
                 </p>
               </div>
             </div>
 
-            {/* Video vs Photo toggle if video exists */}
-            <div className="flex items-center gap-3">
+            {/* Mode toggles & Control Actions */}
+            <div className="flex items-center gap-2.5 sm:gap-3.5">
               {p.videoId && (
-                <div className="flex items-center rounded-xl bg-white/10 p-1">
+                <div className="flex items-center rounded-full bg-white/10 p-1 border border-white/15">
                   <button
                     type="button"
                     onClick={() => setShowVideo(true)}
-                    className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                      showVideo ? "bg-brand-600 text-white shadow" : "text-slate-300 hover:text-white"
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-bold transition-all ${
+                      showVideo ? "bg-brand-600 text-white shadow-md" : "text-slate-300 hover:text-white"
                     }`}
                   >
-                    <i className="fa-solid fa-film" />
-                    <span className="hidden sm:inline">Video Tour</span>
+                    <i className="fa-solid fa-film text-[11px]" />
+                    <span>Video Tour</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowVideo(false)}
-                    className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                      !showVideo ? "bg-brand-600 text-white shadow" : "text-slate-300 hover:text-white"
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-bold transition-all ${
+                      !showVideo ? "bg-brand-600 text-white shadow-md" : "text-slate-300 hover:text-white"
                     }`}
                   >
-                    <i className="fa-solid fa-images" />
-                    <span className="hidden sm:inline">Photos</span> ({images.length})
+                    <i className="fa-solid fa-images text-[11px]" />
+                    <span>Photos ({images.length})</span>
                   </button>
                 </div>
               )}
 
-              {/* Close Button: Only exit on X or Esc */}
+              {/* Native Fullscreen Toggle Button */}
               <button
                 type="button"
-                onClick={() => setLightboxOpen(false)}
-                className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-white transition hover:bg-white/20 hover:border-white/40 active:scale-95 shadow-md"
+                onClick={toggleNativeFullscreen}
+                className="hidden sm:grid h-9 w-9 place-items-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20 hover:border-white/40 active:scale-95"
+                title={isNativeFullscreen ? "Exit full screen (F)" : "Enter full screen (F)"}
+                aria-label="Toggle full screen"
+              >
+                <i className={`fa-solid ${isNativeFullscreen ? "fa-compress" : "fa-expand"} text-sm`} />
+              </button>
+
+              {/* Close Button: Strictly exits only on click or Esc key */}
+              <button
+                type="button"
+                onClick={closeLightbox}
+                className="flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-white transition-all hover:bg-rose-600 hover:border-rose-500 hover:text-white active:scale-95 shadow-md group"
                 aria-label="Close fullscreen (Esc)"
                 title="Close (Esc)"
               >
-                <i className="fa-solid fa-xmark text-base sm:text-lg" />
-                <span className="hidden sm:inline text-xs font-bold uppercase tracking-wider">Close (Esc)</span>
+                <i className="fa-solid fa-xmark text-base transition-transform group-hover:rotate-90" />
+                <span className="text-xs font-bold uppercase tracking-wider">Close</span>
+                <kbd className="hidden md:inline rounded bg-white/20 px-1.5 py-0.5 text-[10px] font-mono uppercase text-white/90">
+                  Esc
+                </kbd>
               </button>
             </div>
-          </div>
+          </header>
 
-          {/* Media Content: True Fullscreen stage */}
-          <div className="relative flex flex-1 w-full items-center justify-center min-h-0 overflow-hidden p-2 sm:p-6">
+          {/* Center Stage: True Full-Bleed Viewport */}
+          <main
+            className="relative flex flex-1 w-full min-h-0 items-center justify-center overflow-hidden p-2 sm:p-5"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             {p.videoId && showVideo ? (
-              <div className="relative aspect-video w-full max-w-5xl overflow-hidden rounded-2xl bg-black shadow-2xl border border-white/15">
+              <div className="relative aspect-video w-full max-w-6xl max-h-[82vh] overflow-hidden rounded-2xl bg-black shadow-2xl border border-white/20">
                 <iframe
                   src={`https://www.youtube-nocookie.com/embed/${p.videoId}?autoplay=1&rel=0`}
                   title={`${p.name} Video Tour`}
@@ -367,40 +468,48 @@ export default function PropertyCard({
               <div className="relative flex h-full w-full items-center justify-center">
                 <img
                   src={currentImg}
-                  alt={`${p.name} - Photo ${activeIdx + 1}`}
-                  className="h-full w-full max-h-[82vh] object-contain rounded-xl shadow-2xl transition-all duration-200 select-none"
+                  alt={`${p.name} - Showcase view ${activeIdx + 1}`}
+                  fetchPriority="high"
+                  loading="eager"
+                  className="h-full w-full max-h-[82vh] object-contain rounded-xl shadow-2xl transition-all duration-300 select-none drop-shadow-[0_20px_50px_rgba(0,0,0,0.9)]"
                 />
 
+                {/* Floating Left Navigation Chevron */}
                 {images.length > 1 && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => setActiveIdx((prev) => (prev > 0 ? prev - 1 : images.length - 1))}
-                      className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-30 grid h-12 w-12 sm:h-16 sm:w-16 place-items-center rounded-full bg-black/65 text-white border border-white/20 backdrop-blur-md transition-all hover:bg-black/90 hover:scale-110 shadow-2xl active:scale-95"
-                      aria-label="Previous photo"
-                      title="Previous (Left Arrow)"
-                    >
-                      <i className="fa-solid fa-chevron-left text-lg sm:text-2xl" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveIdx((prev) => (prev < images.length - 1 ? prev + 1 : 0))}
-                      className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-30 grid h-12 w-12 sm:h-16 sm:w-16 place-items-center rounded-full bg-black/65 text-white border border-white/20 backdrop-blur-md transition-all hover:bg-black/90 hover:scale-110 shadow-2xl active:scale-95"
-                      aria-label="Next photo"
-                      title="Next (Right Arrow)"
-                    >
-                      <i className="fa-solid fa-chevron-right text-lg sm:text-2xl" />
-                    </button>
-                  </>
+                  <button
+                    type="button"
+                    onClick={() => setActiveIdx((prev) => (prev > 0 ? prev - 1 : images.length - 1))}
+                    className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-30 grid h-12 w-12 sm:h-16 sm:w-16 place-items-center rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/20 backdrop-blur-md transition-all hover:scale-110 shadow-2xl active:scale-95"
+                    aria-label="Previous photo"
+                    title="Previous (Left Arrow)"
+                  >
+                    <i className="fa-solid fa-chevron-left text-lg sm:text-2xl" />
+                  </button>
+                )}
+
+                {/* Floating Right Navigation Chevron */}
+                {images.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveIdx((prev) => (prev < images.length - 1 ? prev + 1 : 0))}
+                    className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-30 grid h-12 w-12 sm:h-16 sm:w-16 place-items-center rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/20 backdrop-blur-md transition-all hover:scale-110 shadow-2xl active:scale-95"
+                    aria-label="Next photo"
+                    title="Next (Right Arrow)"
+                  >
+                    <i className="fa-solid fa-chevron-right text-lg sm:text-2xl" />
+                  </button>
                 )}
               </div>
             )}
-          </div>
+          </main>
 
-          {/* Bottom Bar: Thumbnails & Inquire CTA (NO external website link) */}
-          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 bg-ink-950/80 px-4 py-3 sm:px-8 sm:py-3.5">
+          {/* Bottom Bar: Interactive Filmstrip, Spec Highlight & Inquire CTA */}
+          <footer className="flex shrink-0 flex-wrap items-center justify-between gap-4 border-t border-white/10 bg-ink-950/85 px-4 py-2.5 sm:px-8 sm:py-3 backdrop-blur-md">
             {images.length > 1 && !showVideo ? (
-              <div className="flex items-center gap-2 overflow-x-auto max-w-[65vw] sm:max-w-[75vw] py-1 scrollbar-thin">
+              <div
+                ref={filmstripRef}
+                className="flex items-center gap-2 overflow-x-auto max-w-[65vw] sm:max-w-[75vw] py-1 scrollbar-thin"
+              >
                 {images.map((img, i) => (
                   <button
                     key={i}
@@ -408,37 +517,50 @@ export default function PropertyCard({
                       setShowVideo(false);
                       setActiveIdx(i);
                     }}
-                    className={`overflow-hidden rounded-lg border-2 shrink-0 transition-all ${
+                    className={`relative overflow-hidden rounded-lg border-2 shrink-0 transition-all duration-200 ${
                       activeIdx === i
-                        ? "border-brand-400 scale-105 shadow-md shadow-brand-500/50"
-                        : "border-transparent opacity-50 hover:opacity-100 hover:border-white/40"
+                        ? "border-brand-400 scale-105 ring-2 ring-brand-400/80 shadow-lg shadow-brand-500/50 opacity-100"
+                        : "border-transparent opacity-45 hover:opacity-100 hover:border-white/40"
                     }`}
+                    aria-label={`Jump to photo ${i + 1}`}
                   >
                     <img
                       src={img}
                       alt={`Thumb ${i + 1}`}
-                      className="h-10 w-14 object-cover"
+                      className="h-11 w-16 sm:h-12 sm:w-20 object-cover"
+                      loading="lazy"
                     />
+                    <span className="absolute bottom-0.5 right-1 rounded bg-black/75 px-1 text-[9px] font-mono text-white">
+                      {i + 1}
+                    </span>
                   </button>
                 ))}
               </div>
             ) : (
-              <div className="text-xs text-slate-400">
-                Dream Home Navigators · Verified Property Inclusions
+              <div className="flex items-center gap-4 text-xs font-semibold text-slate-300">
+                <span className="inline-flex items-center gap-1.5 text-brand-300">
+                  <i className="fa-solid fa-shield-halved" />
+                  PRC-Licensed Representation
+                </span>
+                <span className="hidden sm:inline text-slate-400">
+                  Guiding You Home, Building Your Future
+                </span>
               </div>
             )}
 
+            {/* Direct Lead Inquire CTA Button (No external website leak) */}
             <button
+              type="button"
               onClick={() => {
-                setLightboxOpen(false);
+                closeLightbox();
                 onInquire(p.name);
               }}
-              className="btn btn-primary !py-2.5 !px-6 text-xs sm:text-sm font-bold shadow-lg shadow-brand-600/50 ml-auto"
+              className="btn btn-primary !py-2.5 !px-6 text-xs sm:text-sm font-bold shadow-lg shadow-brand-600/50 ml-auto flex items-center gap-2 group"
             >
-              Inquire About This Unit
-              <i className="fa-solid fa-arrow-right" />
+              <span>Inquire About This Unit</span>
+              <i className="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1" />
             </button>
-          </div>
+          </footer>
         </div>
       )}
     </>
