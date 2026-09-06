@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Page } from "../data";
 import { Logo } from "../ui";
+import { CONFIG } from "../config";
 
 const LINKS: { id: Page; label: string }[] = [
   { id: "home", label: "Home" },
@@ -21,7 +22,7 @@ export default function Nav({
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -32,122 +33,182 @@ export default function Nav({
     go(p);
   };
 
-  return (
-    <header className="fixed inset-x-0 top-0 z-50 px-3 sm:px-5 pointer-events-none">
-      <div
-        className={`mx-auto mt-3 flex max-w-7xl items-center justify-between gap-3 rounded-2xl px-4 py-2.5 transition-all duration-300 sm:mt-4 sm:px-5 pointer-events-auto ${
-          scrolled
-            ? "glass-panel-deep !rounded-2xl shadow-2xl bg-ink-950/90 border border-brand-400/20"
-            : "glass-panel !rounded-2xl bg-ink-950/60 backdrop-blur-md border border-white/10 shadow-lg"
-        }`}
-      >
-        <button
-          onClick={() => nav("home")}
-          className="group flex items-center gap-2.5 sm:gap-3 text-left cursor-pointer active:scale-95"
-          aria-label="Dream Home Navigators — home"
-        >
-          <span className="transition-transform duration-500 group-hover:rotate-12 shrink-0">
-            <Logo size={36} />
-          </span>
-          <span className="leading-tight">
-            <span className="block font-display text-[15px] sm:text-[17px] font-semibold tracking-wide text-slate-50">
-              Dream Home Navigators
-            </span>
-            <span className="hidden sm:block text-[10.5px] font-medium tracking-wide text-brand-200/80">
-              Guiding You Home, Building Your Future
-            </span>
-          </span>
-        </button>
+  const openOwnerPortal = () => {
+    setOpen(false);
+    window.location.hash = CONFIG.ADMIN_ROUTE_HASH;
+  };
 
-        <nav className="hidden items-center gap-1 lg:flex">
-          {LINKS.map((l) => (
-            <button
-              key={l.id}
-              onClick={() => nav(l.id)}
-              className={`relative rounded-lg px-3.5 py-2 text-[13.5px] font-semibold tracking-wide transition-colors duration-200 cursor-pointer ${
-                page === l.id
-                  ? "text-brand-300"
-                  : "text-slate-200 hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              {l.label}
-              <span
-                className={`absolute -bottom-0.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-brand-300 transition-all duration-300 ${
-                  page === l.id ? "opacity-100 scale-100" : "opacity-0 scale-0"
-                }`}
-              />
-            </button>
-          ))}
-          <a
-            href="tel:+639216030693"
-            className="ml-2 flex items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] font-medium text-slate-300 transition hover:text-white"
-          >
-            <i className="fa-solid fa-phone text-xs text-brand-300" />
-            <span>+63 921 603 0693</span>
-          </a>
+  return (
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-surface-dim/95 backdrop-blur-2xl shadow-[0_4px_24px_rgba(0,0,0,0.35)] border-b border-surface-container-high/60"
+          : "bg-surface-dim/80 backdrop-blur-2xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-surface-container-high/30"
+      }`}
+    >
+      <div className="h-20 max-w-max-width mx-auto px-gutter-mobile md:px-gutter-tablet lg:px-gutter-desktop flex items-center justify-between gap-space-md">
+        {/* Brand logo & tagline */}
+        <div className="flex items-center gap-space-sm shrink-0">
           <button
-            onClick={() => nav("contact")}
-            className="btn btn-primary ml-1 !px-4 !py-2 text-[13px] active:scale-95"
+            onClick={() => nav("home")}
+            className="flex items-center gap-space-sm group text-left cursor-pointer active:scale-95 transition-transform"
+            aria-label="Dream Home Navigators — Home"
           >
-            <i className="fa-regular fa-paper-plane" />
-            Send an Inquiry
+            <span className="transition-transform duration-500 group-hover:rotate-12 shrink-0">
+              <Logo size={36} />
+            </span>
+            <div className="flex flex-col">
+              <span className="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors">
+                Dream Home Navigators
+              </span>
+              <span className="font-label-overline text-label-overline text-tertiary tracking-wider uppercase">
+                Guiding You Home, Building Your Future
+              </span>
+            </div>
+          </button>
+        </div>
+
+        {/* Center pill navigation */}
+        <nav
+          className="hidden xl:flex items-center gap-space-xs bg-surface-container-lowest/60 backdrop-blur-md px-space-sm py-space-xs rounded-full shadow-[0_1px_8px_rgba(0,0,0,0.04)] border border-surface-container-high/40"
+          data-active-classes="bg-surface-container-high text-primary font-label-lg rounded-full px-space-sm py-space-xxs"
+        >
+          {LINKS.map((l) => {
+            const isActive = page === l.id;
+            return (
+              <button
+                key={l.id}
+                onClick={() => nav(l.id)}
+                aria-current={isActive ? "page" : undefined}
+                className={
+                  isActive
+                    ? "transition-all bg-surface-container-high text-primary font-label-lg rounded-full px-space-sm py-space-xxs cursor-pointer"
+                    : "px-space-sm py-space-xxs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all cursor-pointer"
+                }
+              >
+                {l.label}
+              </button>
+            );
+          })}
+          <button
+            onClick={openOwnerPortal}
+            className="px-space-sm py-space-xxs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-tertiary hover:bg-surface-container transition-all cursor-pointer"
+            title="Open Console"
+          >
+            Owner Portal
           </button>
         </nav>
 
-        <button
-          className="grid h-11 w-11 min-h-[44px] min-w-[44px] place-items-center rounded-xl border border-white/15 bg-white/10 text-slate-100 transition hover:bg-white/15 active:scale-90 cursor-pointer pointer-events-auto lg:hidden"
-          onClick={() => setOpen((v) => !v)}
-          aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
-        >
-          <i className={`fa-solid ${open ? "fa-xmark" : "fa-bars"} text-base`} />
-        </button>
+        {/* Right CTA cluster */}
+        <div className="flex items-center gap-space-md shrink-0">
+          <div className="hidden md:flex flex-col text-right">
+            <span className="font-label-overline text-label-overline text-on-surface-variant">
+              Direct Line
+            </span>
+            <a
+              className="font-label-md text-label-md text-secondary hover:text-primary transition-colors"
+              href="tel:+639216030693"
+            >
+              +63 921 603 0693
+            </a>
+          </div>
+
+          <button
+            onClick={() => nav("contact")}
+            className="hidden sm:inline-flex items-center gap-space-xs px-space-md py-space-xs bg-primary-container text-on-primary-container rounded-full font-label-lg text-label-lg hover:bg-inverse-primary hover:text-on-primary shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-all cursor-pointer active:scale-95"
+          >
+            <span className="material-symbols-outlined text-[18px]">mail</span>
+            <span>Send an Inquiry</span>
+          </button>
+
+          <button
+            onClick={openOwnerPortal}
+            className="w-8 h-8 rounded-full bg-primary hover:bg-primary-container flex items-center justify-center shrink-0 transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+            title="Owner Portal"
+            aria-label="Owner Portal"
+          >
+            <span className="material-symbols-outlined text-on-primary text-[18px]">
+              person
+            </span>
+          </button>
+
+          {/* Mobile hamburger button */}
+          <button
+            className="grid h-10 w-10 min-h-[40px] min-w-[40px] place-items-center rounded-xl border border-surface-container-high bg-surface-container/80 text-on-surface transition hover:bg-surface-container-high active:scale-90 cursor-pointer xl:hidden"
+            onClick={() => setOpen((v) => !v)}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+          >
+            <span className="material-symbols-outlined text-[20px]">
+              {open ? "close" : "menu"}
+            </span>
+          </button>
+        </div>
       </div>
 
-      {/* Mobile menu backdrop dismiss */}
+      {/* Mobile backdrop */}
       {open && (
         <div
-          className="fixed inset-0 -z-10 bg-ink-950/75 backdrop-blur-md lg:hidden pointer-events-auto transition-opacity duration-300"
+          className="fixed inset-0 top-20 -z-10 bg-surface-dim/80 backdrop-blur-md xl:hidden transition-opacity"
           onClick={() => setOpen(false)}
           aria-hidden="true"
         />
       )}
 
-      {/* Mobile menu: only rendered in DOM when open */}
+      {/* Mobile drawer */}
       {open && (
-        <div className="mx-auto max-w-7xl overflow-hidden mt-2.5 max-h-[calc(100vh-5.5rem)] overflow-y-auto pointer-events-auto lg:hidden animate-card-in">
-          <div className="glass-panel-deep grid gap-1.5 rounded-2xl p-3 shadow-2xl border border-brand-400/20">
-            {LINKS.map((l) => (
-              <button
-                key={l.id}
-                onClick={() => nav(l.id)}
-                className={`min-h-[48px] rounded-xl px-4 py-3 text-left text-[14.5px] font-bold transition flex items-center cursor-pointer active:scale-[0.98] ${
-                  page === l.id
-                    ? "bg-brand-600/35 text-brand-200 border border-brand-400/30"
-                    : "text-slate-200 hover:bg-white/5 active:bg-white/10"
-                }`}
-              >
-                <i className="fa-solid fa-compass mr-3 text-brand-300/80" />
-                {l.label}
-              </button>
-            ))}
-            <a
-              href="tel:+639216030693"
-              className="min-h-[48px] flex items-center justify-center gap-2 rounded-xl border border-white/10 py-3 text-sm font-bold text-slate-200 transition hover:bg-white/5 active:bg-white/10 active:scale-[0.98]"
-            >
-              <i className="fa-solid fa-phone text-xs text-brand-300" />
-              Call +63 921 603 0693
-            </a>
+        <div className="max-w-max-width mx-auto px-gutter-mobile py-space-sm xl:hidden animate-card-in">
+          <div className="bg-surface-container/95 border border-surface-container-high backdrop-blur-2xl rounded-2xl p-space-md shadow-2xl flex flex-col gap-space-xs">
+            {LINKS.map((l) => {
+              const isActive = page === l.id;
+              return (
+                <button
+                  key={l.id}
+                  onClick={() => nav(l.id)}
+                  className={`min-h-[46px] rounded-xl px-space-md py-space-xs text-left font-label-lg text-label-lg transition flex items-center justify-between cursor-pointer active:scale-[0.98] ${
+                    isActive
+                      ? "bg-primary-container text-on-primary-container font-bold"
+                      : "text-on-surface hover:bg-surface-container-high"
+                  }`}
+                >
+                  <span>{l.label}</span>
+                  <span className="material-symbols-outlined text-[18px]">
+                    chevron_right
+                  </span>
+                </button>
+              );
+            })}
+
             <button
-              onClick={() => nav("contact")}
-              className="btn btn-primary min-h-[48px] mt-1 justify-center text-sm font-bold active:scale-[0.98]"
+              onClick={openOwnerPortal}
+              className="min-h-[46px] rounded-xl px-space-md py-space-xs text-left font-label-lg text-label-lg text-tertiary hover:bg-surface-container-high transition flex items-center justify-between cursor-pointer"
             >
-              <i className="fa-regular fa-paper-plane" />
-              Send an Inquiry
+              <span>Owner Portal</span>
+              <span className="material-symbols-outlined text-[18px]">
+                admin_panel_settings
+              </span>
             </button>
+
+            <div className="pt-space-xs border-t border-surface-container-high/60 flex flex-col gap-space-xs">
+              <a
+                href="tel:+639216030693"
+                className="min-h-[44px] flex items-center justify-center gap-space-xs rounded-full bg-surface-container-high/80 text-secondary font-label-md text-label-md hover:bg-surface-bright transition"
+              >
+                <span className="material-symbols-outlined text-[16px]">call</span>
+                <span>Call +63 921 603 0693</span>
+              </a>
+              <button
+                onClick={() => nav("contact")}
+                className="min-h-[44px] flex items-center justify-center gap-space-xs rounded-full bg-primary-container text-on-primary-container font-label-lg text-label-lg shadow-md hover:bg-inverse-primary hover:text-on-primary transition"
+              >
+                <span className="material-symbols-outlined text-[18px]">mail</span>
+                <span>Send an Inquiry</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
     </header>
   );
 }
+

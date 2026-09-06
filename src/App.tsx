@@ -143,7 +143,7 @@ export default function App() {
 
       <Nav page={page} go={go} />
 
-      <main key={page} className="relative z-10 animate-card-in">
+      <main key={page} className="w-full pt-20 bg-background min-h-screen relative overflow-x-hidden animate-card-in">
         {page === "home" && <Home go={go} inquire={inquire} browseLocation={browseLocation} />}
         {page === "properties" && (
           <Properties filter={locFilter} onFilter={setLocFilter} inquire={inquire} go={go} />
