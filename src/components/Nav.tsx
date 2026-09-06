@@ -42,8 +42,8 @@ export default function Nav({
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-surface-dim/95 backdrop-blur-2xl shadow-[0_4px_24px_rgba(0,0,0,0.35)] border-b border-surface-container-high/60"
-          : "bg-surface-dim/80 backdrop-blur-2xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-surface-container-high/30"
+          ? "bg-[#080f22]/90 backdrop-blur-[36px] shadow-[0_24px_64px_-12px_rgba(0,0,0,0.8),0_0_32px_0_rgba(37,99,235,0.2)] border-b border-[#38bdf8]/30"
+          : "bg-[#080f22]/80 backdrop-blur-[32px] shadow-[0_12px_32px_rgba(0,0,0,0.4)] border-b border-surface-container-high/40"
       }`}
     >
       <div className="h-20 max-w-max-width mx-auto px-gutter-mobile md:px-gutter-tablet lg:px-gutter-desktop flex items-center justify-between gap-space-md">
@@ -70,8 +70,7 @@ export default function Nav({
 
         {/* Center pill navigation */}
         <nav
-          className="hidden xl:flex items-center gap-space-xs bg-surface-container-lowest/60 backdrop-blur-md px-space-sm py-space-xs rounded-full shadow-[0_1px_8px_rgba(0,0,0,0.04)] border border-surface-container-high/40"
-          data-active-classes="bg-surface-container-high text-primary font-label-lg rounded-full px-space-sm py-space-xxs"
+          className="hidden xl:flex items-center gap-space-xs bg-[#050d23]/80 backdrop-blur-xl px-space-sm py-space-xs rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.5)] border border-[rgba(59,130,246,0.25)]"
         >
           {LINKS.map((l) => {
             const isActive = page === l.id;
@@ -82,17 +81,18 @@ export default function Nav({
                 aria-current={isActive ? "page" : undefined}
                 className={
                   isActive
-                    ? "transition-all bg-surface-container-high text-primary font-label-lg rounded-full px-space-sm py-space-xxs cursor-pointer"
-                    : "px-space-sm py-space-xxs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all cursor-pointer"
+                    ? "transition-all bg-primary-container/25 text-[#60a5fa] border border-[#3b82f6] shadow-[0_0_14px_rgba(59,130,246,0.3)] font-label-lg rounded-full px-space-sm py-space-xxs flex items-center gap-1.5 cursor-pointer"
+                    : "px-space-sm py-space-xxs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-white hover:bg-surface-container transition-all cursor-pointer"
                 }
               >
-                {l.label}
+                {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] animate-pulse" />}
+                <span>{l.label}</span>
               </button>
             );
           })}
           <button
             onClick={openOwnerPortal}
-            className="px-space-sm py-space-xxs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-tertiary hover:bg-surface-container transition-all cursor-pointer"
+            className="px-space-sm py-space-xxs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-secondary hover:bg-surface-container transition-all cursor-pointer"
             title="Open Console"
           >
             Owner Portal

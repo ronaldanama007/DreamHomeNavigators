@@ -33,8 +33,8 @@ export default function Properties({ filter, onFilter, inquire, go }: Props) {
         {/* Filter pills */}
         <Reveal delay={120}>
           <div className="mt-8 sm:mt-10 flex flex-wrap items-center gap-2 sm:gap-2.5">
-            <span className="mr-1 hidden items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.2em] text-slate-400 sm:inline-flex">
-              <i className="fa-solid fa-filter text-brand-400" />
+            <span className="mr-1 hidden items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.2em] text-outline sm:inline-flex">
+              <span className="material-symbols-outlined text-[16px] text-secondary">filter_alt</span>
               Filter
             </span>
             {["All", ...LOCATIONS].map((loc) => {
@@ -44,19 +44,20 @@ export default function Properties({ filter, onFilter, inquire, go }: Props) {
                   key={loc}
                   onClick={() => onFilter(loc)}
                   aria-pressed={active}
-                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[12.5px] font-bold transition-all duration-250 sm:px-5 sm:py-2.5 sm:text-[13px] min-h-[44px] cursor-pointer touch-manipulation active:scale-95 ${
+                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-semibold transition-all duration-200 sm:px-5 sm:py-2.5 min-h-[44px] cursor-pointer touch-manipulation active:scale-95 ${
                     active
-                      ? "bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-[0_8px_24px_-6px_rgba(37,99,235,0.7)] scale-[1.03]"
-                      : "glass-chip text-slate-200 hover:-translate-y-0.5 hover:border-brand-300/60 hover:bg-white/10 hover:text-white"
+                      ? "glass-chip-selected scale-[1.03]"
+                      : "glass-chip text-on-surface-variant hover:text-white hover:border-primary/40"
                   }`}
                 >
-                  {loc !== "All" && (
-                    <i className={`fa-solid fa-location-dot text-[11px] ${active ? "text-brand-200" : "text-brand-400"}`} />
+                  {active && <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] animate-pulse" />}
+                  {loc !== "All" && !active && (
+                    <span className="material-symbols-outlined text-[14px] text-secondary">location_on</span>
                   )}
                   {loc}
                   <span
-                    className={`rounded-full px-1.5 py-0.5 text-[10px] font-extrabold ${
-                      active ? "bg-white/25 text-white" : "bg-white/10 text-slate-300"
+                    className={`rounded-full px-2 py-0.5 text-[11px] font-mono ${
+                      active ? "bg-primary-container text-white" : "bg-white/10 text-on-surface-variant"
                     }`}
                   >
                     {loc === "All" ? properties.length : properties.filter((p) => p.location === loc).length}
@@ -68,12 +69,12 @@ export default function Properties({ filter, onFilter, inquire, go }: Props) {
         </Reveal>
 
         {/* Result meta */}
-        <div className="mt-6 sm:mt-8 flex items-center gap-3 text-[13px] font-semibold text-slate-400">
-          <span className="h-px w-8 bg-brand-500/60" />
-          Showing <strong className="text-brand-300">{filtered.length}</strong> of {properties.length} units
+        <div className="mt-6 sm:mt-8 flex items-center gap-3 text-[13px] font-semibold text-on-surface-variant">
+          <span className="h-px w-8 bg-secondary/60" />
+          Showing <strong className="text-secondary">{filtered.length}</strong> of {properties.length} units
           {filter !== "All" && (
             <>
-              in <strong className="text-slate-100">{filter}</strong>
+              in <strong className="text-white">{filter}</strong>
             </>
           )}
         </div>

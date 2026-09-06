@@ -109,10 +109,11 @@ export default function PropertyCard({
   return (
     <>
       <article
-        className="glass-panel-light group flex h-full flex-col overflow-hidden transition-transform duration-300 hover:-translate-y-1.5 motion-reduce:transition-none animate-card-in"
+        className="glass-card-interactive group flex h-full flex-col overflow-hidden rounded-xl animate-card-in select-none"
         style={{ animationDelay: `${Math.min(index, 8) * 70}ms` }}
       >
-        <div className="relative h-56 overflow-hidden bg-ink-950/20">
+        {/* High-Resolution Hero Image with dark gradient baseline overlay */}
+        <div className="relative h-60 overflow-hidden bg-surface-container-lowest">
           <img
             src={currentImg}
             alt={`${p.name} - Photo ${activeIdx + 1}`}
@@ -120,23 +121,27 @@ export default function PropertyCard({
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:transition-none cursor-pointer"
             onClick={() => openLightbox(false)}
           />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-brand-950/75 via-transparent to-brand-950/15" />
+          {/* Baseline gradient overlay: linear-gradient(to top, rgba(3, 7, 18, 0.9) 0%, transparent 60%) */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#030712]/95 via-[#030712]/40 to-transparent" />
 
-          {/* Badges */}
-          <span
-            className={`absolute left-3.5 top-3.5 rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-md ${
-              p.badge === "Featured"
-                ? "bg-brass-400 text-brand-950"
-                : p.badge === "RFO"
-                ? "bg-emerald-600"
-                : "bg-brand-600"
-            }`}
-          >
-            {p.badge}
-          </span>
+          {/* Floating Top-Left Luxury Badges */}
+          <div className="absolute left-3.5 top-3.5 flex items-center gap-2">
+            <span
+              className={`rounded-full px-3 py-1 text-[10.5px] font-bold uppercase tracking-wider text-white shadow-md backdrop-blur-md ${
+                p.badge === "Featured"
+                  ? "bg-primary-container text-white border border-primary/30"
+                  : p.badge === "RFO"
+                  ? "bg-emerald-600/90 text-white border border-emerald-400/30"
+                  : "bg-surface-container-high/90 text-on-surface border border-outline-variant/40"
+              }`}
+            >
+              {p.badge}
+            </span>
+          </div>
 
-          <span className="glass-chip absolute right-3.5 top-3.5 inline-flex items-center gap-1.5 !bg-ink-950/65 px-2.5 py-1 text-[11px] font-bold text-white shadow">
-            <i className="fa-solid fa-location-dot text-brand-300" />
+          {/* Floating Top-Right Location Tag */}
+          <span className="glass-chip absolute right-3.5 top-3.5 inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-semibold text-white shadow-sm">
+            <span className="material-symbols-outlined text-secondary text-[14px]">location_on</span>
             {p.location}
           </span>
 
@@ -148,16 +153,16 @@ export default function PropertyCard({
                 e.stopPropagation();
                 openLightbox(true);
               }}
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center gap-2 rounded-full bg-brand-600/90 px-4 py-2 text-xs font-extrabold text-white shadow-xl backdrop-blur transition hover:scale-105 hover:bg-brand-500"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center gap-2 rounded-full bg-primary-container/90 px-4 py-2 text-xs font-bold text-white shadow-xl backdrop-blur transition hover:scale-105 hover:bg-inverse-primary cursor-pointer active:scale-95"
             >
-              <i className="fa-solid fa-play text-xs text-white" />
-              Watch Video
+              <span className="material-symbols-outlined text-[16px]">play_arrow</span>
+              Watch Video Tour
             </button>
           )}
 
           {/* Photo Switcher on Card */}
           {images.length > 1 && (
-            <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1 rounded-full bg-ink-950/80 px-2.5 py-1 text-xs font-bold text-white shadow-md backdrop-blur-sm">
+            <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1 rounded-full bg-[#050d23]/80 px-2.5 py-1 text-xs font-semibold text-white shadow-md backdrop-blur-md border border-surface-container-high/60">
               <button
                 type="button"
                 onClick={(e) => {
@@ -165,12 +170,12 @@ export default function PropertyCard({
                   setActiveIdx((prev) => (prev > 0 ? prev - 1 : images.length - 1));
                   setShowVideo(false);
                 }}
-                className="px-1 text-slate-300 transition hover:text-brand-300"
+                className="px-1 text-on-surface-variant transition hover:text-secondary cursor-pointer"
                 aria-label="Previous image"
               >
                 <i className="fa-solid fa-chevron-left text-[10px]" />
               </button>
-              <span className="px-1 text-[11px] font-mono text-slate-200">
+              <span className="px-1 text-[11px] font-mono text-on-surface">
                 {activeIdx + 1}/{images.length}
               </span>
               <button
@@ -180,7 +185,7 @@ export default function PropertyCard({
                   setActiveIdx((prev) => (prev < images.length - 1 ? prev + 1 : 0));
                   setShowVideo(false);
                 }}
-                className="px-1 text-slate-300 transition hover:text-brand-300"
+                className="px-1 text-on-surface-variant transition hover:text-secondary cursor-pointer"
                 aria-label="Next image"
               >
                 <i className="fa-solid fa-chevron-right text-[10px]" />
@@ -191,7 +196,7 @@ export default function PropertyCard({
                   e.stopPropagation();
                   openLightbox(false);
                 }}
-                className="ml-1 border-l border-white/20 pl-1.5 text-brand-300 transition hover:text-white"
+                className="ml-1 border-l border-white/20 pl-1.5 text-secondary transition hover:text-white cursor-pointer"
                 title="View photo fullscreen"
               >
                 <i className="fa-solid fa-expand text-[11px]" />
@@ -200,194 +205,142 @@ export default function PropertyCard({
           )}
 
           <div className="absolute bottom-3 left-3.5 flex items-center gap-2">
-            <span className="glass-chip !bg-ink-950/65 px-2.5 py-1 text-[11px] font-bold text-white">
+            <span className="glass-chip px-2.5 py-1 text-[11px] font-medium text-on-surface">
               {p.type}
             </span>
-            <span className="text-xs font-semibold text-brand-100 drop-shadow">
+            <span className="text-xs font-semibold text-on-surface-variant drop-shadow">
               {p.area}
             </span>
           </div>
         </div>
 
-        <div className="flex flex-1 flex-col p-4 sm:p-6">
-          <h3 className="font-display text-[19px] font-semibold leading-snug text-slate-900 transition-colors group-hover:text-brand-700">
-            {p.name}
-          </h3>
-          <p className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-slate-600">
-            {p.tagline}
-          </p>
+        {/* Card Body */}
+        <div className="flex flex-1 flex-col p-5 sm:p-6 justify-between gap-4">
+          <div>
+            <h3 className="font-headline-sm text-headline-sm font-semibold leading-snug text-white transition-colors group-hover:text-primary">
+              {p.name}
+            </h3>
+            <p className="mt-1.5 line-clamp-2 font-body-sm text-body-sm text-on-surface-variant">
+              {p.tagline}
+            </p>
 
-          {/* Specs */}
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-slate-200/90 py-3 text-[12.5px] font-semibold text-slate-700">
-            {p.id === "ongpin-tower" ? (
-              <>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-building text-brand-600" /> 57 Storeys
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-bed text-brand-600" /> 2–5 Bedrooms
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-ruler-combined text-brand-600" /> 99–480 sqm
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-seedling text-brand-600" /> Sustainable Design
-                </span>
-              </>
-            ) : p.id === "pine-deluxe" ? (
-              <>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-bed text-brand-600" /> 4 Bedrooms
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-bath text-brand-600" /> 3 T&amp;B
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-car text-brand-600" /> 2 Carports
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-ruler-combined text-brand-600" /> Approx. 90 sqm
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-door-open text-brand-600" /> Balcony &amp; High Ceiling
-                </span>
-              </>
-            ) : p.id === "jaro-house" ? (
-              <>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-bed text-brand-600" /> 3 Bedrooms
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-bath text-brand-600" /> 2 Toilet &amp; Bath
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-car text-brand-600" /> Carport
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-door-open text-brand-600" /> Balcony
-                </span>
-              </>
-            ) : p.id === "samantha-welford" ? (
-              <>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-bed text-brand-600" /> 4 Bedrooms
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-bath text-brand-600" /> 3 T&amp;B
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-car text-brand-600" /> Paved Carport
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-ruler-combined text-brand-600" /> 84 sqm Floor / 120 sqm Lot
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-door-open text-brand-600" /> Balcony &amp; Maid's Rm
-                </span>
-              </>
-            ) : p.id === "janella-welford" ? (
-              <>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-bed text-brand-600" /> 2 Beds + Family Rm
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-bath text-brand-600" /> 2 T&amp;B
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-car text-brand-600" /> Carport
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-ruler-combined text-brand-600" /> 63 sqm Floor / 120 sqm Lot
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-door-open text-brand-600" /> Maid's &amp; Storage Rm
-                </span>
-              </>
-            ) : p.id === "natalia-welford" ? (
-              <>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-bed text-brand-600" /> 3 Bedrooms
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-bath text-brand-600" /> 2 T&amp;B
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-car text-brand-600" /> Carport
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-ruler-combined text-brand-600" /> 73 sqm Floor / 120 sqm Lot
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-door-open text-brand-600" /> Balcony &amp; Maid's Rm
-                </span>
-              </>
-            ) : p.id === "rosanna-welford" ? (
-              <>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-bed text-brand-600" /> 4 Bedrooms
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-bath text-brand-600" /> 3 T&amp;B
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-car text-brand-600" /> Carport
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-ruler-combined text-brand-600" /> 117 sqm Floor / 144 sqm Lot
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <i className="fa-solid fa-door-open text-brand-600" /> Balcony &amp; Storage Rm
-                </span>
-              </>
-            ) : (
-              <>
-                {p.beds > 0 && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <i className="fa-solid fa-bed text-brand-600" /> {p.beds} Bed{p.beds > 1 ? "s" : ""}
-                  </span>
-                )}
-                {p.baths > 0 && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <i className="fa-solid fa-bath text-brand-600" /> {p.baths} Bath{p.baths > 1 ? "s" : ""}
-                  </span>
-                )}
-                {p.sqm > 0 && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <i className="fa-solid fa-ruler-combined text-brand-600" /> {p.sqm} sqm
-                  </span>
-                )}
-                {p.parking > 0 && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <i className="fa-solid fa-car text-brand-600" /> Carport
-                  </span>
-                )}
-              </>
+            {/* Specialized Component: Architectural Spec Bar */}
+            <div className="mt-4 architectural-spec-bar flex-wrap">
+              {p.id === "ongpin-tower" ? (
+                <>
+                  <div className="architectural-spec-item text-white">
+                    <span className="material-symbols-outlined text-secondary text-[16px]">apartment</span>
+                    <span className="font-semibold">57</span>
+                    <span className="text-on-surface-variant text-[11px]">Storeys</span>
+                  </div>
+                  <div className="architectural-spec-divider" />
+                  <div className="architectural-spec-item text-white">
+                    <span className="material-symbols-outlined text-secondary text-[16px]">bed</span>
+                    <span className="font-semibold">2–5</span>
+                    <span className="text-on-surface-variant text-[11px]">Beds</span>
+                  </div>
+                  <div className="architectural-spec-divider" />
+                  <div className="architectural-spec-item text-white">
+                    <span className="material-symbols-outlined text-secondary text-[16px]">square_foot</span>
+                    <span className="font-semibold">99–480</span>
+                    <span className="text-on-surface-variant text-[11px]">sqm</span>
+                  </div>
+                </>
+              ) : p.id === "pine-deluxe" ? (
+                <>
+                  <div className="architectural-spec-item text-white">
+                    <span className="material-symbols-outlined text-secondary text-[16px]">bed</span>
+                    <span className="font-semibold">4</span>
+                    <span className="text-on-surface-variant text-[11px]">Beds</span>
+                  </div>
+                  <div className="architectural-spec-divider" />
+                  <div className="architectural-spec-item text-white">
+                    <span className="material-symbols-outlined text-secondary text-[16px]">bathtub</span>
+                    <span className="font-semibold">3</span>
+                    <span className="text-on-surface-variant text-[11px]">Baths</span>
+                  </div>
+                  <div className="architectural-spec-divider" />
+                  <div className="architectural-spec-item text-white">
+                    <span className="material-symbols-outlined text-secondary text-[16px]">directions_car</span>
+                    <span className="font-semibold">2</span>
+                    <span className="text-on-surface-variant text-[11px]">Cars</span>
+                  </div>
+                  <div className="architectural-spec-divider" />
+                  <div className="architectural-spec-item text-white">
+                    <span className="material-symbols-outlined text-secondary text-[16px]">square_foot</span>
+                    <span className="font-semibold">~90</span>
+                    <span className="text-on-surface-variant text-[11px]">sqm</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {p.beds > 0 && (
+                    <div className="architectural-spec-item text-white">
+                      <span className="material-symbols-outlined text-secondary text-[16px]">bed</span>
+                      <span className="font-semibold">{p.beds}</span>
+                      <span className="text-on-surface-variant text-[11px]">Beds</span>
+                    </div>
+                  )}
+                  {p.baths > 0 && (
+                    <>
+                      <div className="architectural-spec-divider" />
+                      <div className="architectural-spec-item text-white">
+                        <span className="material-symbols-outlined text-secondary text-[16px]">bathtub</span>
+                        <span className="font-semibold">{p.baths}</span>
+                        <span className="text-on-surface-variant text-[11px]">Baths</span>
+                      </div>
+                    </>
+                  )}
+                  {p.sqm > 0 && (
+                    <>
+                      <div className="architectural-spec-divider" />
+                      <div className="architectural-spec-item text-white">
+                        <span className="material-symbols-outlined text-secondary text-[16px]">square_foot</span>
+                        <span className="font-semibold">{p.sqm}</span>
+                        <span className="text-on-surface-variant text-[11px]">sqm</span>
+                      </div>
+                    </>
+                  )}
+                  {p.parking > 0 && (
+                    <>
+                      <div className="architectural-spec-divider" />
+                      <div className="architectural-spec-item text-white">
+                        <span className="material-symbols-outlined text-secondary text-[16px]">directions_car</span>
+                        <span className="font-semibold">{p.parking}</span>
+                        <span className="text-on-surface-variant text-[11px]">Car</span>
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Highlights */}
+            {p.highlights && p.highlights.length > 0 && (
+              <ul className="mt-3.5 space-y-1.5 border-b border-surface-container-high/60 pb-3.5 font-body-sm text-body-sm text-on-surface-variant">
+                {p.highlights.slice(0, 2).map((h, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="material-symbols-outlined text-secondary text-[16px] shrink-0 mt-0.5">
+                      check_circle
+                    </span>
+                    <span className="line-clamp-1">{h}</span>
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
 
-          {/* Highlights */}
-          {p.highlights && p.highlights.length > 0 && (
-            <ul className="mt-3.5 space-y-1.5 border-b border-slate-100 pb-3.5 text-xs text-slate-600">
-              {p.highlights.slice(0, 3).map((h, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <i className="fa-solid fa-circle-check mt-0.5 text-brand-600 text-[11px]" />
-                  <span>{h}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {/* Price & CTA */}
-          <div className="mt-auto flex items-end justify-between pt-4 gap-2">
+          {/* Price & Primary CTA */}
+          <div className="mt-auto flex items-end justify-between pt-2 gap-3">
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 truncate">
-                {p.priceLabel || "Price"}
+              <p className="font-label-overline text-label-overline uppercase tracking-wider text-outline truncate">
+                {p.priceLabel || "Valuation"}
               </p>
-              <p className="font-display text-2xl font-bold tracking-tight text-brand-700">
+              <p className="font-price-xl text-[24px] sm:text-[28px] font-extrabold tracking-tight text-[#38bdf8] drop-shadow-[0_0_12px_rgba(56,189,248,0.35)]">
                 {fmtPrice(p.price)}
               </p>
               {p.lotNote && (
-                <p className="mt-0.5 text-[11px] font-medium text-slate-500 truncate">
+                <p className="mt-0.5 font-body-sm text-[12px] font-medium text-on-surface-variant truncate">
                   {p.lotNote}
                 </p>
               )}
@@ -398,31 +351,31 @@ export default function PropertyCard({
                 <button
                   type="button"
                   onClick={() => openLightbox(true)}
-                  className="btn btn-ghost !px-2.5 sm:!px-3 !py-2 text-xs !border-brand-300 text-brand-700 hover:!bg-brand-50"
+                  className="btn btn-ghost !px-3 !py-2 text-xs"
                   title="Watch Video Tour"
                 >
-                  <i className="fa-solid fa-play text-brand-600" />
-                  <span className="hidden xs:inline sm:inline">Video</span>
+                  <span className="material-symbols-outlined text-[16px] text-secondary">play_circle</span>
+                  <span className="hidden xs:inline sm:inline">Tour</span>
                 </button>
               )}
               {images.length > 1 && !p.videoId && (
                 <button
                   type="button"
                   onClick={() => openLightbox(false)}
-                  className="btn btn-ghost !px-2.5 sm:!px-3 !py-2 text-xs !border-slate-300 text-slate-700 hover:!bg-slate-100"
+                  className="btn btn-ghost !px-3 !py-2 text-xs"
                   title="View photo gallery"
                 >
-                  <i className="fa-solid fa-images text-brand-600" />
-                  <span className="hidden xs:inline sm:inline">Photos ({images.length})</span>
+                  <span className="material-symbols-outlined text-[16px] text-secondary">photo_library</span>
+                  <span className="hidden xs:inline sm:inline">({images.length})</span>
                 </button>
               )}
               <button
                 type="button"
                 onClick={() => onInquire(p.name)}
-                className="btn btn-primary !px-3.5 sm:!px-4 !py-2 text-xs font-bold"
+                className="btn btn-primary !px-4 !py-2 text-xs font-bold shadow-[0_0_20px_rgba(37,99,235,0.4)]"
               >
-                Inquire
-                <i className="fa-solid fa-arrow-right text-[10px]" />
+                <span>Inquire</span>
+                <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
               </button>
             </div>
           </div>

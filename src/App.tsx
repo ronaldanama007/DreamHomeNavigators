@@ -108,18 +108,18 @@ export default function App() {
           aria-hidden="true"
           className="h-full w-full scale-105 object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-ink-950/90 via-brand-950/85 to-ink-950/95" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#030712]/95 via-[#091228]/90 to-[#030712]/98" />
         <div
-          className="absolute inset-0 opacity-70"
+          className="absolute inset-0 opacity-80 pointer-events-none"
           style={{
             background:
-              "radial-gradient(52% 44% at 18% 8%, rgba(37,99,235,0.30), transparent 70%), radial-gradient(46% 40% at 88% 82%, rgba(30,64,175,0.34), transparent 70%)",
+              "radial-gradient(60% 50% at 18% 12%, rgba(37,99,235,0.24), transparent 70%), radial-gradient(55% 45% at 85% 75%, rgba(56,189,248,0.18), transparent 70%)",
           }}
         />
-        <div className="blueprint-grid absolute inset-0" />
+        <div className="blueprint-grid absolute inset-0 opacity-60" />
         {/* Floating decorative compasses */}
         <svg
-          className="absolute -left-24 top-1/3 h-96 w-96 text-brand-400/[0.06] animate-float-slow"
+          className="absolute -left-24 top-1/3 h-96 w-96 text-primary/[0.05] animate-float-slow"
           viewBox="0 0 100 100"
           fill="none"
           aria-hidden="true"
@@ -130,7 +130,7 @@ export default function App() {
           <path d="M8 50 L50 43 L92 50 L50 57 Z" fill="currentColor" />
         </svg>
         <svg
-          className="absolute -right-20 top-16 h-72 w-72 text-brand-300/[0.07] animate-float-slow [animation-delay:2s]"
+          className="absolute -right-20 top-16 h-72 w-72 text-secondary/[0.06] animate-float-slow [animation-delay:2s]"
           viewBox="0 0 100 100"
           fill="none"
           aria-hidden="true"

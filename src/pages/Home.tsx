@@ -97,18 +97,18 @@ export default function Home({ go, inquire, browseLocation }: Props) {
             {/* Hero Left Column: Typography & CTAs */}
             <div className="lg:col-span-7 flex flex-col items-start gap-space-md">
               {/* Tagline Pill */}
-              <div className="inline-flex items-center gap-space-xs px-space-md py-space-xxs rounded-full bg-surface-container-high/70 backdrop-blur-xl shadow-md border border-surface-container-highest/50">
-                <span className="text-tertiary text-[14px]">✨</span>
-                <span className="font-label-overline text-label-overline text-tertiary tracking-widest uppercase">
+              <div className="inline-flex items-center gap-space-xs px-space-md py-space-xxs rounded-full bg-surface-container-high/80 backdrop-blur-xl shadow-md border border-primary/20">
+                <span className="text-secondary text-[14px]">✨</span>
+                <span className="font-label-overline text-label-overline text-secondary tracking-widest uppercase">
                   Guiding You Home, Building Your Future
                 </span>
               </div>
 
               {/* Headline with Editorial Contrast */}
-              <h1 className="font-display-xl text-display-xl-mobile md:text-display-xl text-on-surface leading-[1.08] tracking-tight">
+              <h1 className="font-display-hero text-display-hero-mobile md:text-display-hero text-white leading-[1.1] tracking-tight">
                 Find the Right Property. <br className="hidden sm:inline" />
                 Build the{" "}
-                <span className="font-title-editorial italic font-normal text-tertiary">
+                <span className="font-title-editorial italic font-normal text-secondary">
                   Future
                 </span>{" "}
                 You Envision.
@@ -125,7 +125,7 @@ export default function Home({ go, inquire, browseLocation }: Props) {
               <div className="flex flex-wrap items-center gap-space-md pt-space-xs w-full sm:w-auto">
                 <button
                   onClick={() => go("properties")}
-                  className="inline-flex items-center justify-center gap-space-xs px-space-lg py-space-sm bg-primary-container text-on-primary-container font-label-lg text-label-lg rounded-full shadow-[0_0_24px_rgba(37,99,235,0.38)] hover:bg-inverse-primary hover:text-on-primary transition-all group cursor-pointer active:scale-95"
+                  className="btn btn-primary !px-7 !py-3 font-bold shadow-[0_4px_24px_rgba(37,99,235,0.45)] group"
                 >
                   <span>Explore Properties</span>
                   <span className="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">
@@ -134,7 +134,7 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                 </button>
                 <button
                   onClick={() => go("contact")}
-                  className="inline-flex items-center justify-center gap-space-xs px-space-lg py-space-sm bg-surface-container/60 hover:bg-surface-container-high text-on-surface font-label-lg text-label-lg rounded-full backdrop-blur-xl transition-all shadow-md cursor-pointer border border-surface-container-highest/40 active:scale-95"
+                  className="btn btn-ghost !px-7 !py-3 font-semibold"
                 >
                   <span className="material-symbols-outlined text-[18px] text-secondary">
                     mail
@@ -159,62 +159,59 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                   <span>Site viewing on request</span>
                 </div>
                 <span className="text-outline-variant">•</span>
-                <a
-                  className="flex items-center gap-space-xxs hover:text-primary transition-colors"
-                  href={CONTACT.phoneHref}
-                >
-                  <span className="material-symbols-outlined text-primary text-[16px]">
-                    call
-                  </span>
-                  <span>{CONTACT.phone}</span>
-                </a>
+                <div className="flex items-center gap-space-xxs text-secondary">
+                  <span className="material-symbols-outlined text-[16px]">verified</span>
+                  <span>PRC-Licensed Representation</span>
+                </div>
               </div>
 
-              {/* Territory Filter Chips */}
-              <div className="pt-space-sm w-full">
-                <span className="font-label-overline text-label-overline uppercase text-outline tracking-wider block mb-space-xs">
-                  Areas We Navigate
-                </span>
+              {/* Territory quick filters bar */}
+              <div className="w-full pt-space-xs">
+                <div className="font-label-overline text-label-overline uppercase tracking-wider text-outline mb-space-xxs">
+                  Territory Quick Jump
+                </div>
                 <div className="flex flex-wrap items-center gap-space-xs">
                   <button
                     onClick={() => browseLocation("Iloilo")}
-                    className="inline-flex items-center gap-space-xxs px-space-sm py-space-xxs rounded-full bg-surface-container-high text-primary font-label-md text-label-md hover:bg-surface-bright transition-all shadow-sm cursor-pointer"
+                    className="glass-chip px-space-sm py-space-xxs text-on-surface-variant hover:text-white hover:border-primary/40 font-label-md text-label-md transition-all cursor-pointer"
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
+                    <span className="material-symbols-outlined text-[14px] text-secondary mr-1">
+                      location_on
+                    </span>
                     <span>Iloilo</span>
                   </button>
                   <button
                     onClick={() => browseLocation("Tagaytay")}
-                    className="inline-flex items-center gap-space-xxs px-space-sm py-space-xxs rounded-full bg-surface-container/70 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-all cursor-pointer border border-surface-container-highest/30"
+                    className="glass-chip px-space-sm py-space-xxs text-on-surface-variant hover:text-white hover:border-primary/40 font-label-md text-label-md transition-all cursor-pointer"
                   >
-                    <span className="material-symbols-outlined text-[14px]">
+                    <span className="material-symbols-outlined text-[14px] text-secondary mr-1">
                       location_on
                     </span>
                     <span>Tagaytay</span>
                   </button>
                   <button
                     onClick={() => browseLocation("Cavite")}
-                    className="inline-flex items-center gap-space-xxs px-space-sm py-space-xxs rounded-full bg-surface-container/70 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-all cursor-pointer border border-surface-container-highest/30"
+                    className="glass-chip px-space-sm py-space-xxs text-on-surface-variant hover:text-white hover:border-primary/40 font-label-md text-label-md transition-all cursor-pointer"
                   >
-                    <span className="material-symbols-outlined text-[14px]">
+                    <span className="material-symbols-outlined text-[14px] text-secondary mr-1">
                       location_on
                     </span>
                     <span>Cavite</span>
                   </button>
                   <button
                     onClick={() => browseLocation("Antipolo")}
-                    className="inline-flex items-center gap-space-xxs px-space-sm py-space-xxs rounded-full bg-surface-container/70 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-all cursor-pointer border border-surface-container-highest/30"
+                    className="glass-chip px-space-sm py-space-xxs text-on-surface-variant hover:text-white hover:border-primary/40 font-label-md text-label-md transition-all cursor-pointer"
                   >
-                    <span className="material-symbols-outlined text-[14px]">
+                    <span className="material-symbols-outlined text-[14px] text-secondary mr-1">
                       location_on
                     </span>
                     <span>Antipolo</span>
                   </button>
                   <button
                     onClick={() => browseLocation("Binondo")}
-                    className="inline-flex items-center gap-space-xxs px-space-sm py-space-xxs rounded-full bg-surface-container/70 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-all cursor-pointer border border-surface-container-highest/30"
+                    className="glass-chip px-space-sm py-space-xxs text-on-surface-variant hover:text-white hover:border-primary/40 font-label-md text-label-md transition-all cursor-pointer"
                   >
-                    <span className="material-symbols-outlined text-[14px]">
+                    <span className="material-symbols-outlined text-[14px] text-secondary mr-1">
                       location_on
                     </span>
                     <span>Binondo</span>
@@ -225,7 +222,7 @@ export default function Home({ go, inquire, browseLocation }: Props) {
 
             {/* Hero Right Column: Featured Glass Spotlight Card */}
             <div className="lg:col-span-5 relative">
-              <div className="relative rounded-xl overflow-hidden bg-surface-container/80 backdrop-blur-2xl shadow-xl border border-surface-container-high/60">
+              <div className="glass-panel-deep relative rounded-xl overflow-hidden shadow-2xl border border-[rgba(56,189,248,0.25)]">
                 {/* Property Hero Media */}
                 <div className="relative h-72 sm:h-80 w-full overflow-hidden bg-surface-container-lowest">
                   {f.videoId && videoPlaying ? (
@@ -239,7 +236,7 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                       />
                       <button
                         onClick={() => setVideoPlaying(false)}
-                        className="absolute top-space-sm left-space-sm z-30 inline-flex items-center gap-space-xxs px-space-sm py-space-xxs rounded-full bg-surface-container-lowest/90 backdrop-blur-md text-on-surface font-label-md text-label-md border border-surface-container-high cursor-pointer hover:bg-surface-container"
+                        className="absolute top-space-sm left-space-sm z-30 inline-flex items-center gap-space-xxs px-space-sm py-space-xxs rounded-full bg-[#050d23]/90 backdrop-blur-md text-on-surface font-label-md text-label-md border border-surface-container-high cursor-pointer hover:bg-surface-container"
                       >
                         <span className="material-symbols-outlined text-[14px]">close</span>
                         <span>Close Video</span>
@@ -255,12 +252,12 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                         src={f.img}
                         alt={f.name}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-surface-dim/90 via-surface-dim/20 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#030712]/95 via-[#030712]/40 to-transparent" />
 
                       {/* Glass Badges on Media */}
                       <div className="absolute top-space-sm left-space-sm flex items-center gap-space-xs">
-                        <span className="inline-flex items-center gap-space-xxs px-space-sm py-space-xxs rounded-full bg-surface-container-lowest/80 backdrop-blur-md text-tertiary font-label-overline text-label-overline tracking-wider uppercase border border-surface-container-high/40">
-                          <span className="w-2 h-2 rounded-full bg-tertiary" />
+                        <span className="inline-flex items-center gap-space-xxs px-space-sm py-space-xxs rounded-full bg-primary-container/90 text-white font-label-overline text-label-overline tracking-wider uppercase border border-primary/30 shadow-md backdrop-blur-md">
+                          <span className="w-2 h-2 rounded-full bg-[#38bdf8] animate-pulse" />
                           Featured Spotlight
                         </span>
                       </div>
@@ -272,7 +269,7 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                               e.stopPropagation();
                               setVideoPlaying(true);
                             }}
-                            className="inline-flex items-center gap-space-xxs px-space-sm py-space-xxs rounded-full bg-surface-container-lowest/80 backdrop-blur-md text-secondary font-label-md text-label-md hover:text-primary transition-colors border border-surface-container-high/40 cursor-pointer"
+                            className="inline-flex items-center gap-space-xxs px-space-sm py-space-xxs rounded-full bg-[#050d23]/80 backdrop-blur-md text-secondary font-label-md text-label-md hover:text-white transition-colors border border-surface-container-high/40 cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-[14px]">videocam</span>
                             <span>Watch Tour</span>
@@ -281,7 +278,7 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                       )}
 
                       {/* Location tag floating on bottom of image */}
-                      <div className="absolute bottom-space-sm left-space-sm inline-flex items-center gap-space-xxs px-space-sm py-space-xxs rounded-lg bg-surface-container-lowest/85 backdrop-blur-md text-on-surface font-label-md text-label-md border border-surface-container-high/40">
+                      <div className="absolute bottom-space-sm left-space-sm inline-flex items-center gap-space-xxs px-space-sm py-space-xxs rounded-lg bg-[#050d23]/85 backdrop-blur-md text-on-surface font-label-md text-label-md border border-surface-container-high/40">
                         <span className="material-symbols-outlined text-[14px] text-secondary">
                           location_on
                         </span>
@@ -298,54 +295,41 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                       <span className="font-label-overline text-label-overline uppercase text-tertiary tracking-widest block">
                         {f.badge || "Signature Unit"}
                       </span>
-                      <h3 className="font-headline-md text-headline-md text-on-surface">
+                      <h3 className="font-headline-md text-headline-md text-white">
                         {f.name}
                       </h3>
                     </div>
                     <div className="text-right">
-                      <span className="font-label-overline text-label-overline text-on-surface-variant block">
-                        {f.priceLabel || "PRICE STARTS AT"}
+                      <span className="font-label-overline text-label-overline text-outline block">
+                        {f.priceLabel || "VALUATION"}
                       </span>
-                      <span className="font-numeric-price text-numeric-price text-tertiary font-bold">
+                      <span className="font-price-xl text-[26px] text-[#38bdf8] font-extrabold drop-shadow-[0_0_12px_rgba(56,189,248,0.35)]">
                         {fmtPrice(f.price)}
                       </span>
                     </div>
                   </div>
 
-                  {/* Quick Specs Grid */}
-                  <div className="grid grid-cols-3 gap-space-xs bg-surface-container-low/70 p-space-sm rounded-lg text-center border border-surface-container-high/30">
-                    <div className="flex flex-col items-center">
-                      <span className="material-symbols-outlined text-secondary text-[20px]">
+                  {/* Architectural Spec Bar */}
+                  <div className="architectural-spec-bar justify-around">
+                    <div className="architectural-spec-item text-white">
+                      <span className="material-symbols-outlined text-secondary text-[18px]">
                         bed
                       </span>
-                      <span className="font-label-md text-label-md text-on-surface mt-0.5">
-                        {f.beds} Beds
-                      </span>
-                      <span className="font-body-sm text-body-sm text-on-surface-variant">
-                        Spacious
-                      </span>
+                      <span className="font-semibold text-[13px]">{f.beds} Beds</span>
                     </div>
-                    <div className="flex flex-col items-center">
-                      <span className="material-symbols-outlined text-secondary text-[20px]">
+                    <div className="architectural-spec-divider" />
+                    <div className="architectural-spec-item text-white">
+                      <span className="material-symbols-outlined text-secondary text-[18px]">
                         bathtub
                       </span>
-                      <span className="font-label-md text-label-md text-on-surface mt-0.5">
-                        {f.baths} Baths
-                      </span>
-                      <span className="font-body-sm text-body-sm text-on-surface-variant">
-                        Designer
-                      </span>
+                      <span className="font-semibold text-[13px]">{f.baths} Baths</span>
                     </div>
-                    <div className="flex flex-col items-center">
-                      <span className="material-symbols-outlined text-secondary text-[20px]">
+                    <div className="architectural-spec-divider" />
+                    <div className="architectural-spec-item text-white">
+                      <span className="material-symbols-outlined text-secondary text-[18px]">
                         square_foot
                       </span>
-                      <span className="font-label-md text-label-md text-on-surface mt-0.5">
-                        {f.sqm} sqm
-                      </span>
-                      <span className="font-body-sm text-body-sm text-on-surface-variant">
-                        Living Area
-                      </span>
+                      <span className="font-semibold text-[13px]">{f.sqm} sqm</span>
                     </div>
                   </div>
 
@@ -362,11 +346,11 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                     </span>
                     <button
                       onClick={() => inquire(f.name)}
-                      className="inline-flex items-center gap-space-xxs px-space-md py-space-xs bg-primary-container hover:bg-inverse-primary text-on-primary-container hover:text-on-primary font-label-lg text-label-lg rounded-full transition-all shadow-md cursor-pointer active:scale-95"
+                      className="btn btn-primary !px-5 !py-2 text-xs font-bold shadow-[0_0_20px_rgba(37,99,235,0.4)]"
                     >
                       <span>Inquire Now</span>
-                      <span className="material-symbols-outlined text-[16px]">
-                        chevron_right
+                      <span className="material-symbols-outlined text-[14px]">
+                        arrow_forward
                       </span>
                     </button>
                   </div>
@@ -583,21 +567,22 @@ export default function Home({ go, inquire, browseLocation }: Props) {
           {displayCards.map((p) => (
             <div
               key={p.id}
-              className="group flex flex-col bg-surface-container/70 hover:bg-surface-container-high/80 rounded-xl overflow-hidden backdrop-blur-2xl transition-all duration-300 shadow-xl border border-surface-container-high/40"
+              className="glass-card-interactive group flex flex-col rounded-xl overflow-hidden shadow-xl"
             >
               <div className="relative h-64 w-full overflow-hidden bg-surface-container-lowest">
                 <img
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   src={p.img}
                   alt={p.name}
                 />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#030712]/95 via-[#030712]/40 to-transparent" />
                 <div className="absolute top-space-sm left-space-sm flex gap-space-xs">
-                  <span className="px-space-sm py-space-xxs rounded-full bg-tertiary-container/90 text-on-tertiary-container font-label-overline text-label-overline uppercase tracking-wider font-bold">
+                  <span className="px-space-sm py-space-xxs rounded-full bg-primary-container/90 text-on-primary-container font-label-overline text-label-overline uppercase tracking-wider font-bold shadow-md backdrop-blur-md border border-primary/25">
                     {p.badge || "Verified Unit"}
                   </span>
                 </div>
                 <div className="absolute top-space-sm right-space-sm">
-                  <span className="px-space-sm py-space-xxs rounded-full bg-surface-container-lowest/80 backdrop-blur-md text-on-surface font-label-md text-label-md flex items-center gap-space-xxs border border-surface-container-high/40">
+                  <span className="glass-chip px-space-sm py-space-xxs text-on-surface font-label-md text-label-md flex items-center gap-space-xxs shadow-sm">
                     <span className="material-symbols-outlined text-secondary text-[14px]">
                       location_on
                     </span>{" "}
@@ -608,7 +593,7 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                   <div className="absolute bottom-space-sm right-space-sm">
                     <button
                       onClick={() => inquire(p.name)}
-                      className="px-space-sm py-space-xxs rounded-full bg-surface-container-lowest/80 backdrop-blur-md text-secondary hover:text-primary font-label-md text-label-md flex items-center gap-space-xxs transition-colors border border-surface-container-high/40 cursor-pointer"
+                      className="px-space-sm py-space-xxs rounded-full bg-surface-container-lowest/80 backdrop-blur-md text-secondary hover:text-primary font-label-md text-label-md flex items-center gap-space-xxs transition-colors border border-surface-container-high/40 cursor-pointer active:scale-95"
                     >
                       <span className="material-symbols-outlined text-[16px]">play_circle</span>
                       <span>Watch Video</span>
@@ -628,46 +613,62 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                   <p className="font-body-sm text-body-sm text-on-surface-variant mt-space-xxs line-clamp-2">
                     {p.tagline}
                   </p>
+
+                  {/* Architectural Spec Bar */}
+                  <div className="mt-space-md architectural-spec-bar flex-wrap">
+                    {p.beds > 0 && (
+                      <div className="architectural-spec-item text-white">
+                        <span className="material-symbols-outlined text-secondary text-[16px]">bed</span>
+                        <span className="font-semibold">{p.beds}</span>
+                        <span className="text-on-surface-variant text-[11px]">Beds</span>
+                      </div>
+                    )}
+                    {p.baths > 0 && (
+                      <>
+                        <div className="architectural-spec-divider" />
+                        <div className="architectural-spec-item text-white">
+                          <span className="material-symbols-outlined text-secondary text-[16px]">bathtub</span>
+                          <span className="font-semibold">{p.baths}</span>
+                          <span className="text-on-surface-variant text-[11px]">Baths</span>
+                        </div>
+                      </>
+                    )}
+                    {p.sqm > 0 && (
+                      <>
+                        <div className="architectural-spec-divider" />
+                        <div className="architectural-spec-item text-white">
+                          <span className="material-symbols-outlined text-secondary text-[16px]">square_foot</span>
+                          <span className="font-semibold">{p.sqm}</span>
+                          <span className="text-on-surface-variant text-[11px]">sqm</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
                   <ul className="mt-space-sm space-y-space-xxs font-body-sm text-body-sm text-on-surface-variant">
                     <li className="flex items-center gap-space-xs">
                       <span className="material-symbols-outlined text-secondary text-[16px]">
-                        bed
-                      </span>
-                      <span>
-                        {p.beds} Beds • {p.baths} Baths
-                      </span>
-                    </li>
-                    <li className="flex items-center gap-space-xs">
-                      <span className="material-symbols-outlined text-tertiary text-[16px]">
-                        square_foot
-                      </span>
-                      <span>
-                        Approx. {p.sqm} sqm {p.lotNote ? `• ${p.lotNote}` : ""}
-                      </span>
-                    </li>
-                    <li className="flex items-center gap-space-xs">
-                      <span className="material-symbols-outlined text-tertiary text-[16px]">
                         verified
                       </span>
-                      <span>Verified clean title and developer documentation</span>
+                      <span>Verified authentic title and developer clearance</span>
                     </li>
                   </ul>
                 </div>
 
-                <div className="pt-space-sm bg-surface-container-low/50 p-space-sm rounded-lg flex items-center justify-between border border-surface-container-high/30">
+                <div className="pt-space-sm bg-surface-container-low/60 p-space-sm rounded-lg flex items-center justify-between border border-surface-container-high/40">
                   <div>
-                    <span className="font-label-overline text-label-overline text-on-surface-variant block uppercase">
+                    <span className="font-label-overline text-label-overline text-outline block uppercase tracking-wider">
                       {p.priceLabel || "Price Starts At"}
                     </span>
-                    <span className="font-numeric-price text-numeric-price text-tertiary font-bold">
+                    <span className="font-price-xl text-[24px] text-[#38bdf8] font-extrabold drop-shadow-[0_0_12px_rgba(56,189,248,0.35)]">
                       {fmtPrice(p.price)}
                     </span>
                   </div>
                   <button
                     onClick={() => inquire(p.name)}
-                    className="px-space-md py-space-xs rounded-full bg-primary-container hover:bg-inverse-primary text-on-primary-container font-label-lg text-label-lg transition-colors cursor-pointer active:scale-95"
+                    className="btn btn-primary !px-4 !py-2 text-xs font-bold shadow-[0_0_20px_rgba(37,99,235,0.4)]"
                   >
-                    Inquire Now
+                    <span>Inquire Now</span>
                   </button>
                 </div>
               </div>
@@ -1188,7 +1189,7 @@ export default function Home({ go, inquire, browseLocation }: Props) {
 
             {/* Interactive Lead Submission Form */}
             <form
-              className="mt-space-lg text-left bg-surface-container-lowest/80 p-space-lg rounded-2xl backdrop-blur-2xl shadow-lg space-y-space-md border border-surface-container-high/60"
+              className="mt-space-lg text-left bg-[#050d23]/80 p-space-lg rounded-2xl backdrop-blur-2xl shadow-2xl space-y-space-md border border-[rgba(59,130,246,0.25)]"
               id="dhn-lead-form"
               onSubmit={handleLeadSubmit}
             >
@@ -1200,7 +1201,7 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                   <input
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
-                    className="w-full px-space-md py-space-xs rounded-lg bg-surface-container/80 text-on-surface font-body-md placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-secondary transition-all border border-surface-container-high/60"
+                    className="w-full min-h-[48px] px-space-md py-space-xs rounded-xl bg-[#060c1a]/70 text-white font-body-md placeholder:text-slate-500 focus:outline-none focus:border-[#38bdf8] focus:ring-2 focus:ring-[#38bdf8]/20 transition-all border border-[rgba(59,130,246,0.2)]"
                     placeholder="e.g. Maria Santos"
                     required
                     type="text"
@@ -1213,7 +1214,7 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                   <input
                     value={formPhone}
                     onChange={(e) => setFormPhone(e.target.value)}
-                    className="w-full px-space-md py-space-xs rounded-lg bg-surface-container/80 text-on-surface font-body-md placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-secondary transition-all border border-surface-container-high/60"
+                    className="w-full min-h-[48px] px-space-md py-space-xs rounded-xl bg-[#060c1a]/70 text-white font-body-md placeholder:text-slate-500 focus:outline-none focus:border-[#38bdf8] focus:ring-2 focus:ring-[#38bdf8]/20 transition-all border border-[rgba(59,130,246,0.2)]"
                     placeholder="+63 9XX XXX XXXX"
                     required
                     type="tel"
@@ -1229,21 +1230,21 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                   <select
                     value={formTerritory}
                     onChange={(e) => setFormTerritory(e.target.value)}
-                    className="w-full px-space-md py-space-xs rounded-lg bg-surface-container/80 text-on-surface font-body-md focus:outline-none focus:ring-2 focus:ring-secondary transition-all border border-surface-container-high/60 cursor-pointer"
+                    className="w-full min-h-[48px] px-space-md py-space-xs rounded-xl bg-[#060c1a]/70 text-white font-body-md focus:outline-none focus:border-[#38bdf8] focus:ring-2 focus:ring-[#38bdf8]/20 transition-all border border-[rgba(59,130,246,0.2)] cursor-pointer"
                   >
-                    <option value="Iloilo" className="bg-surface-container-high text-on-surface">
+                    <option value="Iloilo" className="bg-[#121b31] text-white">
                       Iloilo (Estate &amp; City)
                     </option>
-                    <option value="Binondo" className="bg-surface-container-high text-on-surface">
+                    <option value="Binondo" className="bg-[#121b31] text-white">
                       Binondo, Manila
                     </option>
-                    <option value="Tagaytay" className="bg-surface-container-high text-on-surface">
+                    <option value="Tagaytay" className="bg-[#121b31] text-white">
                       Tagaytay Ridges
                     </option>
-                    <option value="Cavite" className="bg-surface-container-high text-on-surface">
+                    <option value="Cavite" className="bg-[#121b31] text-white">
                       Cavite Subdivisions
                     </option>
-                    <option value="Antipolo" className="bg-surface-container-high text-on-surface">
+                    <option value="Antipolo" className="bg-[#121b31] text-white">
                       Antipolo Retreats
                     </option>
                   </select>
@@ -1256,18 +1257,18 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                   <select
                     value={formPropType}
                     onChange={(e) => setFormPropType(e.target.value)}
-                    className="w-full px-space-md py-space-xs rounded-lg bg-surface-container/80 text-on-surface font-body-md focus:outline-none focus:ring-2 focus:ring-secondary transition-all border border-surface-container-high/60 cursor-pointer"
+                    className="w-full min-h-[48px] px-space-md py-space-xs rounded-xl bg-[#060c1a]/70 text-white font-body-md focus:outline-none focus:border-[#38bdf8] focus:ring-2 focus:ring-[#38bdf8]/20 transition-all border border-[rgba(59,130,246,0.2)] cursor-pointer"
                   >
-                    <option value="House and Lot" className="bg-surface-container-high text-on-surface">
+                    <option value="House and Lot" className="bg-[#121b31] text-white">
                       House and Lot
                     </option>
-                    <option value="Condominium" className="bg-surface-container-high text-on-surface">
+                    <option value="Condominium" className="bg-[#121b31] text-white">
                       High-Rise Condominium
                     </option>
-                    <option value="Lot Only" className="bg-surface-container-high text-on-surface">
+                    <option value="Lot Only" className="bg-[#121b31] text-white">
                       Lot Only / Land
                     </option>
-                    <option value="Commercial" className="bg-surface-container-high text-on-surface">
+                    <option value="Commercial" className="bg-[#121b31] text-white">
                       Commercial / Rental Asset
                     </option>
                   </select>
@@ -1280,18 +1281,18 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                   <select
                     value={formBudget}
                     onChange={(e) => setFormBudget(e.target.value)}
-                    className="w-full px-space-md py-space-xs rounded-lg bg-surface-container/80 text-on-surface font-body-md focus:outline-none focus:ring-2 focus:ring-secondary transition-all border border-surface-container-high/60 cursor-pointer"
+                    className="w-full min-h-[48px] px-space-md py-space-xs rounded-xl bg-[#060c1a]/70 text-white font-body-md focus:outline-none focus:border-[#38bdf8] focus:ring-2 focus:ring-[#38bdf8]/20 transition-all border border-[rgba(59,130,246,0.2)] cursor-pointer"
                   >
-                    <option value="2.5M - 5M" className="bg-surface-container-high text-on-surface">
+                    <option value="2.5M - 5M" className="bg-[#121b31] text-white">
                       ₱2.5M – ₱5M
                     </option>
-                    <option value="5M - 10M" className="bg-surface-container-high text-on-surface">
+                    <option value="5M - 10M" className="bg-[#121b31] text-white">
                       ₱5M – ₱10M
                     </option>
-                    <option value="10M - 20M" className="bg-surface-container-high text-on-surface">
+                    <option value="10M - 20M" className="bg-[#121b31] text-white">
                       ₱10M – ₱20M
                     </option>
-                    <option value="20M+" className="bg-surface-container-high text-on-surface">
+                    <option value="20M+" className="bg-[#121b31] text-white">
                       ₱20M+ (Luxury &amp; Estate)
                     </option>
                   </select>
@@ -1305,7 +1306,7 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                 <textarea
                   value={formMessage}
                   onChange={(e) => setFormMessage(e.target.value)}
-                  className="w-full px-space-md py-space-xs rounded-lg bg-surface-container/80 text-on-surface font-body-md placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-secondary transition-all border border-surface-container-high/60"
+                  className="w-full px-space-md py-space-xs rounded-xl bg-[#060c1a]/70 text-white font-body-md placeholder:text-slate-500 focus:outline-none focus:border-[#38bdf8] focus:ring-2 focus:ring-[#38bdf8]/20 transition-all border border-[rgba(59,130,246,0.2)]"
                   placeholder="Tell us if you're an OFW, your preferred move-in date, or questions about title &amp; financing..."
                   rows={3}
                 />
@@ -1320,7 +1321,7 @@ export default function Home({ go, inquire, browseLocation }: Props) {
                 </div>
                 <button
                   disabled={formSubmitting}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-space-xs px-space-xl py-space-sm bg-primary-container hover:bg-inverse-primary text-on-primary-container hover:text-on-primary font-label-lg text-label-lg rounded-full shadow-[0_0_24px_rgba(37,99,235,0.4)] transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                  className="btn btn-primary !px-8 !py-3 w-full sm:w-auto font-bold shadow-[0_0_24px_rgba(37,99,235,0.45)] disabled:opacity-50"
                   type="submit"
                 >
                   <span className="material-symbols-outlined text-[18px]">send</span>
