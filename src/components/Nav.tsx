@@ -113,45 +113,41 @@ export default function Nav({
         />
       )}
 
-      {/* Mobile menu */}
-      <div
-        className={`mx-auto max-w-7xl overflow-hidden transition-all duration-300 lg:hidden ${
-          open
-            ? "mt-2.5 max-h-[calc(100vh-5.5rem)] overflow-y-auto opacity-100 pointer-events-auto visible"
-            : "max-h-0 opacity-0 pointer-events-none invisible"
-        }`}
-      >
-        <div className="glass-panel-deep grid gap-1.5 rounded-2xl p-3 shadow-2xl border border-brand-400/20">
-          {LINKS.map((l) => (
-            <button
-              key={l.id}
-              onClick={() => nav(l.id)}
-              className={`min-h-[48px] rounded-xl px-4 py-3 text-left text-[14.5px] font-bold transition flex items-center cursor-pointer active:scale-[0.98] ${
-                page === l.id
-                  ? "bg-brand-600/35 text-brand-200 border border-brand-400/30"
-                  : "text-slate-200 hover:bg-white/5 active:bg-white/10"
-              }`}
+      {/* Mobile menu: only rendered in DOM when open */}
+      {open && (
+        <div className="mx-auto max-w-7xl overflow-hidden mt-2.5 max-h-[calc(100vh-5.5rem)] overflow-y-auto pointer-events-auto lg:hidden animate-card-in">
+          <div className="glass-panel-deep grid gap-1.5 rounded-2xl p-3 shadow-2xl border border-brand-400/20">
+            {LINKS.map((l) => (
+              <button
+                key={l.id}
+                onClick={() => nav(l.id)}
+                className={`min-h-[48px] rounded-xl px-4 py-3 text-left text-[14.5px] font-bold transition flex items-center cursor-pointer active:scale-[0.98] ${
+                  page === l.id
+                    ? "bg-brand-600/35 text-brand-200 border border-brand-400/30"
+                    : "text-slate-200 hover:bg-white/5 active:bg-white/10"
+                }`}
+              >
+                <i className="fa-solid fa-compass mr-3 text-brand-300/80" />
+                {l.label}
+              </button>
+            ))}
+            <a
+              href="tel:+639216030693"
+              className="min-h-[48px] flex items-center justify-center gap-2 rounded-xl border border-white/10 py-3 text-sm font-bold text-slate-200 transition hover:bg-white/5 active:bg-white/10 active:scale-[0.98]"
             >
-              <i className="fa-solid fa-compass mr-3 text-brand-300/80" />
-              {l.label}
+              <i className="fa-solid fa-phone text-xs text-brand-300" />
+              Call +63 921 603 0693
+            </a>
+            <button
+              onClick={() => nav("contact")}
+              className="btn btn-primary min-h-[48px] mt-1 justify-center text-sm font-bold active:scale-[0.98]"
+            >
+              <i className="fa-regular fa-paper-plane" />
+              Send an Inquiry
             </button>
-          ))}
-          <a
-            href="tel:+639216030693"
-            className="min-h-[48px] flex items-center justify-center gap-2 rounded-xl border border-white/10 py-3 text-sm font-bold text-slate-200 transition hover:bg-white/5 active:bg-white/10 active:scale-[0.98]"
-          >
-            <i className="fa-solid fa-phone text-xs text-brand-300" />
-            Call +63 921 603 0693
-          </a>
-          <button
-            onClick={() => nav("contact")}
-            className="btn btn-primary min-h-[48px] mt-1 justify-center text-sm font-bold active:scale-[0.98]"
-          >
-            <i className="fa-regular fa-paper-plane" />
-            Send an Inquiry
-          </button>
+          </div>
         </div>
-      </div>
+      )}
     </header>
   );
 }
