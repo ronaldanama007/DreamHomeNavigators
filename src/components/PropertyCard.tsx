@@ -285,6 +285,60 @@ export default function PropertyCard({
                   <i className="fa-solid fa-door-open text-brand-600" /> Balcony &amp; Maid's Rm
                 </span>
               </>
+            ) : p.id === "janella-welford" ? (
+              <>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-bed text-brand-600" /> 2 Beds + Family Rm
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-bath text-brand-600" /> 2 T&amp;B
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-car text-brand-600" /> Carport
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-ruler-combined text-brand-600" /> 63 sqm Floor / 120 sqm Lot
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-door-open text-brand-600" /> Maid's &amp; Storage Rm
+                </span>
+              </>
+            ) : p.id === "natalia-welford" ? (
+              <>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-bed text-brand-600" /> 3 Bedrooms
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-bath text-brand-600" /> 2 T&amp;B
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-car text-brand-600" /> Carport
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-ruler-combined text-brand-600" /> 73 sqm Floor / 120 sqm Lot
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-door-open text-brand-600" /> Balcony &amp; Maid's Rm
+                </span>
+              </>
+            ) : p.id === "rosanna-welford" ? (
+              <>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-bed text-brand-600" /> 4 Bedrooms
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-bath text-brand-600" /> 3 T&amp;B
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-car text-brand-600" /> Carport
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-ruler-combined text-brand-600" /> 117 sqm Floor / 144 sqm Lot
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <i className="fa-solid fa-door-open text-brand-600" /> Balcony &amp; Storage Rm
+                </span>
+              </>
             ) : (
               <>
                 {p.beds > 0 && (
