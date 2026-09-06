@@ -76,8 +76,8 @@ README.md             Client-facing setup guide (Sheet CRM, Messenger, console)
 ## 6. State layer (`src/store.tsx`)
 
 localStorage-backed; seeds come from `data.ts`. Keys:
-`dhn_custom_properties_v1`, `dhn_deleted_properties_v1`, `dhn_leads_v1`,
-`dhn_services_v1`, `dhn_about_v1`, `dhn_featured_v1`.
+`dhn_custom_properties_v2`, `dhn_deleted_properties_v2`, `dhn_leads_v1`,
+`dhn_services_v2`, `dhn_about_v1`, `dhn_featured_v1`.
 
 - `properties` = PROPERTIES minus deleted, plus custom/edited overrides
   (editing a default listing soft-deletes the original and stores the override
