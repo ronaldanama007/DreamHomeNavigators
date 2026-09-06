@@ -44,7 +44,7 @@ export default function Properties({ filter, onFilter, inquire, go }: Props) {
                   key={loc}
                   onClick={() => onFilter(loc)}
                   aria-pressed={active}
-                  className={`inline-flex items-center gap-2 rounded-full px-4.5 py-2.5 text-[13px] font-bold transition-all duration-250 sm:px-5 ${
+                  className={`inline-flex items-center gap-2 rounded-full px-4.5 py-2.5 text-[13px] font-bold transition-all duration-250 sm:px-5 min-h-[44px] cursor-pointer touch-manipulation active:scale-95 ${
                     active
                       ? "bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-[0_8px_24px_-6px_rgba(37,99,235,0.7)] scale-[1.03]"
                       : "glass-chip text-slate-200 hover:-translate-y-0.5 hover:border-brand-300/60 hover:bg-white/10 hover:text-white"

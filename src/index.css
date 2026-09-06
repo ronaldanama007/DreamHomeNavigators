@@ -67,6 +67,8 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
   body {
     font-family: var(--font-body);
@@ -74,6 +76,8 @@
     color: #e2e8f0;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
   ::selection {
     background: rgba(59, 130, 246, 0.45);
@@ -125,11 +129,14 @@
     align-items: center;
     justify-content: center;
     gap: 0.55rem;
+    min-height: 44px;
     border-radius: 11px;
     font-weight: 700;
     font-size: 0.925rem;
     padding: 0.8rem 1.45rem;
     cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
     transition:
       transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
       box-shadow 0.25s,
@@ -138,7 +145,7 @@
       color 0.25s;
     white-space: nowrap;
   }
-  .btn:active { transform: translateY(1px) scale(0.99); }
+  .btn:active { transform: translateY(1px) scale(0.98); }
   .btn-primary {
     background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
     color: #f8fafc;

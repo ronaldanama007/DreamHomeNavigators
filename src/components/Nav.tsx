@@ -33,9 +33,9 @@ export default function Nav({
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-3 sm:px-5">
+    <header className="fixed inset-x-0 top-0 z-50 px-3 sm:px-5 pointer-events-none">
       <div
-        className={`mx-auto mt-3 flex max-w-7xl items-center justify-between gap-3 rounded-2xl px-4 py-2.5 transition-all duration-300 sm:mt-4 sm:px-5 ${
+        className={`mx-auto mt-3 flex max-w-7xl items-center justify-between gap-3 rounded-2xl px-4 py-2.5 transition-all duration-300 sm:mt-4 sm:px-5 pointer-events-auto ${
           scrolled
             ? "glass-panel-deep !rounded-2xl shadow-2xl bg-ink-950/90 border border-brand-400/20"
             : "glass-panel !rounded-2xl bg-ink-950/60 backdrop-blur-md border border-white/10 shadow-lg"
@@ -43,7 +43,7 @@ export default function Nav({
       >
         <button
           onClick={() => nav("home")}
-          className="group flex items-center gap-3 text-left"
+          className="group flex items-center gap-3 text-left cursor-pointer active:scale-95"
           aria-label="Dream Home Navigators — home"
         >
           <span className="transition-transform duration-500 group-hover:rotate-12">
@@ -64,7 +64,7 @@ export default function Nav({
             <button
               key={l.id}
               onClick={() => nav(l.id)}
-              className={`relative rounded-lg px-3.5 py-2 text-[13.5px] font-semibold tracking-wide transition-colors duration-200 ${
+              className={`relative rounded-lg px-3.5 py-2 text-[13.5px] font-semibold tracking-wide transition-colors duration-200 cursor-pointer ${
                 page === l.id
                   ? "text-brand-300"
                   : "text-slate-200 hover:bg-white/5 hover:text-white"
@@ -87,7 +87,7 @@ export default function Nav({
           </a>
           <button
             onClick={() => nav("contact")}
-            className="btn btn-primary ml-1 !px-4 !py-2 text-[13px]"
+            className="btn btn-primary ml-1 !px-4 !py-2 text-[13px] active:scale-95"
           >
             <i className="fa-regular fa-paper-plane" />
             Send an Inquiry
@@ -95,44 +95,58 @@ export default function Nav({
         </nav>
 
         <button
-          className="grid h-10 w-10 place-items-center rounded-lg border border-white/15 bg-white/5 text-slate-100 transition hover:bg-white/10 lg:hidden"
+          className="grid h-11 w-11 min-h-[44px] min-w-[44px] place-items-center rounded-xl border border-white/15 bg-white/10 text-slate-100 transition hover:bg-white/15 active:scale-90 cursor-pointer pointer-events-auto lg:hidden"
           onClick={() => setOpen((v) => !v)}
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
         >
-          <i className={`fa-solid ${open ? "fa-xmark" : "fa-bars"}`} />
+          <i className={`fa-solid ${open ? "fa-xmark" : "fa-bars"} text-base`} />
         </button>
       </div>
+
+      {/* Mobile menu backdrop dismiss */}
+      {open && (
+        <div
+          className="fixed inset-0 -z-10 bg-ink-950/75 backdrop-blur-md lg:hidden pointer-events-auto transition-opacity duration-300"
+          onClick={() => setOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
       {/* Mobile menu */}
       <div
         className={`mx-auto max-w-7xl overflow-hidden transition-all duration-300 lg:hidden ${
-          open ? "mt-2 max-h-96 opacity-100" : "max-h-0 opacity-0"
+          open
+            ? "mt-2.5 max-h-[460px] opacity-100 pointer-events-auto visible"
+            : "max-h-0 opacity-0 pointer-events-none invisible"
         }`}
       >
-        <div className="glass-panel-deep grid gap-1 rounded-2xl p-3">
+        <div className="glass-panel-deep grid gap-1.5 rounded-2xl p-3 shadow-2xl border border-brand-400/20">
           {LINKS.map((l) => (
             <button
               key={l.id}
               onClick={() => nav(l.id)}
-              className={`rounded-lg px-4 py-3 text-left text-sm font-semibold transition ${
+              className={`min-h-[48px] rounded-xl px-4 py-3 text-left text-[14.5px] font-bold transition flex items-center cursor-pointer active:scale-[0.98] ${
                 page === l.id
-                  ? "bg-brand-600/30 text-brand-200"
-                  : "text-slate-200 hover:bg-white/5"
+                  ? "bg-brand-600/35 text-brand-200 border border-brand-400/30"
+                  : "text-slate-200 hover:bg-white/5 active:bg-white/10"
               }`}
             >
-              <i className="fa-solid fa-compass mr-3 text-brand-300/70" />
+              <i className="fa-solid fa-compass mr-3 text-brand-300/80" />
               {l.label}
             </button>
           ))}
           <a
             href="tel:+639216030693"
-            className="flex items-center justify-center gap-2 rounded-lg border border-white/10 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-white/5"
+            className="min-h-[48px] flex items-center justify-center gap-2 rounded-xl border border-white/10 py-3 text-sm font-bold text-slate-200 transition hover:bg-white/5 active:bg-white/10 active:scale-[0.98]"
           >
             <i className="fa-solid fa-phone text-xs text-brand-300" />
             Call +63 921 603 0693
           </a>
-          <button onClick={() => nav("contact")} className="btn btn-primary mt-1 justify-center">
+          <button
+            onClick={() => nav("contact")}
+            className="btn btn-primary min-h-[48px] mt-1 justify-center text-sm font-bold active:scale-[0.98]"
+          >
             <i className="fa-regular fa-paper-plane" />
             Send an Inquiry
           </button>
