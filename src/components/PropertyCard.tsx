@@ -127,8 +127,16 @@ export default function PropertyCard({
             className={`absolute left-3.5 top-3.5 rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-md ${
               p.badge === "Featured"
                 ? "bg-brass-400 text-brand-950"
-                : p.badge === "RFO"
+                : p.badge === "RFO" || p.badge === "Ready for Occupancy"
                 ? "bg-emerald-600"
+                : p.badge === "Fully Furnished"
+                ? "bg-cyan-600"
+                : p.badge === "Long-term Lease"
+                ? "bg-blue-600"
+                : p.badge === "Executive Suite"
+                ? "bg-indigo-600"
+                : p.badge === "Commercial Space"
+                ? "bg-amber-600"
                 : "bg-brand-600"
             }`}
           >
@@ -384,7 +392,7 @@ export default function PropertyCard({
                 {p.priceLabel || "Price"}
               </p>
               <p className="font-display text-2xl font-bold tracking-tight text-brand-700">
-                {fmtPrice(p.price)}
+                {fmtPrice(p.price, p.isRental)}
               </p>
               {p.lotNote && (
                 <p className="mt-0.5 text-[11px] font-medium text-slate-500 truncate">

@@ -60,7 +60,8 @@ export default function Footer({
               {(
                 [
                   ["home", "Home"],
-                  ["properties", "Properties"],
+                  ["properties", "For Sale"],
+                  ["rentals", "Rentals"],
                   ["services", "Services"],
                   ["about", "About Us"],
                   ["contact", "Contact"],

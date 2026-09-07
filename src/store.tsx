@@ -12,6 +12,7 @@ import {
   ABOUT_SEED,
   Property,
   PROPERTIES,
+  RENTAL_PROPERTIES,
   ServiceItem,
   SERVICE_SEED,
 } from "./data";
@@ -63,6 +64,7 @@ function write(key: string, value: unknown) {
 
 interface StoreValue {
   properties: Property[];
+  rentalProperties: Property[];
   customCount: number;
   deletedCount: number;
   /** ids of default listings that were edited via the console (stored as overrides) */
@@ -117,8 +119,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [deleted, custom]
   );
 
+  const rentalProperties = useMemo(() => RENTAL_PROPERTIES, []);
+
   const value: StoreValue = {
     properties,
+    rentalProperties,
     customCount: custom.length,
     deletedCount: deleted.length,
     editedIds: useMemo(

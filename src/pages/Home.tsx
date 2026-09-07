@@ -66,8 +66,13 @@ export default function Home({ go, inquire, browseLocation }: Props) {
             <Reveal delay={300}>
               <div className="mt-8 flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-3.5">
                 <button onClick={() => go("properties")} className="btn btn-primary w-full sm:w-auto">
-                  Explore Properties
+                  <i className="fa-solid fa-house-chimney" />
+                  Properties For Sale
                   <i className="fa-solid fa-arrow-right" />
+                </button>
+                <button onClick={() => go("rentals")} className="btn btn-ghost w-full sm:w-auto">
+                  <i className="fa-solid fa-key text-brand-300" />
+                  Rental Properties
                 </button>
                 <button onClick={() => go("contact")} className="btn btn-ghost w-full sm:w-auto">
                   <i className="fa-regular fa-paper-plane text-brand-300" />
@@ -321,10 +326,16 @@ export default function Home({ go, inquire, browseLocation }: Props) {
             sub="Every listing below comes straight from official Dream Home Navigators material — nothing is estimated or embellished."
           />
           <Reveal delay={150}>
-            <button onClick={() => go("properties")} className="btn btn-ghost w-full sm:w-auto">
-              View all listings
-              <i className="fa-solid fa-arrow-right" />
-            </button>
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              <button onClick={() => go("properties")} className="btn btn-ghost w-full sm:w-auto">
+                For Sale ({properties.length})
+                <i className="fa-solid fa-arrow-right" />
+              </button>
+              <button onClick={() => go("rentals")} className="btn btn-ghost w-full sm:w-auto text-brand-200">
+                <i className="fa-solid fa-key text-brand-300" />
+                Rentals
+              </button>
+            </div>
           </Reveal>
         </div>
         <div className="mt-10 sm:mt-12 grid gap-6 sm:gap-7 sm:grid-cols-2 lg:grid-cols-3">

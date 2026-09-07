@@ -19,14 +19,33 @@ export default function Properties({ filter, onFilter, inquire, go }: Props) {
     <>
       <section className="mx-auto max-w-7xl px-4 pt-28 sm:px-8 sm:pt-36">
         <Reveal>
-          <span className="kicker">Property listings</span>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="kicker">Properties For Sale</span>
+            <span className="glass-chip px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-brand-300">
+              <i className="fa-solid fa-house-chimney mr-1.5 text-brand-400" />
+              Ownership Listings
+            </span>
+          </div>
           <div className="mt-4 flex flex-wrap items-end justify-between gap-6">
-            <h1 className="font-display max-w-2xl text-3xl font-semibold leading-tight text-slate-50 sm:text-5xl xl:text-6xl">
-              Explore <span className="text-brand-300">selected properties</span>
-            </h1>
-            <p className="max-w-md text-[14.5px] leading-relaxed text-slate-300/90">
-              Browse a selection of current property materials and contact Dream Home Navigators for availability, pricing and viewing details.
-            </p>
+            <div>
+              <h1 className="font-display max-w-2xl text-3xl font-semibold leading-tight text-slate-50 sm:text-5xl xl:text-6xl">
+                Explore <span className="text-brand-300">Properties For Sale</span>
+              </h1>
+              <p className="mt-3 max-w-xl text-[14.5px] leading-relaxed text-slate-300/90">
+                Browse verified residential house &amp; lots, master-planned township models, and luxury condominiums across Iloilo, Tagaytay, Cavite, Antipolo, and Binondo.
+              </p>
+            </div>
+
+            {/* Quick Switch to Rentals */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => go("rentals")}
+                className="btn btn-ghost !py-2.5 !px-4 text-xs font-bold text-brand-200 hover:text-white"
+              >
+                <i className="fa-solid fa-key mr-1.5 text-brand-400" />
+                Looking to lease? View Rental Properties
+              </button>
+            </div>
           </div>
         </Reveal>
 

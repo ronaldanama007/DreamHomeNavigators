@@ -1,6 +1,6 @@
 import { CONFIG } from "./config";
 
-export type Page = "home" | "properties" | "services" | "about" | "contact";
+export type Page = "home" | "properties" | "rentals" | "services" | "about" | "contact";
 
 export interface Prefill {
   property: string;
@@ -34,6 +34,8 @@ export interface Property {
   videoUrl?: string;
   videoId?: string;
   developer?: string;
+  category?: "sale" | "rental";
+  isRental?: boolean;
 }
 
 const u = (id: string, w = 1000) =>
@@ -291,7 +293,171 @@ export const PROPERTIES: Property[] = [
 
 export const FEATURED_PROPERTY = PROPERTIES.find((p) => p.id === FEATURED_ID)!;
 
-export const fmtPrice = (n: number) => {
+export const RENTAL_PROPERTIES: Property[] = [
+  {
+    id: "rent-iloilo-mandurriao",
+    name: "Courtyard Executive Suite at Iloilo Business Park",
+    location: "Iloilo",
+    area: "Mandurriao, Iloilo City",
+    type: "Executive Condominium Unit",
+    badge: "Fully Furnished",
+    beds: 2,
+    baths: 2,
+    parking: 1,
+    sqm: 68,
+    lotNote: "Corner Unit · High Floor · City Skyline View",
+    price: 38_000,
+    priceLabel: "Monthly Rental Rate",
+    priceNote: "Inclusive of monthly condominium association dues. Min. 1-year contract.",
+    img: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=1200&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=1200&auto=format&fit=crop",
+    ],
+    tagline: "Move-in ready premium 2-bedroom suite directly fronting Megaworld Festive Walk Mall with dedicated high-speed fiber provision.",
+    highlights: [
+      "Fully furnished with designer Scandinavian-modern furniture",
+      "Corner master suite with floor-to-ceiling panoramic glass windows",
+      "Direct walking access to Festive Walk Mall, transport hub & dining strip",
+      "Building infinity pool, 24/7 biometric security and fitness gym access",
+      "Dedicated basement parking slot included",
+    ],
+    developer: "Megaworld Corporation",
+    category: "rental",
+    isRental: true,
+  },
+  {
+    id: "rent-tagaytay-ridge",
+    name: "Pinecrest Ridge Villa & Loft",
+    location: "Tagaytay",
+    area: "Silang Junction South, Tagaytay City",
+    type: "Scenic Vacation Villa / Loft",
+    badge: "Long-term Lease",
+    beds: 3,
+    baths: 3,
+    parking: 2,
+    sqm: 142,
+    lotNote: "Private Garden Terrace · Cool Tagaytay Breeze",
+    price: 65_000,
+    priceLabel: "Monthly Lease Rate",
+    priceNote: "Ideal for remote executives, expatriates, and sabbatical retreats.",
+    img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1200&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=1200&auto=format&fit=crop",
+    ],
+    tagline: "Tranquil two-level mountain villa with double-height fireplace lounge, pine tree views, and wraparound veranda.",
+    highlights: [
+      "Cool Tagaytay mountain climate all year round",
+      "Spacious outdoor entertaining deck with garden grill area",
+      "Cathedral ceiling living room with stone accents and natural pine finishes",
+      "High-speed dual broadband connectivity for executive work-from-home",
+      "Gated sanctuary with 24-hour perimeter security patrol",
+    ],
+    category: "rental",
+    isRental: true,
+  },
+  {
+    id: "rent-cavite-general-trias",
+    name: "Verdana Crest Modern Family Residence",
+    location: "Cavite",
+    area: "General Trias / Daang Hari Ext., Cavite",
+    type: "Two-Storey Single Detached Home",
+    badge: "Ready for Occupancy",
+    beds: 4,
+    baths: 3,
+    parking: 2,
+    sqm: 125,
+    lotNote: "150 sqm lot · Semi-Furnished · Gated Community",
+    price: 32_000,
+    priceLabel: "Monthly Rental Rate",
+    priceNote: "Semi-furnished with inverter air conditioners, modular kitchen & built-in closets.",
+    img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1200&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?q=80&w=1200&auto=format&fit=crop",
+    ],
+    tagline: "Comfortable, master-planned family home near major Cavite expressways (CALAX, MCX, and CAVITEX).",
+    highlights: [
+      "Energy-efficient inverter AC units installed in all bedrooms and living hall",
+      "Spacious covered 2-car garage with gated driveway",
+      "Pet-friendly private backyard lawn with utility area",
+      "Village amenities: resort-type swimming pool, basketball court and children's park",
+      "10 minutes to Vista Mall, district hospitals, and international schools",
+    ],
+    category: "rental",
+    isRental: true,
+  },
+  {
+    id: "rent-antipolo-valley",
+    name: "The Heights Skyview Residence",
+    location: "Antipolo",
+    area: "Mambugan / Valley Golf Road, Antipolo",
+    type: "Modern Multi-Level Hillside Home",
+    badge: "Executive Suite",
+    beds: 3,
+    baths: 3,
+    parking: 2,
+    sqm: 160,
+    lotNote: "Overlooking Metro Skyline · Fresh Mountain Air",
+    price: 45_000,
+    priceLabel: "Monthly Rental Rate",
+    priceNote: "Long-term lease preferred (1-2 years). Security deposit: 2 months.",
+    img: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1200&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?q=80&w=1200&auto=format&fit=crop",
+    ],
+    tagline: "Hillside sanctuary with sweeping sunset views of the Ortigas and BGC skylines, minutes from Sumulong Highway.",
+    highlights: [
+      "Unobstructed panoramic valley and metropolitan skyline views",
+      "Expansive rooftop terrace perfect for stargazing and sunset leisure",
+      "Master suite with walk-in closet and ensuite bathroom with glass enclosure",
+      "Flood-free elevated elevation with peaceful neighborhood ambiance",
+      "Convenient access to LRT-2 Antipolo Station and Marikina-Infanta Highway",
+    ],
+    category: "rental",
+    isRental: true,
+  },
+  {
+    id: "rent-binondo-chinatown",
+    name: "Chinatown Commercial & Residential Mezzanine Suite",
+    location: "Binondo",
+    area: "Quintin Paredes / Dasmariñas St., Binondo, Manila",
+    type: "Mixed Commercial / Residential Suite",
+    badge: "Commercial Space",
+    beds: 2,
+    baths: 2,
+    parking: 1,
+    sqm: 110,
+    lotNote: "High Foot Traffic · Prime Chinatown Commercial Hub",
+    price: 55_000,
+    priceLabel: "Monthly Lease Rate",
+    priceNote: "Ideal for trading firm headquarters, showroom, or live-work executive base.",
+    img: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1200&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=1200&auto=format&fit=crop",
+    ],
+    tagline: "Prime live-work property in Binondo's bustling commerce district, walking distance to major Chinese banking headquarters.",
+    highlights: [
+      "Strategic downtown Binondo location with prominent ground-floor elevator lobby",
+      "Multi-purpose open layout suitable for office desks, conference, and residential stay",
+      "Equipped with secure access card controls and commercial-grade fiber internet",
+      "Walking distance to Lucky Chinatown, Escolta, Jones Bridge & historic landmarks",
+      "Dedicated basement parking slot available",
+    ],
+    category: "rental",
+    isRental: true,
+  },
+];
+
+export const fmtPrice = (n: number, isRental?: boolean) => {
+  if (isRental) {
+    return `₱${n.toLocaleString("en-PH")}/mo`;
+  }
   if (n >= 1_000_000) {
     return `₱${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
   }
