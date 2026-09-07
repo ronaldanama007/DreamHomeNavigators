@@ -76,16 +76,16 @@ README.md             Client-facing setup guide (Sheet CRM, Messenger, console)
 ## 6. State layer (`src/store.tsx`)
 
 localStorage-backed; seeds come from `data.ts`. Keys:
-`dhn_custom_properties_v3`, `dhn_deleted_properties_v3`, `dhn_leads_v1`,
-`dhn_services_v2`, `dhn_about_v1`, `dhn_featured_v1`.
+`dhn_custom_properties_v3`, `dhn_deleted_properties_v3`, `dhn_custom_rentals_v1`,
+`dhn_deleted_rentals_v1`, `dhn_leads_v1`, `dhn_services_v2`, `dhn_about_v1`, `dhn_featured_v1`.
 
-- `properties` = PROPERTIES minus deleted, plus custom/edited overrides
-  (editing a default listing soft-deletes the original and stores the override
-  with the **same id**; deleting an edited default also purges its override).
-- `editedIds` drives the "Edited" chip; `featuredId` drives the Home hero card
-  (fallback: first `badge==="Featured"`, then first listing).
+- `properties` = PROPERTIES minus deleted, plus custom/edited overrides.
+- `rentalProperties` = RENTAL_PROPERTIES minus deleted rentals, plus custom/edited rental overrides.
+- `editedIds` and `rentalEditedIds` drive the "Edited" chips in Owner Console.
+- `featuredId` drives the Home hero card (fallback: first `badge==="Featured"`, then first listing).
 - Services & About content are **fully store-driven** (Home previews read the store too).
 - Leads: `addLead` (form), `importLeads` (Sheet sync, deduped by timestamp|phone), CSV export.
+- **Website Auth Backup & Restore**: `createBackup()`, `restoreBackup()`, `resetAllToFactory()` (with JSON snapshot download, file validation restore, raw JSON inspector, and factory reset in Owner Console).
 - When adding new editable content: seed in `data.ts`, state + LS key in `store.tsx`,
   read via `useStore()` in the page, add an editor tab in `pages/Admin.tsx`.
 
