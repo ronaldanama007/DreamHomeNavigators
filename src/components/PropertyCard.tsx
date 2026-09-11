@@ -131,6 +131,8 @@ export default function PropertyCard({
                 ? "bg-emerald-600"
                 : p.badge === "Fully Furnished"
                 ? "bg-cyan-600"
+                : p.badge === "Daily Stay" || p.badge === "Book Family Stay"
+                ? "bg-emerald-500 text-white"
                 : p.badge === "Long-term Lease"
                 ? "bg-blue-600"
                 : p.badge === "Executive Suite"
@@ -392,7 +394,13 @@ export default function PropertyCard({
                 {p.priceLabel || "Price"}
               </p>
               <p className="font-display text-2xl font-bold tracking-tight text-brand-700">
-                {fmtPrice(p.price, p.isRental)}
+                {fmtPrice(
+                  p.price,
+                  p.isRental,
+                  p.isRental && (p.priceLabel?.toLowerCase().includes("daily") || p.priceNote?.toLowerCase().includes("daily"))
+                    ? "/day"
+                    : undefined
+                )}
               </p>
               {p.lotNote && (
                 <p className="mt-0.5 text-[11px] font-medium text-slate-500 truncate">

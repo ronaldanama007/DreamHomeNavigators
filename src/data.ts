@@ -295,6 +295,41 @@ export const FEATURED_PROPERTY = PROPERTIES.find((p) => p.id === FEATURED_ID)!;
 
 export const RENTAL_PROPERTIES: Property[] = [
   {
+    id: "rent-avida-tower3-iloilo",
+    name: "Avida Tower 3 at Iloilo",
+    location: "Iloilo",
+    area: "Atria Park District, San Rafael, Mandurriao, Iloilo City",
+    type: "Condominium Staycation / Suite",
+    badge: "Daily Stay",
+    beds: 1,
+    baths: 1,
+    parking: 1,
+    sqm: 23,
+    lotNote: "Modern Home Away From Home · Air Conditioned",
+    price: 2_000,
+    priceLabel: "Daily Stay Rate",
+    priceNote: "PHP 2,000 Daily · Book Family Stay & Transient Vacation",
+    img: "/assets/img/avida-tower3/avida-banner.jpg",
+    gallery: [
+      "/assets/img/avida-tower3/avida-banner.jpg",
+      "/assets/img/avida-tower3/avida-pool-day.jpg",
+      "/assets/img/avida-tower3/avida-sunset-amenities.jpg",
+      "/assets/img/avida-tower3/avida-towers-exterior.jpg",
+    ],
+    tagline: "More space for shared memories. A modern home away from home with resort-style swimming pools and prime Atria Park District lifestyle.",
+    highlights: [
+      "Comfortable queen-size bed setup with fresh linens & towels provided",
+      "Split-type air conditioning, ambient lighting & dining table suite",
+      "Access to expansive resort-style lap pool, kiddie pool & landscaped open courtyards",
+      "Prime location inside Atria Park District — walking distance to QualiMed Hospital, Ateneo de Iloilo, and Shops at Atria",
+      "24/7 security lobby, biometric RFID access, and high-speed elevators",
+      "Ideal for family staycations, weekend getaways, medical visits, and executive business trips",
+    ],
+    developer: "Avida Land (Ayala Land)",
+    category: "rental",
+    isRental: true,
+  },
+  {
     id: "rent-iloilo-mandurriao",
     name: "Courtyard Executive Suite at Iloilo Business Park",
     location: "Iloilo",
@@ -454,7 +489,10 @@ export const RENTAL_PROPERTIES: Property[] = [
   },
 ];
 
-export const fmtPrice = (n: number, isRental?: boolean) => {
+export const fmtPrice = (n: number, isRental?: boolean, suffix?: string) => {
+  if (suffix) {
+    return `₱${n.toLocaleString("en-PH")}${suffix}`;
+  }
   if (isRental) {
     return `₱${n.toLocaleString("en-PH")}/mo`;
   }

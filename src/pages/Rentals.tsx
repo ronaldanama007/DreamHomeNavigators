@@ -28,6 +28,8 @@ export default function Rentals({ filter, onFilter, inquire, go }: Props) {
             ? p.badge === "Commercial Space" || p.type.toLowerCase().includes("commercial")
             : propertyTypeFilter === "Furnished"
             ? p.badge === "Fully Furnished"
+            : propertyTypeFilter === "Daily"
+            ? p.badge === "Daily Stay" || (p.priceNote && p.priceNote.toLowerCase().includes("daily"))
             : true
         );
 
@@ -140,6 +142,16 @@ export default function Rentals({ filter, onFilter, inquire, go }: Props) {
               }`}
             >
               Fully Furnished
+            </button>
+            <button
+              onClick={() => setPropertyTypeFilter(propertyTypeFilter === "Daily" ? "All" : "Daily")}
+              className={`px-3 py-1 rounded-full border text-[11px] transition ${
+                propertyTypeFilter === "Daily"
+                  ? "border-emerald-400 bg-emerald-500/20 text-emerald-200 font-bold"
+                  : "border-white/10 text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              Daily Stay
             </button>
             <button
               onClick={() => setPropertyTypeFilter(propertyTypeFilter === "Commercial" ? "All" : "Commercial")}

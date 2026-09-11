@@ -905,14 +905,16 @@ function PropertiesAdmin({ notify }: { notify: (msg: string, ok?: boolean) => vo
 /* ─────────────────────────── rentals tab ─────────────────────────── */
 
 const RENTAL_BADGE_OPTIONS = [
-  "Long-term Lease",
+  "Daily Stay",
   "Fully Furnished",
+  "Long-term Lease",
   "Ready for Occupancy",
   "Commercial Space",
   "Executive Suite",
 ];
 
 const RENTAL_TYPE_OPTIONS = [
+  "Condominium Staycation / Suite",
   "Executive Condominium Unit",
   "Scenic Vacation Villa / Loft",
   "Two-Storey Single Detached Home",
