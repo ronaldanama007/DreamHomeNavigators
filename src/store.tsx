@@ -16,6 +16,7 @@ import {
   ServiceItem,
   SERVICE_SEED,
 } from "./data";
+import { supabase } from "./supabase";
 
 /* ────────────────────────────────────────────────────────────────────────────
    Persistent client-side store.
@@ -27,7 +28,7 @@ import {
 
 export interface Lead {
   id: string;
-  timestamp: string; // ISO string
+  timestamp: string; // ISO string, mapped from Supabase created_at
   name: string;
   phone: string;
   email: string;
@@ -36,7 +37,6 @@ export interface Lead {
   propertyInterest: string;
   message: string;
   source: string;
-  synced: boolean; // true when imported from (or confirmed sent to) the Sheet
 }
 
 const LS_CUSTOM = "dhn_custom_properties_v3";
@@ -60,6 +60,34 @@ export interface SiteBackupData {
   services: ServiceItem[];
   about: AboutContent;
   featuredId: string | null;
+}
+
+interface LeadRow {
+  id: string;
+  created_at: string;
+  name: string;
+  phone: string;
+  email: string;
+  location: string;
+  budget: string;
+  property_interest: string;
+  message: string;
+  source: string;
+}
+
+function rowToLead(r: LeadRow): Lead {
+  return {
+    id: r.id,
+    timestamp: r.created_at,
+    name: r.name ?? "",
+    phone: r.phone ?? "",
+    email: r.email ?? "",
+    location: r.location ?? "",
+    budget: r.budget ?? "",
+    propertyInterest: r.property_interest ?? "",
+    message: r.message ?? "",
+    source: r.source ?? "",
+  };
 }
 
 function read<T>(key: string, fallback: T): T {
@@ -99,10 +127,10 @@ interface StoreValue {
   featuredId: string | null;
   setFeatured: (id: string | null) => void;
   leads: Lead[];
-  addLead: (l: Omit<Lead, "id" | "timestamp">) => void;
-  deleteLead: (id: string) => void;
-  clearLeads: () => void;
-  importLeads: (rows: Omit<Lead, "id">[]) => number;
+  refreshLeads: () => Promise<{ ok: boolean; error?: string }>;
+  addLead: (l: Omit<Lead, "id" | "timestamp">) => Promise<{ ok: boolean }>;
+  deleteLead: (id: string) => Promise<void>;
+  clearLeads: () => Promise<void>;
   services: ServiceItem[];
   addService: (s: Omit<ServiceItem, "id">) => void;
   updateService: (s: ServiceItem) => void;
@@ -123,7 +151,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [deleted, setDeleted] = useState<string[]>(() => read(LS_DELETED, []));
   const [customRentals, setCustomRentals] = useState<Property[]>(() => read(LS_CUSTOM_RENTALS, []));
   const [deletedRentals, setDeletedRentals] = useState<string[]>(() => read(LS_DELETED_RENTALS, []));
-  const [leads, setLeads] = useState<Lead[]>(() => read(LS_LEADS, []));
+  // Leads live in Supabase. This in-memory list is populated by refreshLeads()
+  // for authenticated admins. LS_LEADS is only a fallback for inserts that fail
+  // while offline, so a submitted lead is never lost.
+  const [leads, setLeads] = useState<Lead[]>([]);
   const [services, setServices] = useState<ServiceItem[]>(() =>
     read(LS_SERVICES, SERVICE_SEED)
   );
@@ -136,7 +167,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => write(LS_DELETED, deleted), [deleted]);
   useEffect(() => write(LS_CUSTOM_RENTALS, customRentals), [customRentals]);
   useEffect(() => write(LS_DELETED_RENTALS, deletedRentals), [deletedRentals]);
-  useEffect(() => write(LS_LEADS, leads), [leads]);
   useEffect(() => write(LS_SERVICES, services), [services]);
   useEffect(() => write(LS_ABOUT, about), [about]);
   useEffect(() => write(LS_FEATURED, featuredId), [featuredId]);
@@ -231,27 +261,50 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     featuredId,
     setFeatured: (id) => setFeaturedId(id),
     leads,
-    addLead: (l) =>
-      setLeads((ls) => [
-        { ...l, id: uuid(), timestamp: new Date().toISOString() },
-        ...ls,
-      ]),
-    deleteLead: (id) => setLeads((ls) => ls.filter((l) => l.id !== id)),
-    clearLeads: () => setLeads([]),
-    importLeads: (rows) => {
-      let added = 0;
-      setLeads((ls) => {
-        const seen = new Set(ls.map((l) => `${l.timestamp}|${l.phone}`));
-        const fresh = rows.filter((r) => {
-          const k = `${r.timestamp}|${r.phone}`;
-          if (seen.has(k)) return false;
-          seen.add(k);
-          added += 1;
-          return true;
-        });
-        return fresh.length ? [...fresh.map((r) => ({ ...r, id: uuid() })).reverse(), ...ls] : ls;
-      });
-      return added;
+    refreshLeads: async () => {
+      const { data, error } = await supabase
+        .from("leads")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) return { ok: false, error: error.message };
+      setLeads((data as LeadRow[]).map(rowToLead));
+      return { ok: true };
+    },
+    addLead: async (l) => {
+      const row = {
+        name: l.name,
+        phone: l.phone,
+        email: l.email,
+        location: l.location,
+        budget: l.budget,
+        property_interest: l.propertyInterest,
+        message: l.message,
+        source: l.source,
+      };
+      const { error } = await supabase.from("leads").insert(row);
+      if (error) {
+        // Never lose a lead: queue it locally so it can be recovered.
+        const pending = read<Lead[]>(LS_LEADS, []);
+        const fallback: Lead = {
+          ...l,
+          id: uuid(),
+          timestamp: new Date().toISOString(),
+        };
+        write(LS_LEADS, [fallback, ...pending]);
+        return { ok: false };
+      }
+      return { ok: true };
+    },
+    deleteLead: async (id) => {
+      const { error } = await supabase.from("leads").delete().eq("id", id);
+      if (!error) setLeads((ls) => ls.filter((l) => l.id !== id));
+    },
+    clearLeads: async () => {
+      const { error } = await supabase
+        .from("leads")
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000");
+      if (!error) setLeads([]);
     },
     /* ── Services page content ── */
     services,
@@ -288,7 +341,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (Array.isArray(data.deletedProperties)) setDeleted(data.deletedProperties);
         if (Array.isArray(data.customRentals)) setCustomRentals(data.customRentals);
         if (Array.isArray(data.deletedRentals)) setDeletedRentals(data.deletedRentals);
-        if (Array.isArray(data.leads)) setLeads(data.leads);
+        // Leads are NOT restored from backup — they live in Supabase.
         if (Array.isArray(data.services)) setServices(data.services);
         if (data.about && typeof data.about === "object") setAbout(data.about);
         if (data.featuredId !== undefined) setFeaturedId(data.featuredId);
@@ -309,7 +362,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setDeleted([]);
       setCustomRentals([]);
       setDeletedRentals([]);
-      setLeads([]);
+      // Leads are NOT reset here — they live in Supabase, not local content.
       setServices(SERVICE_SEED);
       setAbout(ABOUT_SEED);
       setFeaturedId(null);
