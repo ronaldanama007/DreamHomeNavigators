@@ -3,3 +3,7 @@ node_modules/
 dist/
 build/
 *.log
+
+# Local environment secrets / config
+.env
+.env.local
