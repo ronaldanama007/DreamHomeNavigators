@@ -1,7 +1,7 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { CONFIG } from "../config";
 import { ABOUT_SEED, fmtPrice, LOCATIONS, Property, ServiceItem } from "../data";
-import { Lead, useStore } from "../store";
+import { Lead, SiteBackupData, useStore } from "../store";
 import { Logo } from "../ui";
 
 /* ─────────────────────────── helpers ─────────────────────────── */
@@ -902,6 +902,514 @@ function PropertiesAdmin({ notify }: { notify: (msg: string, ok?: boolean) => vo
   );
 }
 
+/* ─────────────────────────── rentals tab ─────────────────────────── */
+
+const RENTAL_BADGE_OPTIONS = [
+  "Daily Stay",
+  "Fully Furnished",
+  "Long-term Lease",
+  "Ready for Occupancy",
+  "Commercial Space",
+  "Executive Suite",
+];
+
+const RENTAL_TYPE_OPTIONS = [
+  "Condominium Staycation / Suite",
+  "Executive Condominium Unit",
+  "Scenic Vacation Villa / Loft",
+  "Two-Storey Single Detached Home",
+  "Modern Multi-Level Hillside Home",
+  "Mixed Commercial / Residential Suite",
+  "Townhouse Unit",
+  "Studio Apartment",
+];
+
+const RENTAL_IMAGE_CHOICES = [
+  "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=1200&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1200&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1200&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1200&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1200&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=1200&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1200&auto=format&fit=crop",
+];
+
+const EMPTY_RENTAL_FORM = {
+  name: "",
+  location: LOCATIONS[0],
+  area: "",
+  price: "",
+  priceLabel: "Monthly Rental Rate",
+  priceNote: "Inclusive of monthly condominium association dues. Min. 1-year contract.",
+  beds: "2",
+  baths: "2",
+  sqm: "65",
+  parking: "1",
+  lotNote: "Furnished · Air Conditioned · High Speed Fiber Ready",
+  type: RENTAL_TYPE_OPTIONS[0],
+  badge: RENTAL_BADGE_OPTIONS[0],
+  tagline: "",
+  img: RENTAL_IMAGE_CHOICES[0],
+  customImg: "",
+};
+
+function RentalsAdmin({ notify }: { notify: (msg: string, ok?: boolean) => void }) {
+  const {
+    rentalProperties,
+    rentalEditedIds,
+    addRentalProperty,
+    updateRentalProperty,
+    deleteRentalProperty,
+    resetRentalProperties,
+    rentalCustomCount,
+    rentalDeletedCount,
+  } = useStore();
+
+  const [f, setF] = useState(EMPTY_RENTAL_FORM);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
+  const set = (k: keyof typeof EMPTY_RENTAL_FORM) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => setF((p) => ({ ...p, [k]: e.target.value }));
+
+  function resetForm() {
+    setF(EMPTY_RENTAL_FORM);
+    setEditingId(null);
+  }
+
+  function startEdit(p: Property) {
+    setEditingId(p.id);
+    setF({
+      name: p.name,
+      location: p.location,
+      area: p.area,
+      price: String(p.price),
+      priceLabel: p.priceLabel || "Monthly Rental Rate",
+      priceNote: p.priceNote || "Inclusive of monthly dues. Min. 1-year contract.",
+      beds: String(p.beds),
+      baths: String(p.baths),
+      sqm: String(p.sqm),
+      parking: String(p.parking),
+      lotNote: p.lotNote ?? "",
+      type: p.type,
+      badge: p.badge,
+      tagline: p.tagline,
+      img: RENTAL_IMAGE_CHOICES.includes(p.img) ? p.img : RENTAL_IMAGE_CHOICES[0],
+      customImg: RENTAL_IMAGE_CHOICES.includes(p.img) ? "" : p.img,
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    if (!f.name.trim() || !f.price || !f.sqm) {
+      notify("Unit name, monthly rate, and floor area are required.", false);
+      return;
+    }
+
+    const details = {
+      name: f.name.trim(),
+      location: f.location,
+      area: f.area.trim() || f.location,
+      price: Number(f.price),
+      priceLabel: f.priceLabel.trim() || "Monthly Rental Rate",
+      priceNote: f.priceNote.trim() || "Inclusive of association dues. Min. 1-year contract.",
+      beds: Number(f.beds) || 0,
+      baths: Number(f.baths) || 0,
+      sqm: Number(f.sqm),
+      parking: Number(f.parking) || 0,
+      lotNote: f.lotNote.trim() || undefined,
+      type: f.type,
+      badge: f.badge,
+      tagline:
+        f.tagline.trim() ||
+        "Prime rental residence presented by Dream Home Navigators — inquire for lease schedule.",
+      img: f.customImg.trim() || f.img,
+      category: "rental" as const,
+      isRental: true,
+    };
+
+    if (editingId) {
+      const orig = rentalProperties.find((p) => p.id === editingId);
+      if (orig) updateRentalProperty({ ...orig, ...details, id: editingId });
+    } else {
+      addRentalProperty(details);
+    }
+
+    notify(
+      editingId
+        ? `Rental unit "${details.name}" updated on the live site.`
+        : `Rental unit "${details.name}" is now live on the Rentals page.`,
+      true
+    );
+    resetForm();
+  }
+
+  const inputCls =
+    "w-full rounded-lg border border-white/12 bg-white/[0.06] px-3.5 py-2.5 text-sm font-semibold text-white outline-none transition placeholder:text-slate-500 focus:border-brand-400 focus:bg-white/10 focus:ring-2 focus:ring-brand-500/25";
+  const labelCls =
+    "mb-1.5 block text-[10.5px] font-extrabold uppercase tracking-[0.18em] text-slate-400";
+
+  return (
+    <div className="animate-card-in grid gap-8 lg:grid-cols-5">
+      {/* Add / Edit Form */}
+      <form
+        onSubmit={submit}
+        className={`glass-panel-deep rounded-2xl p-6 lg:col-span-3 sm:p-7 transition-shadow ${
+          editingId ? "ring-2 ring-emerald-400/50" : ""
+        }`}
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-display text-xl font-semibold text-white">
+            <i
+              className={`fa-solid ${
+                editingId ? "fa-pen-to-square" : "fa-key"
+              } mr-2.5 text-emerald-300`}
+            />
+            {editingId ? "Edit Rental Property" : "Add Rental Property"}
+          </h2>
+          {editingId && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="rounded-lg border border-amber-400/50 bg-amber-400/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-amber-300 transition hover:bg-amber-400/20"
+            >
+              <i className="fa-solid fa-xmark mr-1.5" />
+              Cancel edit
+            </button>
+          )}
+        </div>
+        <p className="mt-1.5 text-[12.5px] text-slate-400">
+          {editingId
+            ? "Modify lease terms, monthly rate, territory, and photos. Updates apply live immediately."
+            : "Publish verified rental listings with monthly rates and lease terms. Appears immediately on the Rental Properties catalog."}
+        </p>
+
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <label className={labelCls}>Unit / Property Name *</label>
+            <input
+              value={f.name}
+              onChange={set("name")}
+              placeholder="e.g. Courtyard Executive Suite at Iloilo Business Park"
+              className={inputCls}
+            />
+          </div>
+
+          <div>
+            <label className={labelCls}>Territory / Location *</label>
+            <select value={f.location} onChange={set("location")} className={inputCls}>
+              {LOCATIONS.map((l) => (
+                <option key={l} value={l} className="bg-ink-900">
+                  {l}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className={labelCls}>Area / District</label>
+            <input
+              value={f.area}
+              onChange={set("area")}
+              placeholder="e.g. Mandurriao, Iloilo City"
+              className={inputCls}
+            />
+          </div>
+
+          <div>
+            <label className={labelCls}>Monthly Rent (PHP / month) *</label>
+            <input
+              value={f.price}
+              onChange={set("price")}
+              type="number"
+              min="0"
+              placeholder="e.g. 38000"
+              className={inputCls}
+            />
+          </div>
+
+          <div>
+            <label className={labelCls}>Price Label</label>
+            <input
+              value={f.priceLabel}
+              onChange={set("priceLabel")}
+              placeholder="e.g. Monthly Rental Rate"
+              className={inputCls}
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className={labelCls}>Lease &amp; Payment Note</label>
+            <input
+              value={f.priceNote}
+              onChange={set("priceNote")}
+              placeholder="e.g. Inclusive of association dues. 1 month advance, 2 months deposit."
+              className={inputCls}
+            />
+          </div>
+
+          <div>
+            <label className={labelCls}>Floor Area (sqm) *</label>
+            <input
+              value={f.sqm}
+              onChange={set("sqm")}
+              type="number"
+              min="0"
+              placeholder="e.g. 68"
+              className={inputCls}
+            />
+          </div>
+
+          <div>
+            <label className={labelCls}>Badge / Lease Status</label>
+            <select value={f.badge} onChange={set("badge")} className={inputCls}>
+              {RENTAL_BADGE_OPTIONS.map((b) => (
+                <option key={b} value={b} className="bg-ink-900">
+                  {b}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 sm:col-span-2">
+            <div>
+              <label className={labelCls}>Bedrooms</label>
+              <input
+                value={f.beds}
+                onChange={set("beds")}
+                type="number"
+                min="0"
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Bathrooms</label>
+              <input
+                value={f.baths}
+                onChange={set("baths")}
+                type="number"
+                min="0"
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Parking Slots</label>
+              <input
+                value={f.parking}
+                onChange={set("parking")}
+                type="number"
+                min="0"
+                className={inputCls}
+              />
+            </div>
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className={labelCls}>Property Type</label>
+            <input
+              value={f.type}
+              onChange={set("type")}
+              list="rental-type-suggestions"
+              placeholder="e.g. Executive Condominium Unit, Scenic Villa, Commercial Space"
+              className={inputCls}
+            />
+            <datalist id="rental-type-suggestions">
+              {RENTAL_TYPE_OPTIONS.map((t) => (
+                <option key={t} value={t} />
+              ))}
+            </datalist>
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className={labelCls}>
+              Features / Key Note{" "}
+              <span className="normal-case tracking-normal text-slate-500">
+                (e.g. "Corner Unit · High Floor · City Skyline View")
+              </span>
+            </label>
+            <input
+              value={f.lotNote}
+              onChange={set("lotNote")}
+              placeholder="e.g. Fully Furnished · High-Speed Fiber Ready · Balcony"
+              className={inputCls}
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className={labelCls}>Tagline</label>
+            <textarea
+              value={f.tagline}
+              onChange={set("tagline")}
+              rows={2}
+              placeholder="One-line summary for tenant appeal…"
+              className={`${inputCls} resize-none`}
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className={labelCls}>Photo — pick preset or paste custom URL</label>
+            <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
+              {RENTAL_IMAGE_CHOICES.map((url) => (
+                <button
+                  type="button"
+                  key={url}
+                  onClick={() => setF((p) => ({ ...p, img: url, customImg: "" }))}
+                  className={`relative aspect-square overflow-hidden rounded-lg border-2 transition ${
+                    !f.customImg && f.img === url
+                      ? "border-emerald-400 ring-2 ring-emerald-500/40"
+                      : "border-transparent opacity-70 hover:opacity-100"
+                  }`}
+                >
+                  <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />
+                  {!f.customImg && f.img === url && (
+                    <span className="absolute inset-0 grid place-items-center bg-emerald-600/40 text-white">
+                      <i className="fa-solid fa-check text-xs" />
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+            <input
+              value={f.customImg}
+              onChange={set("customImg")}
+              placeholder="…or paste an image URL (https://…)"
+              className={`${inputCls} mt-2.5`}
+            />
+            {f.customImg.trim() && (
+              <img
+                src={f.customImg.trim()}
+                alt="Custom preview"
+                className="mt-2.5 h-28 w-full rounded-lg object-cover"
+              />
+            )}
+          </div>
+        </div>
+
+        <button type="submit" className="btn btn-primary mt-6 w-full sm:w-auto">
+          <i className={`fa-solid ${editingId ? "fa-floppy-disk" : "fa-plus"}`} />
+          {editingId ? "Save Rental Changes" : "Publish Rental Unit"}
+        </button>
+      </form>
+
+      {/* Rental Units Catalog List */}
+      <div className="lg:col-span-2">
+        <div className="glass-panel-deep rounded-2xl p-6">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-display text-xl font-semibold text-white">
+              <i className="fa-solid fa-key mr-2.5 text-emerald-300" />
+              Manage Rentals
+              <span className="ml-2.5 rounded-full bg-emerald-500/20 px-2.5 py-1 align-middle text-xs font-extrabold text-emerald-300">
+                {rentalProperties.length}
+              </span>
+            </h2>
+            {(rentalCustomCount > 0 || rentalDeletedCount > 0) && (
+              <button
+                onClick={() => {
+                  if (confirmReset) {
+                    resetRentalProperties();
+                    setConfirmReset(false);
+                    notify("Rental list restored to defaults.", true);
+                  } else {
+                    setConfirmReset(true);
+                    setTimeout(() => setConfirmReset(false), 3000);
+                  }
+                }}
+                className={`rounded-lg border px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider transition ${
+                  confirmReset
+                    ? "border-amber-400/60 bg-amber-400/15 text-amber-300"
+                    : "border-white/12 text-slate-400 hover:border-emerald-300/50 hover:text-white"
+                }`}
+              >
+                {confirmReset ? "Confirm?" : "Restore defaults"}
+              </button>
+            )}
+          </div>
+
+          <ul className="mt-5 max-h-[560px] space-y-3 overflow-y-auto pr-1">
+            {rentalProperties.map((p) => (
+              <li
+                key={p.id}
+                className="group flex items-center gap-3.5 rounded-xl border border-white/8 bg-white/[0.04] p-2.5 transition hover:border-white/20 hover:bg-white/[0.07]"
+              >
+                <img
+                  src={p.img}
+                  alt=""
+                  loading="lazy"
+                  className="h-14 w-16 shrink-0 rounded-lg object-cover"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[13.5px] font-bold text-white">{p.name}</p>
+                  <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] font-semibold text-slate-400">
+                    <span>
+                      <i className="fa-solid fa-location-dot mr-1 text-emerald-400" />
+                      {p.location}
+                    </span>
+                    <span className="text-emerald-300">{fmtPrice(p.price, true)}</span>
+                    <span className="rounded-full bg-slate-800/80 px-2 py-0.5 text-[9.5px] font-extrabold text-slate-300">
+                      {p.badge}
+                    </span>
+                    {p.id.startsWith("custom-rent-") ? (
+                      <span className="rounded-full bg-emerald-400/20 px-2 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider text-emerald-300">
+                        Added
+                      </span>
+                    ) : rentalEditedIds.includes(p.id) ? (
+                      <span className="rounded-full bg-cyan-400/20 px-2 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider text-cyan-300">
+                        Edited
+                      </span>
+                    ) : null}
+                  </p>
+                </div>
+                <button
+                  onClick={() => startEdit(p)}
+                  aria-label={`Edit ${p.name}`}
+                  title="Edit details"
+                  className={`shrink-0 rounded-lg border px-3 py-2 text-[11px] font-extrabold uppercase tracking-wider transition ${
+                    editingId === p.id
+                      ? "border-emerald-400/70 bg-emerald-500/25 text-emerald-200"
+                      : "border-white/12 text-slate-500 hover:border-emerald-400/50 hover:bg-emerald-400/10 hover:text-emerald-300"
+                  }`}
+                >
+                  <i className="fa-solid fa-pen" />
+                </button>
+                <button
+                  onClick={() => {
+                    if (confirmDelete === p.id) {
+                      deleteRentalProperty(p.id);
+                      setConfirmDelete(null);
+                      if (editingId === p.id) resetForm();
+                      notify(`Rental unit "${p.name}" removed.`, true);
+                    } else {
+                      setConfirmDelete(p.id);
+                      setTimeout(() => setConfirmDelete(null), 2600);
+                    }
+                  }}
+                  aria-label={`Delete ${p.name}`}
+                  className={`shrink-0 rounded-lg border px-3 py-2 text-[11px] font-extrabold uppercase tracking-wider transition ${
+                    confirmDelete === p.id
+                      ? "border-rose-400/60 bg-rose-500/20 text-rose-300"
+                      : "border-white/12 text-slate-500 hover:border-rose-400/50 hover:bg-rose-400/10 hover:text-rose-300"
+                  }`}
+                >
+                  {confirmDelete === p.id ? "Sure?" : <i className="fa-solid fa-trash-can" />}
+                </button>
+              </li>
+            ))}
+            {rentalProperties.length === 0 && (
+              <li className="rounded-xl border border-dashed border-white/15 p-6 text-center text-[13px] text-slate-400">
+                No rental units listed. Add one or restore default listings.
+              </li>
+            )}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─────────────────────────── services tab ─────────────────────────── */
 
 const ICON_CHOICES = [
@@ -1407,9 +1915,320 @@ MESSENGER_QUICK_REPLIES: [
   );
 }
 
+/* ─────────────────────────── backup tab ─────────────────────────── */
+
+function BackupAdmin({ notify }: { notify: (msg: string, ok?: boolean) => void }) {
+  const {
+    properties,
+    rentalProperties,
+    leads,
+    services,
+    about,
+    createBackup,
+    restoreBackup,
+    resetAllToFactory,
+  } = useStore();
+
+  const [confirmFactoryReset, setConfirmFactoryReset] = useState(false);
+  const [jsonText, setJsonText] = useState("");
+  const [importPreview, setImportPreview] = useState<SiteBackupData | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDownloadBackup = () => {
+    const backup = createBackup();
+    const jsonStr = JSON.stringify(backup, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const dateStamp = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `dhn-backup-${dateStamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    notify("Website snapshot backup downloaded successfully.", true);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result as string;
+        const parsed = JSON.parse(text) as SiteBackupData;
+
+        if (!parsed || typeof parsed !== "object") {
+          throw new Error("Invalid JSON structure.");
+        }
+
+        setImportPreview(parsed);
+        setJsonText(text);
+        setImportError(null);
+      } catch (err) {
+        setImportError(
+          `Failed to parse backup file: ${err instanceof Error ? err.message : "Malformed JSON"}`
+        );
+        setImportPreview(null);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleApplyRestore = () => {
+    if (!importPreview) {
+      notify("No valid backup data selected to restore.", false);
+      return;
+    }
+
+    const res = restoreBackup(importPreview);
+    notify(res.message, res.ok);
+    if (res.ok) {
+      setImportPreview(null);
+      setJsonText("");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  return (
+    <div className="animate-card-in space-y-8">
+      {/* Top Banner */}
+      <div className="glass-panel-deep rounded-2xl p-6 sm:p-7 border border-brand-500/20">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="max-w-2xl">
+            <span className="glass-chip px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-brand-300">
+              <i className="fa-solid fa-shield-halved mr-1.5 text-brand-400" />
+              Owner Authenticated Security
+            </span>
+            <h2 className="font-display mt-2.5 text-2xl font-semibold text-white sm:text-3xl">
+              Website Snapshot Backup &amp; Disaster Recovery
+            </h2>
+            <p className="mt-2 text-[13.5px] leading-relaxed text-slate-300">
+              Download complete state snapshots of Dream Home Navigators — including custom for-sale listings, verified rental residences, captured CRM leads, customized services, and About copy. Restoring instantly updates live state across all client pages.
+            </p>
+          </div>
+
+          <button
+            onClick={handleDownloadBackup}
+            className="btn btn-primary !px-5 !py-3 text-[13.5px] font-bold shadow-lg shadow-brand-950/60"
+          >
+            <i className="fa-solid fa-download mr-1 text-sm" />
+            Download Backup Snapshot (.json)
+          </button>
+        </div>
+
+        {/* Current State Summary Chips */}
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 border-t border-white/10 pt-5">
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5 text-center">
+            <div className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+              For-Sale Units
+            </div>
+            <div className="mt-1 font-display text-2xl font-bold text-white">
+              {properties.length}
+            </div>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5 text-center">
+            <div className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+              Rental Units
+            </div>
+            <div className="mt-1 font-display text-2xl font-bold text-emerald-300">
+              {rentalProperties.length}
+            </div>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5 text-center">
+            <div className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+              Captured Leads
+            </div>
+            <div className="mt-1 font-display text-2xl font-bold text-cyan-300">
+              {leads.length}
+            </div>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5 text-center">
+            <div className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+              Core Services
+            </div>
+            <div className="mt-1 font-display text-2xl font-bold text-amber-300">
+              {services.length}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Restore Section & File Picker */}
+      <div className="grid gap-8 lg:grid-cols-2">
+        {/* Import Box */}
+        <div className="glass-panel-deep rounded-2xl p-6 sm:p-7 border border-white/10 flex flex-col justify-between">
+          <div>
+            <h3 className="font-display text-xl font-semibold text-white flex items-center gap-2">
+              <i className="fa-solid fa-cloud-arrow-up text-brand-300" />
+              Restore From File
+            </h3>
+            <p className="mt-1.5 text-[13px] text-slate-400 leading-relaxed">
+              Upload a previously downloaded <code className="rounded bg-white/10 px-1 text-slate-300">.json</code> backup to overwrite or recover your website content.
+            </p>
+
+            <div className="mt-5">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json,application/json"
+                onChange={handleFileChange}
+                className="hidden"
+                id="backup-file-input"
+              />
+              <label
+                htmlFor="backup-file-input"
+                className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-brand-400/40 bg-white/[0.02] p-8 text-center cursor-pointer transition hover:border-brand-400 hover:bg-white/[0.05]"
+              >
+                <i className="fa-solid fa-file-arrow-up text-3xl text-brand-400 mb-2" />
+                <span className="text-sm font-bold text-white">Click to select backup file</span>
+                <span className="mt-1 text-xs text-slate-400">Accepts .json backup files exported from Owner Console</span>
+              </label>
+            </div>
+
+            {importError && (
+              <div className="mt-4 rounded-xl border border-rose-400/40 bg-rose-500/15 p-3.5 text-xs font-semibold text-rose-200 flex items-start gap-2">
+                <i className="fa-solid fa-circle-exclamation mt-0.5" />
+                <span>{importError}</span>
+              </div>
+            )}
+
+            {importPreview && (
+              <div className="mt-4 rounded-xl border border-emerald-400/30 bg-emerald-500/10 p-4">
+                <div className="flex items-center justify-between text-xs font-bold text-emerald-300">
+                  <span>
+                    <i className="fa-solid fa-circle-check mr-1.5" />
+                    Valid backup snapshot ready
+                  </span>
+                  <span className="text-slate-400">
+                    Exported: {fmtDate(importPreview.exportedAt || "")}
+                  </span>
+                </div>
+                <ul className="mt-3 space-y-1 text-xs text-slate-300">
+                  <li>• Custom for-sale listings: <b>{importPreview.customProperties?.length ?? 0}</b></li>
+                  <li>• Custom rental listings: <b>{importPreview.customRentals?.length ?? 0}</b></li>
+                  <li>• Leads log: <b>{importPreview.leads?.length ?? 0}</b> entries</li>
+                  <li>• Services catalog: <b>{importPreview.services?.length ?? 0}</b> packages</li>
+                </ul>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between gap-3">
+            <button
+              onClick={handleApplyRestore}
+              disabled={!importPreview}
+              className="btn btn-primary !px-5 !py-2.5 text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <i className="fa-solid fa-rotate-left mr-1.5" />
+              Apply &amp; Restore Live Site
+            </button>
+            {importPreview && (
+              <button
+                onClick={() => {
+                  setImportPreview(null);
+                  setJsonText("");
+                  if (fileInputRef.current) fileInputRef.current.value = "";
+                }}
+                className="text-xs font-semibold text-slate-400 hover:text-white"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Manual Paste / Inspect Snapshot */}
+        <div className="glass-panel-deep rounded-2xl p-6 sm:p-7 border border-white/10 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <h3 className="font-display text-xl font-semibold text-white flex items-center gap-2">
+                <i className="fa-solid fa-code text-cyan-300" />
+                Raw JSON Inspector
+              </h3>
+              {jsonText && <CopyBtn text={jsonText} />}
+            </div>
+            <p className="mt-1.5 text-[13px] text-slate-400 leading-relaxed">
+              Directly view or paste backup JSON payload if transferring between browsers without downloading files.
+            </p>
+
+            <textarea
+              value={jsonText}
+              onChange={(e) => {
+                const text = e.target.value;
+                setJsonText(text);
+                if (!text.trim()) {
+                  setImportPreview(null);
+                  setImportError(null);
+                  return;
+                }
+                try {
+                  const parsed = JSON.parse(text) as SiteBackupData;
+                  setImportPreview(parsed);
+                  setImportError(null);
+                } catch {
+                  setImportError("Invalid JSON entered in raw inspector.");
+                  setImportPreview(null);
+                }
+              }}
+              rows={8}
+              placeholder="Paste raw backup JSON text here to validate and restore…"
+              className="mt-4 w-full rounded-xl border border-white/10 bg-ink-950/80 p-3.5 font-mono text-[12px] text-slate-300 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+            />
+          </div>
+
+          <div className="mt-4 text-[11px] text-slate-500 flex items-center gap-2">
+            <i className="fa-solid fa-circle-info text-slate-400" />
+            <span>Encrypted local storage schema with validation safeguards.</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Danger Zone: Factory Reset */}
+      <div className="rounded-2xl border border-rose-500/30 bg-rose-500/[0.06] p-6 sm:p-7">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h3 className="font-display text-lg font-semibold text-rose-200 flex items-center gap-2">
+              <i className="fa-solid fa-triangle-exclamation text-rose-400" />
+              Danger Zone: Factory Reset
+            </h3>
+            <p className="mt-1 text-[13px] text-rose-200/80 max-w-xl">
+              Purges all custom property listings, custom rental listings, local leads, and custom service/about edits, returning the entire website to pristine factory default data.
+            </p>
+          </div>
+
+          <button
+            onClick={() => {
+              if (confirmFactoryReset) {
+                resetAllToFactory();
+                setConfirmFactoryReset(false);
+                notify("All website content has been reset to factory defaults.", true);
+              } else {
+                setConfirmFactoryReset(true);
+                setTimeout(() => setConfirmFactoryReset(false), 4000);
+              }
+            }}
+            className={`btn !px-4 !py-2.5 text-xs font-bold transition ${
+              confirmFactoryReset
+                ? "bg-rose-600 text-white hover:bg-rose-700 shadow-lg shadow-rose-950/80"
+                : "border border-rose-400/50 bg-rose-500/20 text-rose-300 hover:bg-rose-500/30"
+            }`}
+          >
+            <i className="fa-solid fa-trash-can mr-1.5" />
+            {confirmFactoryReset ? "Click to Confirm Factory Reset" : "Reset Everything to Factory Defaults"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─────────────────────────── page shell ─────────────────────────── */
 
-type Tab = "dashboard" | "properties" | "services" | "about" | "setup";
+type Tab = "dashboard" | "properties" | "rentals" | "services" | "about" | "backup" | "setup";
 
 export default function Admin({ exit }: { exit: () => void }) {
   const [authed, setAuthed] = useState(() => sessionStorage.getItem("dhn_admin") === "1");
@@ -1435,8 +2254,10 @@ export default function Admin({ exit }: { exit: () => void }) {
   const tabs: { id: Tab; label: string; icon: string }[] = [
     { id: "dashboard", label: "Leads Dashboard", icon: "fa-gauge-high" },
     { id: "properties", label: "Properties", icon: "fa-house" },
+    { id: "rentals", label: "Rental Units", icon: "fa-key" },
     { id: "services", label: "Services", icon: "fa-briefcase" },
     { id: "about", label: "About Page", icon: "fa-address-card" },
+    { id: "backup", label: "Website Backup", icon: "fa-database" },
     { id: "setup", label: "Setup Guide", icon: "fa-plug" },
   ];
 
@@ -1463,7 +2284,7 @@ export default function Admin({ exit }: { exit: () => void }) {
             Navigator Console
           </h1>
           <p className="mt-2 max-w-xl text-[13.5px] leading-relaxed text-slate-400">
-            Manage listings, the Home featured unit, services, About copy, and the lead CRM — without touching code.
+            Manage listings, rental units, the Home featured unit, services, About copy, full auth backups, and the lead CRM — without touching code.
           </p>
         </div>
         <div className="flex gap-2.5">
@@ -1504,10 +2325,13 @@ export default function Admin({ exit }: { exit: () => void }) {
       <div className="mt-7">
         {tab === "dashboard" && <Dashboard notify={notify} />}
         {tab === "properties" && <PropertiesAdmin notify={notify} />}
+        {tab === "rentals" && <RentalsAdmin notify={notify} />}
         {tab === "services" && <ServicesAdmin notify={notify} />}
         {tab === "about" && <AboutAdmin notify={notify} />}
+        {tab === "backup" && <BackupAdmin notify={notify} />}
         {tab === "setup" && <SetupGuide />}
       </div>
     </section>
   );
 }
+

@@ -4,7 +4,8 @@ import { Logo } from "../ui";
 
 const LINKS: { id: Page; label: string }[] = [
   { id: "home", label: "Home" },
-  { id: "properties", label: "Properties" },
+  { id: "properties", label: "For Sale" },
+  { id: "rentals", label: "Rentals" },
   { id: "services", label: "Services" },
   { id: "about", label: "About Us" },
   { id: "contact", label: "Contact" },

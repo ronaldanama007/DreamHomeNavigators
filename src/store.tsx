@@ -12,6 +12,7 @@ import {
   ABOUT_SEED,
   Property,
   PROPERTIES,
+  RENTAL_PROPERTIES,
   ServiceItem,
   SERVICE_SEED,
 } from "./data";
@@ -40,10 +41,26 @@ export interface Lead {
 
 const LS_CUSTOM = "dhn_custom_properties_v3";
 const LS_DELETED = "dhn_deleted_properties_v3";
+const LS_CUSTOM_RENTALS = "dhn_custom_rentals_v1";
+const LS_DELETED_RENTALS = "dhn_deleted_rentals_v1";
 const LS_LEADS = "dhn_leads_v1";
 const LS_SERVICES = "dhn_services_v2";
 const LS_ABOUT = "dhn_about_v1";
 const LS_FEATURED = "dhn_featured_v1";
+
+export interface SiteBackupData {
+  version: string;
+  exportedAt: string;
+  source: string;
+  customProperties: Property[];
+  deletedProperties: string[];
+  customRentals: Property[];
+  deletedRentals: string[];
+  leads: Lead[];
+  services: ServiceItem[];
+  about: AboutContent;
+  featuredId: string | null;
+}
 
 function read<T>(key: string, fallback: T): T {
   try {
@@ -63,14 +80,22 @@ function write(key: string, value: unknown) {
 
 interface StoreValue {
   properties: Property[];
+  rentalProperties: Property[];
   customCount: number;
   deletedCount: number;
+  rentalCustomCount: number;
+  rentalDeletedCount: number;
   /** ids of default listings that were edited via the console (stored as overrides) */
   editedIds: string[];
+  rentalEditedIds: string[];
   addProperty: (p: Omit<Property, "id">) => Property;
   updateProperty: (p: Property) => void;
   deleteProperty: (id: string) => void;
   resetProperties: () => void;
+  addRentalProperty: (p: Omit<Property, "id">) => Property;
+  updateRentalProperty: (p: Property) => void;
+  deleteRentalProperty: (id: string) => void;
+  resetRentalProperties: () => void;
   featuredId: string | null;
   setFeatured: (id: string | null) => void;
   leads: Lead[];
@@ -86,6 +111,9 @@ interface StoreValue {
   about: AboutContent;
   updateAbout: (a: AboutContent) => void;
   resetAbout: () => void;
+  createBackup: () => SiteBackupData;
+  restoreBackup: (data: SiteBackupData) => { ok: boolean; message: string };
+  resetAllToFactory: () => void;
 }
 
 const StoreCtx = createContext<StoreValue | null>(null);
@@ -93,6 +121,8 @@ const StoreCtx = createContext<StoreValue | null>(null);
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [custom, setCustom] = useState<Property[]>(() => read(LS_CUSTOM, []));
   const [deleted, setDeleted] = useState<string[]>(() => read(LS_DELETED, []));
+  const [customRentals, setCustomRentals] = useState<Property[]>(() => read(LS_CUSTOM_RENTALS, []));
+  const [deletedRentals, setDeletedRentals] = useState<string[]>(() => read(LS_DELETED_RENTALS, []));
   const [leads, setLeads] = useState<Lead[]>(() => read(LS_LEADS, []));
   const [services, setServices] = useState<ServiceItem[]>(() =>
     read(LS_SERVICES, SERVICE_SEED)
@@ -104,6 +134,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => write(LS_CUSTOM, custom), [custom]);
   useEffect(() => write(LS_DELETED, deleted), [deleted]);
+  useEffect(() => write(LS_CUSTOM_RENTALS, customRentals), [customRentals]);
+  useEffect(() => write(LS_DELETED_RENTALS, deletedRentals), [deletedRentals]);
   useEffect(() => write(LS_LEADS, leads), [leads]);
   useEffect(() => write(LS_SERVICES, services), [services]);
   useEffect(() => write(LS_ABOUT, about), [about]);
@@ -117,16 +149,31 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [deleted, custom]
   );
 
+  const rentalProperties = useMemo(
+    () => [
+      ...RENTAL_PROPERTIES.filter((p) => !deletedRentals.includes(p.id)),
+      ...customRentals,
+    ],
+    [deletedRentals, customRentals]
+  );
+
   const value: StoreValue = {
     properties,
+    rentalProperties,
     customCount: custom.length,
     deletedCount: deleted.length,
+    rentalCustomCount: customRentals.length,
+    rentalDeletedCount: deletedRentals.length,
     editedIds: useMemo(
       () => custom.filter((p) => !p.id.startsWith("custom-")).map((p) => p.id),
       [custom]
     ),
+    rentalEditedIds: useMemo(
+      () => customRentals.filter((p) => !p.id.startsWith("custom-rent-")).map((p) => p.id),
+      [customRentals]
+    ),
     addProperty: (p) => {
-      const created: Property = { ...p, id: `custom-${uuid().slice(0, 8)}` };
+      const created: Property = { ...p, id: `custom-${uuid().slice(0, 8)}`, category: "sale" };
       setCustom((c) => [created, ...c]);
       return created;
     },
@@ -151,6 +198,35 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setCustom([]);
       setDeleted([]);
       setFeaturedId(null);
+    },
+    addRentalProperty: (p) => {
+      const created: Property = {
+        ...p,
+        id: `custom-rent-${uuid().slice(0, 8)}`,
+        category: "rental",
+        isRental: true,
+      };
+      setCustomRentals((c) => [created, ...c]);
+      return created;
+    },
+    updateRentalProperty: (p) => {
+      const enriched: Property = { ...p, category: "rental", isRental: true };
+      if (p.id.startsWith("custom-rent-")) {
+        setCustomRentals((c) => c.map((x) => (x.id === p.id ? enriched : x)));
+      } else {
+        setDeletedRentals((d) => (d.includes(p.id) ? d : [...d, p.id]));
+        setCustomRentals((c) => [...c.filter((x) => x.id !== p.id), enriched]);
+      }
+    },
+    deleteRentalProperty: (id) => {
+      setCustomRentals((c) => c.filter((p) => p.id !== id));
+      if (!id.startsWith("custom-rent-")) {
+        setDeletedRentals((d) => (d.includes(id) ? d : [...d, id]));
+      }
+    },
+    resetRentalProperties: () => {
+      setCustomRentals([]);
+      setDeletedRentals([]);
     },
     featuredId,
     setFeatured: (id) => setFeaturedId(id),
@@ -189,6 +265,55 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     about,
     updateAbout: (a) => setAbout(a),
     resetAbout: () => setAbout(ABOUT_SEED),
+    /* ── Global Website Auth Backup & Restore ── */
+    createBackup: (): SiteBackupData => ({
+      version: "1.0",
+      exportedAt: new Date().toISOString(),
+      source: "Dream Home Navigators Owner Console",
+      customProperties: custom,
+      deletedProperties: deleted,
+      customRentals: customRentals,
+      deletedRentals: deletedRentals,
+      leads,
+      services,
+      about,
+      featuredId,
+    }),
+    restoreBackup: (data: SiteBackupData) => {
+      try {
+        if (!data || typeof data !== "object") {
+          return { ok: false, message: "Invalid backup data format." };
+        }
+        if (Array.isArray(data.customProperties)) setCustom(data.customProperties);
+        if (Array.isArray(data.deletedProperties)) setDeleted(data.deletedProperties);
+        if (Array.isArray(data.customRentals)) setCustomRentals(data.customRentals);
+        if (Array.isArray(data.deletedRentals)) setDeletedRentals(data.deletedRentals);
+        if (Array.isArray(data.leads)) setLeads(data.leads);
+        if (Array.isArray(data.services)) setServices(data.services);
+        if (data.about && typeof data.about === "object") setAbout(data.about);
+        if (data.featuredId !== undefined) setFeaturedId(data.featuredId);
+
+        return {
+          ok: true,
+          message: `Backup restored successfully (exported: ${new Date(data.exportedAt || Date.now()).toLocaleDateString()}).`,
+        };
+      } catch (err) {
+        return {
+          ok: false,
+          message: err instanceof Error ? err.message : "Failed to restore backup.",
+        };
+      }
+    },
+    resetAllToFactory: () => {
+      setCustom([]);
+      setDeleted([]);
+      setCustomRentals([]);
+      setDeletedRentals([]);
+      setLeads([]);
+      setServices(SERVICE_SEED);
+      setAbout(ABOUT_SEED);
+      setFeaturedId(null);
+    },
   };
 
   return <StoreCtx.Provider value={value}>{children}</StoreCtx.Provider>;

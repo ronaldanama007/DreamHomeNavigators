@@ -6,6 +6,7 @@ import Footer from "./components/Footer";
 import MessengerFab from "./components/MessengerFab";
 import Home from "./pages/Home";
 import Properties from "./pages/Properties";
+import Rentals from "./pages/Rentals";
 import Services from "./pages/Services";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -16,6 +17,7 @@ import { CONFIG } from "./config";
 export default function App() {
   const [page, setPage] = useState<Page>("home");
   const [locFilter, setLocFilter] = useState<string>("All");
+  const [rentalLocFilter, setRentalLocFilter] = useState<string>("All");
   const [prefill, setPrefill] = useState<Prefill | null>(null);
 
   /* ── Hidden owner route ────────────────────────────────────────────────────
@@ -71,9 +73,13 @@ export default function App() {
       page === "home"
         ? "Dream Home Navigators — Find the Right Property. Build the Future You Envision."
         : `${
-            { properties: "Properties", services: "Services", about: "About Us", contact: "Contact" }[
-              page as Exclude<Page, "home">
-            ]
+            {
+              properties: "Properties For Sale",
+              rentals: "Rental Properties",
+              services: "Services",
+              about: "About Us",
+              contact: "Contact",
+            }[page as Exclude<Page, "home">]
           } · Dream Home Navigators`;
   }, [page, ownerMode]);
 
@@ -148,6 +154,9 @@ export default function App() {
         {page === "home" && <Home go={go} inquire={inquire} browseLocation={browseLocation} />}
         {page === "properties" && (
           <Properties filter={locFilter} onFilter={setLocFilter} inquire={inquire} go={go} />
+        )}
+        {page === "rentals" && (
+          <Rentals filter={rentalLocFilter} onFilter={setRentalLocFilter} inquire={inquire} go={go} />
         )}
         {page === "services" && <Services go={go} />}
         {page === "about" && <About go={go} inquire={inquire} />}
