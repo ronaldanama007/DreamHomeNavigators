@@ -1,5 +1,4 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { CONFIG } from "../config";
 import { BUDGETS, CONTACT, LOCATIONS, Page, Prefill } from "../data";
 import { useStore } from "../store";
 import { prefersReduced, Reveal, SectionHead } from "../ui";
@@ -69,33 +68,7 @@ export default function Contact({
     if (status === "loading") return;
     setStatus("loading");
 
-    const payload = {
-      ...form,
-      source: "Dream Home Navigators Website",
-      submittedAt: new Date().toISOString(),
-    };
-
-    /* CRM: POST to Google Apps Script (no-cors, text/plain avoids preflight) */
-    let sheetConfigured = false;
-    if (CONFIG.GOOGLE_SCRIPT_URL) {
-      sheetConfigured = true;
-      try {
-        await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload),
-        });
-      } catch {
-        /* no-cors responses are opaque; treat send as attempted */
-      }
-    } else {
-      await new Promise((r) => setTimeout(r, 900)); // demo pacing while Script URL is unset
-      console.info("[DHN CRM · demo] Lead captured:", payload);
-    }
-
-    /* Always log locally too → Admin → Leads Dashboard */
-    addLead({
+    const { ok } = await addLead({
       name: form.name,
       phone: form.phone,
       email: form.email,
@@ -104,8 +77,13 @@ export default function Contact({
       propertyInterest: form.propertyInterest,
       message: form.message,
       source: "Website Contact Form",
-      synced: sheetConfigured,
     });
+
+    if (!ok) {
+      // Insert failed (offline / misconfig). The store queued it locally so it
+      // is not lost; still show the user a soft success so they aren't blocked.
+      console.warn("[DHN] Lead insert failed; queued locally.");
+    }
 
     setStatus("success");
     window.setTimeout(() => {
