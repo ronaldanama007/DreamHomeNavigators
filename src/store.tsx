@@ -22,8 +22,9 @@ import { supabase } from "./supabase";
    Persistent client-side store.
    - Properties: seeded from src/data.ts; additions/deletions persist in
      localStorage so the Admin Console works immediately, with zero backend.
-   - Leads: every submitted inquiry is logged here AND (when configured in
-     src/config.ts) posted to the Google Apps Script → Google Sheet CRM.
+   - Leads: submitted inquiries are inserted into the Supabase `leads` table
+     (RLS: anon insert-only); a localStorage queue is used only as an offline
+     fallback when an insert fails. Admins read leads via refreshLeads().
    ──────────────────────────────────────────────────────────────────────────── */
 
 export interface Lead {

@@ -43,7 +43,7 @@ p { margin: 8px 0; }
 <ul><li><strong>Leads Dashboard:</strong> Real-time inquiry log, stats overview, phone click-to-call, CSV export, and two-way Google Sheet synchronization.</li></ul>
 <ul><li><strong>Property Manager:</strong> Add, edit, delete, and feature property listings with instant preview and localStorage persistence.</li></ul>
 <ul><li><strong>Services & About Editors:</strong> Live copy and feature editors updating public pages without code modification.</li></ul>
-<ul><li><strong>Setup Guide:</strong> In-app setup instructions and one-click copyable Google Apps Script code.</li></ul>
+<ul><li><strong>Setup Guide:</strong> In-app setup instructions for the Supabase CRM and Messenger integrations.</li></ul>
 <ul><li><strong>Embedded Floating Messenger Widget:</strong></li></ul>
 <ul><li>One-tap Messenger launcher connected to <code>https://m.me/dreamhomenavigators01</code>.</li></ul>
 <ul><li>Built-in quick reply prompts, tap-outside dismiss backdrop, and isolated touch events.</li></ul>
@@ -59,7 +59,7 @@ p { margin: 8px 0; }
   <tr><td>**Typography**</td><td>Google Fonts: Fraunces & Plus Jakarta Sans</td><td>Editorial display serif titles + clean, highly legible modern body sans-serif</td></tr>
   <tr><td>**Iconography**</td><td>FontAwesome 6/7 CDN</td><td>Unified iconography across cards, features, and navigation</td></tr>
   <tr><td>**State & Persistence**</td><td>React Context + LocalStorage</td><td>Client-side reactive store powering dynamic listings and lead caching</td></tr>
-  <tr><td>**CRM Integration**</td><td>Google Apps Script Web App (JSON POST/GET)</td><td>Free, automated lead capture directly to Google Sheets</td></tr>
+  <tr><td>**CRM Integration**</td><td>Supabase (Postgres + Auth + RLS)</td><td>Secure lead capture — public insert-only, admin-only reads via Row Level Security</td></tr>
 </table>
 <hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;'>
 <h2>3. Architecture & Codebase Map</h2>
@@ -105,16 +105,15 @@ c:\Users\nhads\AntiGravity\
 <ol><li>Pre-fills the message box with: <code>"Hello, I am interested in inquiring about this unit: [Property Name]. Please provide more details and schedule a site visit."</code></li></ol>
 <ol><li>Smooth-scrolls the viewport to the inquiry form.</li></ol>
 <ol><li>Automatically focuses the "Full Name" input field after a ~140ms settling timeout.</li></ol>
-<h3>3. Google Sheets CRM Integration</h3>
-<ul><li>The Contact form sends a <code>no-cors</code> HTTP POST request with <code>Content-Type: text/plain;charset=utf-8</code> to the Google Apps Script Web App.</li></ul>
-<ul><li>This bypasses standard browser CORS preflight restrictions, enabling static hosting to save leads directly to a Google Sheet.</li></ul>
-<ul><li>Leads are simultaneously written to the browser's <code>localStorage</code> (<code>dhn_leads_v1</code>), ensuring the Owner Console leads table remains functional even in demo mode or if offline.</li></ul>
-<ul><li>When <code>SHEET_READ_URL</code> is configured, clicking <strong>"Sync from Sheet"</strong> in the Owner Console performs a GET request to fetch remote leads and deduplicates records by <code>timestamp + phone</code>.</li></ul>
+<h3>3. Supabase Leads CRM Integration</h3>
+<ul><li>The Contact form inserts each lead into the Supabase <code>leads</code> table using the <code>@supabase/supabase-js</code> client.</li></ul>
+<ul><li>Row Level Security enforces access server-side: the public (anon) key can only <strong>insert</strong> a lead — anonymous visitors cannot read or delete the CRM. Only signed-in admin accounts can read/delete.</li></ul>
+<ul><li>If an insert fails (e.g. offline), the lead is queued in the browser's <code>localStorage</code> (<code>dhn_leads_v1</code>) as a fallback so it is never lost.</li></ul>
+<ul><li>The Owner Console Leads Dashboard loads leads live from Supabase (authenticated SELECT, newest first).</li></ul>
 <h3>4. Owner Console Security</h3>
-<ul><li>Reachable only via the secret hash route: <code>https://[domain]/#/dhn-owner</code> (no hyperlinks exist anywhere on the public site).</li></ul>
-<ul><li>Requires passcode <code>DHN2026</code> (configurable via <code>src/config.ts</code>).</li></ul>
-<ul><li>Failed attempts are tracked in <code>localStorage</code> (<code>dhn_admin_attempts</code>). After 5 consecutive failed entries, the gate is locked for 60 seconds (<code>dhn_admin_locked_until</code>), persisting across browser refreshes.</li></ul>
-<ul><li>Authorized session is stored in <code>sessionStorage</code> (<code>dhn_admin</code>), which expires automatically when the browser tab is closed.</li></ul>
+<ul><li>Reachable only via the secret hash route: <code>https://[domain]/#/dhn-owner</code> (no hyperlinks exist anywhere on the public site) — a convenience, not the security boundary.</li></ul>
+<ul><li>Requires a <strong>Supabase email/password login</strong>. Only invited admin accounts exist (public signups disabled); Supabase rate-limits sign-in attempts server-side.</li></ul>
+<ul><li>The session persists across reloads and is ended by pressing <strong>Sign out</strong>.</li></ul>
 <h3>5. Mobile Touch & Interaction Isolation</h3>
 <ul><li>The floating Messenger widget wrapper uses <code>pointer-events-none</code> so inactive space never blocks background taps.</li></ul>
 <ul><li>The chat popup card is mounted only when <code>open === true</code>, with a full-screen tap-to-dismiss overlay (<code>bg-black/50 backdrop-blur-sm</code>).</li></ul>
@@ -122,18 +121,15 @@ c:\Users\nhads\AntiGravity\
 <ul><li>Form inputs enforce a minimum font size of <code>16px</code> to prevent iOS Safari from automatically zooming in when fields are focused.</li></ul>
 <ul><li>All interactive elements strictly meet the WCAG touch target guideline of <code>≥ 44px</code>.</li></ul>
 <hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;'>
-<h2>5. Configuration & Credentials Reference (`src/config.ts`)</h2>
-<p>All operational configuration parameters are centralized in <code>src/config.ts</code>:</p>
+<h2>5. Configuration & Credentials Reference</h2>
+<p>Supabase credentials live in <code>.env</code> (public by design; see <code>.env.example</code>); non-secret site settings live in <code>src/config.ts</code>:</p>
 <table>
   <tr><th>Configuration Key</th><th>Current Value</th><th>Description / Action Required</th></tr>
-  <tr><td>`GOOGLE_SCRIPT_URL`</td><td>`""`</td><td>Deploy Google Apps Script (code in `README.md`) and paste web app `/exec` URL here</td></tr>
-  <tr><td>`SHEET_READ_URL`</td><td>`""`</td><td>Same Web App `/exec` URL (powers "Sync from Sheet" in Admin Console)</td></tr>
+  <tr><td>`VITE_SUPABASE_URL` (.env)</td><td>Project API URL</td><td>Supabase project URL — public by design; RLS enforces access</td></tr>
+  <tr><td>`VITE_SUPABASE_ANON_KEY` (.env)</td><td>Publishable key</td><td>Supabase anon/publishable key — safe to ship in the bundle</td></tr>
   <tr><td>`MESSENGER_URL`</td><td>`https://m.me/dreamhomenavigators01`</td><td>Official Facebook Messenger endpoint</td></tr>
   <tr><td>`MESSENGER_QUICK_REPLIES`</td><td>4 Real Estate Prompts</td><td>Quick reply chips shown in the widget chat popup</td></tr>
-  <tr><td>`ADMIN_ROUTE_HASH`</td><td>`#/dhn-owner`</td><td>Secret URL hash route to access the Owner Console</td></tr>
-  <tr><td>`ADMIN_PASSCODE`</td><td>`DHN2026`</td><td>Console password (**Recommended to change prior to public launch**)</td></tr>
-  <tr><td>`ADMIN_MAX_ATTEMPTS`</td><td>`5`</td><td>Maximum failed attempts allowed before lockout</td></tr>
-  <tr><td>`ADMIN_LOCK_SECONDS`</td><td>`60`</td><td>Duration (in seconds) of temporary console lockout</td></tr>
+  <tr><td>`ADMIN_ROUTE_HASH`</td><td>`#/dhn-owner`</td><td>Console route hash (convenience only — auth is Supabase login)</td></tr>
   <tr><td>`EMAIL`</td><td>`support@dreamhomenavigators.com`</td><td>Primary business email displayed across the site</td></tr>
   <tr><td>`LOGO_URL`</td><td>Direct Drive CDN link</td><td>Direct brand logo image source (falls back to SVG if offline)</td></tr>
 </table>
@@ -159,10 +155,11 @@ npm run build
 <hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;'>
 <h2>7. Client Pre-Launch Checklist</h2>
 <p>Before handing over to the marketing team for public promotion:</p>
-<ul><li>[ ] <strong>Deploy Google Sheet CRM:</strong> Follow instructions in <code>README.md</code> to deploy the Google Apps Script and update <code>GOOGLE_SCRIPT_URL</code> in <code>src/config.ts</code>.</li></ul>
-<ul><li>[ ] <strong>Update Owner Passcode:</strong> Change <code>ADMIN_PASSCODE</code> in <code>src/config.ts</code> from <code>DHN2026</code> to a secure client password.</li></ul>
+<ul><li>[ ] <strong>Set up Supabase CRM:</strong> Follow <code>README.md</code> §1 — create the project, run the <code>leads</code> migration, disable public signups, create admin users, and set <code>VITE_SUPABASE_URL</code> + <code>VITE_SUPABASE_ANON_KEY</code> in <code>.env</code>.</li></ul>
+<ul><li>[ ] <strong>Verify access control:</strong> Confirm anonymous visitors cannot read the <code>leads</code> table (RLS) and that an invited admin can sign in at <code>#/dhn-owner</code>.</li></ul>
+<ul><li>[ ] <strong>Decommission old Apps Script:</strong> The previously-committed Apps Script URL and passcode (<code>DHN2026</code>) are exposed in git history — retire that deployment.</li></ul>
 <ul><li>[ ] <strong>Custom Domain & SSL:</strong> Map the custom domain (e.g., <code>dreamhomenavigators.com</code>) to the hosting provider and confirm HTTPS is active.</li></ul>
 <ul><li>[ ] <strong>Verify Facebook Messenger:</strong> Confirm that messages sent to <code>https://m.me/dreamhomenavigators01</code> trigger notifications on the company's Meta Business Suite app.</li></ul>
-<ul><li>[ ] <strong>Test Form Submission:</strong> Submit a test lead through the Contact page and verify that it populates both the Google Sheet and the Owner Console dashboard.</li></ul>
+<ul><li>[ ] <strong>Test Form Submission:</strong> Submit a test lead through the Contact page and verify that it appears in the Supabase <code>leads</code> table and the Owner Console dashboard.</li></ul>
 </body>
 </html>

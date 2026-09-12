@@ -7,7 +7,7 @@
 
 A 5-page real-estate brokerage website for **Dream Home Navigators** (Philippines),
 delivered as a client rebuild: Home, Properties, Services, About Us, Contact —
-plus a **hidden, passcode-locked Owner Console** (leads dashboard, property manager,
+plus a **hidden, Supabase-authenticated Owner Console** (leads dashboard, property manager,
 services editor, about-page editor, setup guide).
 
 Client requirements already satisfied (do not regress):
@@ -15,8 +15,8 @@ Client requirements already satisfied (do not regress):
 - Interactive location filtering: Iloilo, Tagaytay, Cavite, Antipolo, Binondo
 - One-click "Inquire About This Unit" → navigates to Contact, pre-fills
   `propertyInterest` + message template, smooth-scrolls, focuses Full Name
-- Lead form → Google Sheet CRM via Apps Script (`fetch`, `mode:"no-cors"`,
-  `Content-Type: text/plain` to avoid CORS preflight) + local lead log
+- Lead form → Supabase `leads` table (RLS: anon insert-only), with a localStorage
+  fallback queue if the insert fails offline
 - Floating Messenger widget → `https://m.me/dreamhomenavigators01` with quick replies
 - Owner console hidden from the public site (secret hash route, no links anywhere)
 
@@ -25,8 +25,9 @@ Client requirements already satisfied (do not regress):
 - React 19 + Vite 6 + TypeScript (strict), Tailwind CSS **v4 (CSS-first)**
 - Fonts: Fraunces (display serif) + Plus Jakarta Sans (body) via Google Fonts in `index.html`
 - Icons: FontAwesome 7 CDN in `index.html` (solid/regular/brands prefixes)
-- Only runtime dep: `uuid`
+- Runtime deps: `uuid`, `@supabase/supabase-js`
 - `npm install` → `npm run dev` / `npm run build` (output: `dist/`, single-page static deploy)
+- Requires `.env` with `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` (see `.env.example`)
 - Never edit `package.json` / `vite.config.ts` by hand; use the package tooling.
 
 ## 3. Architecture map
@@ -37,7 +38,9 @@ src/main.tsx          Mounts <App/>
 src/index.css         Tailwind v4: @theme tokens (brand/ink/brass palettes, fonts,
                       animations) + @layer components (glass-panel, glass-panel-deep,
                       glass-panel-light, glass-chip, .btn-*, .field, .reveal, keyframes)
-src/config.ts         ALL client-configurable values (see §7) — edit here first
+src/config.ts         Non-secret client values (see §7); Supabase creds are in .env
+src/supabase.ts       Supabase client singleton (reads VITE_SUPABASE_* from .env)
+supabase/migrations/  SQL: leads table + RLS policies (anon insert, auth read/delete)
 src/data.ts           Seeds/content: Property[], SERVICE_SEED, ABOUT_SEED, TEAM, STATS,
                       TESTIMONIALS, LOCATIONS, BUDGETS, CONTACT (reads config), fmtPrice()
 src/store.tsx         StoreProvider + useStore(): the editable state layer (see §6)
@@ -75,31 +78,40 @@ README.md             Client-facing setup guide (Sheet CRM, Messenger, console)
 
 ## 6. State layer (`src/store.tsx`)
 
-localStorage-backed; seeds come from `data.ts`. Keys:
+Site **content** is localStorage-backed (seeds from `data.ts`). Keys:
 `dhn_custom_properties_v3`, `dhn_deleted_properties_v3`, `dhn_custom_rentals_v1`,
-`dhn_deleted_rentals_v1`, `dhn_leads_v1`, `dhn_services_v2`, `dhn_about_v1`, `dhn_featured_v1`.
+`dhn_deleted_rentals_v1`, `dhn_services_v2`, `dhn_about_v1`, `dhn_featured_v1`.
+
+**Leads** are Supabase-backed, not localStorage: `refreshLeads()` (authenticated SELECT),
+`addLead()` (anon INSERT + `dhn_leads_v1` fallback on failure), `deleteLead()`, `clearLeads()`.
+The `Lead.timestamp` field maps from the DB `created_at` column.
 
 - `properties` = PROPERTIES minus deleted, plus custom/edited overrides.
 - `rentalProperties` = RENTAL_PROPERTIES minus deleted rentals, plus custom/edited rental overrides.
 - `editedIds` and `rentalEditedIds` drive the "Edited" chips in Owner Console.
 - `featuredId` drives the Home hero card (fallback: first `badge==="Featured"`, then first listing).
 - Services & About content are **fully store-driven** (Home previews read the store too).
-- Leads: `addLead` (form), `importLeads` (Sheet sync, deduped by timestamp|phone), CSV export.
-- **Website Auth Backup & Restore**: `createBackup()`, `restoreBackup()`, `resetAllToFactory()` (with JSON snapshot download, file validation restore, raw JSON inspector, and factory reset in Owner Console).
+- Leads (Supabase): `refreshLeads()` (auth SELECT), `addLead()` (anon INSERT), `deleteLead()`, `clearLeads()`, plus CSV export in the Dashboard.
+- **Website Auth Backup & Restore** (content only, not leads): `createBackup()`, `restoreBackup()`, `resetAllToFactory()` (JSON snapshot download, file-validation restore, raw JSON inspector, factory reset in Owner Console).
 - When adding new editable content: seed in `data.ts`, state + LS key in `store.tsx`,
   read via `useStore()` in the page, add an editor tab in `pages/Admin.tsx`.
 
-## 7. Config reference (`src/config.ts`)
+## 7. Config reference
+
+**Supabase creds — `.env`** (public by design; RLS enforces access):
+
+| Key | Purpose |
+| --- | --- |
+| `VITE_SUPABASE_URL` | Supabase project API URL |
+| `VITE_SUPABASE_ANON_KEY` | Supabase publishable (anon) key |
+
+**Non-secret site config — `src/config.ts`:**
 
 | Key | Current value / purpose |
 | --- | --- |
-| `GOOGLE_SCRIPT_URL` | `""` until client deploys Apps Script (POST leads) |
-| `SHEET_READ_URL` | Same URL (GET → JSON for Dashboard "Sync from Sheet") |
 | `MESSENGER_URL` | `https://m.me/dreamhomenavigators01` |
 | `MESSENGER_QUICK_REPLIES` | 4 prompts shown in the widget chat card |
-| `ADMIN_ROUTE_HASH` | `#/dhn-owner` — secret console route |
-| `ADMIN_PASSCODE` | `DHN2026` — **must change before launch** |
-| `ADMIN_MAX_ATTEMPTS` / `ADMIN_LOCK_SECONDS` | 5 / 60 — lockout persists via LS |
+| `ADMIN_ROUTE_HASH` | `#/dhn-owner` — console route (convenience, not the auth boundary) |
 | `EMAIL` | `support@dreamhomenavigators.com` |
 | `LOGO_URL` | Drive direct link `lh3.googleusercontent.com/d/1sYTdg6Izwy6pxVxTlgifZ3vewRuWEiwa`; `Logo` falls back to the inline compass SVG on error |
 
@@ -135,12 +147,13 @@ Phone number lives in `data.ts` → `CONTACT` (`0921 603 0693`, href `tel:+63921
 
 ## 10. Outstanding client-side items (tell the client, don't "fix" in code)
 
-- Deploy the Apps Script (full code in `README.md` §1 and console Setup Guide) and set
-  `GOOGLE_SCRIPT_URL` + `SHEET_READ_URL`.
+- Create the Supabase project, run the `leads` migration (`supabase/migrations`),
+  disable public signups, create admin users, and set `VITE_SUPABASE_URL` +
+  `VITE_SUPABASE_ANON_KEY` in `.env` (see `README.md` §1 and console Setup Guide).
+- Decommission the old Google Apps Script deployment — the previously-committed URL and
+  passcode (`DHN2026`) are exposed in git history and no longer grant access to anything.
 - Make the Drive logo file public ("Anyone with the link") — or copy it to
   `public/logo.png` and set `LOGO_URL: "/logo.png"` (recommended for production).
-- Change `ADMIN_PASSCODE`; optionally password-protect the route at host level
-  (Cloudflare Access / Netlify) since static-site gating is deterrent-grade only.
 - Domain, hosting + SSL, and the 10 GB business mailbox are client-provided.
 
 ## 11. Quick recipes
@@ -150,4 +163,4 @@ Phone number lives in `data.ts` → `CONTACT` (`0921 603 0693`, href `tel:+63921
 - **Recolor**: adjust `--color-brand-*` in `@theme` (index.css) — everything follows.
 - **New editable field**: seed (`data.ts`) → store state + LS key (`store.tsx`) →
   page reads store → admin editor tab (`pages/Admin.tsx`).
-- **Change console route/passcode**: `src/config.ts` only; README + Setup Guide read config live.
+- **Change console route**: `src/config.ts` only. **Manage admins**: Supabase → Authentication → Users.

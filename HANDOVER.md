@@ -18,9 +18,10 @@ DreamHomeNavigators/
 │   ├── main.tsx             # Application entry point mounting <App />
 │   ├── App.tsx              # State-based router, global layout, and owner console hash-listener
 │   ├── index.css            # Tailwind v4 theme variables, glass surface layer components & animations
-│   ├── config.ts            # Centralized client configuration (passcode, routes, CRM URLs, contact)
+│   ├── config.ts            # Non-secret client config (Messenger, admin route, contact email)
+│   ├── supabase.ts          # Supabase client singleton (URL + publishable key from .env)
 │   ├── data.ts              # Seed listings (for-sale & rentals), services seed, about seed, locations
-│   ├── store.tsx            # LocalStorage state layer, rental CRUD, CRM lead manager, auth backup
+│   ├── store.tsx            # LocalStorage content layer + Supabase-backed leads CRM, backup
 │   ├── ui.tsx               # Reusable UI primitives: Reveal, CountUp, SectionHead, Logo, Diamond
 │   ├── components/
 │   │   ├── Nav.tsx          # Responsive navigation header with active page tracking
@@ -33,14 +34,15 @@ DreamHomeNavigators/
 │       ├── Rentals.tsx      # Rental catalog with territory & quick lease type filters (Daily/Furnished/Comm.)
 │       ├── Services.tsx     # 6 brokerage service packages, OFW consultation roadmap, buying guide
 │       ├── About.tsx        # Company heritage, mission, vision, core values, team showcase
-│       ├── Contact.tsx      # Lead inquiry form with automated unit pre-fill and Google Sheet dispatch
+│       ├── Contact.tsx      # Lead inquiry form with automated unit pre-fill and Supabase dispatch
 │       └── Admin.tsx        # Secret Owner Console (Leads CRM, For-Sale & Rental CRUD, Site Backup)
 ├── public/
 │   └── assets/img/          # Optimized static photo assets, floor plans, and model cards
+├── supabase/migrations/     # SQL migration: leads table + Row Level Security policies
 ├── GEMINI.md                # AI agent handover prompt & single source of truth
-├── README.md                # Client-facing setup guide (Sheet CRM, Messenger, console)
+├── README.md                # Client-facing setup guide (Supabase CRM, Messenger, console)
 ├── HANDOVER.md              # System handover and maintenance instructions
-└── package.json             # Scripts & dependencies (only runtime dependency: `uuid`)
+└── package.json             # Scripts & dependencies (runtime: `uuid`, `@supabase/supabase-js`)
 ```
 
 ---
@@ -51,14 +53,14 @@ DreamHomeNavigators/
 1. **Public Routing**: Driven by `page: Page` state inside `src/App.tsx` (`"home" | "properties" | "rentals" | "services" | "about" | "contact"`).
 2. **Hidden Owner Console**:
    - Access URL: `https://your-site.com/#/dhn-owner` (or whatever `CONFIG.ADMIN_ROUTE_HASH` is set to in `src/config.ts`).
-   - Gated by `ADMIN_PASSCODE` (default: `DHN2026`) with a 5-attempt lockout (60 seconds) stored in `localStorage`.
+   - Gated by **Supabase Auth** (email/password); only invited admin accounts can sign in, and sign-in attempts are rate-limited server-side. The route hash is a convenience only — not the security boundary.
    - The owner console is **completely excluded** from all public navigation, footer, and sitemaps.
 
 ### B. State Layer (`src/store.tsx`)
-LocalStorage-backed state with zero backend dependencies required for demo and operation:
+Site **content** is LocalStorage-backed (no backend needed for the demo); **leads** live in Supabase (Postgres + RLS):
 - `dhn_custom_properties_v3` / `dhn_deleted_properties_v3`: Custom and edited For-Sale listings.
 - `dhn_custom_rentals_v1` / `dhn_deleted_rentals_v1`: Custom and edited Rental listings.
-- `dhn_leads_v1`: Locally captured contact form leads.
+- Leads: stored in the Supabase `leads` table (read/deleted only by signed-in admins). `dhn_leads_v1` is now only an offline fallback queue for inserts that fail while the network is down.
 - `dhn_services_v2`: Service packages.
 - `dhn_about_v1`: About Us copy and company statements.
 - `dhn_featured_v1`: Selected listing for the Home hero banner.
@@ -68,34 +70,41 @@ LocalStorage-backed state with zero backend dependencies required for demo and o
 ## 3. How to Update the System (Operational Guide)
 
 ### Workflow 1: Updating Configuration & Security
-**Target File**: `src/config.ts`
 
-To change contact info, console passwords, or CRM integrations:
+The leads CRM and admin login are backed by **Supabase**. Secrets are not kept
+in `config.ts` — the Supabase URL and publishable key live in `.env`.
+
+**Supabase env** — `.env` (git-ignored; copy from `.env.example`):
+```
+VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+VITE_SUPABASE_ANON_KEY=YOUR_ANON_PUBLISHABLE_KEY
+```
+These values are **public by design** — they ship in the browser bundle. Data is
+protected by Supabase Row Level Security, not by hiding the key: the public form
+can only *insert* a lead, and only signed-in admins can *read* or *delete* leads.
+
+**Non-secret site config** — `src/config.ts`:
 ```ts
 export const CONFIG = {
-  // 1. Google Sheets CRM Integration
-  GOOGLE_SCRIPT_URL: "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec",
-  SHEET_READ_URL: "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec",
-
-  // 2. Facebook Messenger
+  // 1. Facebook Messenger
   MESSENGER_URL: "https://m.me/dreamhomenavigators01",
 
-  // 3. Owner Console Security
-  ADMIN_ROUTE_HASH: "#/dhn-owner",    // Change to a secret hash, e.g., "#/secure-dhn-2026"
-  ADMIN_PASSCODE: "DHN2026",          // MUST change before production launch!
-  ADMIN_MAX_ATTEMPTS: 5,
-  ADMIN_LOCK_SECONDS: 60,
+  // 2. Owner Console route (convenience only — real auth is Supabase login)
+  ADMIN_ROUTE_HASH: "#/dhn-owner",
 
-  // 4. Branding & Contact
+  // 3. Branding & Contact
   EMAIL: "support@dreamhomenavigators.com",
 };
 ```
+
+**Adding admins:** invite users from Supabase → Authentication → Users. Keep
+public signups disabled so only invited accounts can sign in.
 
 ---
 
 ### Workflow 2: Managing Listings Without Code (Owner Console)
 1. Open the website and navigate to `#/dhn-owner`.
-2. Enter the passcode to unlock the console.
+2. Sign in with your Supabase admin email and password.
 3. **Properties Tab**:
    - Add new for-sale listings or edit existing ones.
    - Click the ★ star to feature a unit in the Home page hero card.
@@ -244,9 +253,13 @@ The production output is generated in the `dist/` directory as a static single-p
 
 ## 5. Pre-Launch Checklist
 
-- [ ] Deploy Google Apps Script and update `GOOGLE_SCRIPT_URL` & `SHEET_READ_URL` in `src/config.ts`.
-- [ ] Change `ADMIN_PASSCODE` and `ADMIN_ROUTE_HASH` in `src/config.ts` to private credentials.
-- [ ] Test the Contact lead submission form and verify rows arrive in the Google Sheet CRM.
+- [ ] Create the Supabase project, run the `leads` migration (`supabase/migrations`), disable public signups, and create admin user accounts.
+- [ ] Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `.env` (copy from `.env.example`).
+- [ ] Verify anonymous visitors cannot read the `leads` table (RLS) and that an invited admin can sign in at `#/dhn-owner`.
+- [ ] (Optional) Change `ADMIN_ROUTE_HASH` in `src/config.ts` to a private hash.
+- [ ] Test the Contact lead submission form and verify rows arrive in the Supabase `leads` table.
 - [ ] Test inquiry buttons on both For-Sale and Rental cards to verify pre-fills function correctly.
 - [ ] Test website backup download and restore in the Owner Console (`#/dhn-owner`).
 - [ ] Run `npm run build` to ensure zero compilation or typecheck errors prior to every release.
+
+> 🔒 **Security note:** the previously-committed Google Apps Script URL and the old `ADMIN_PASSCODE` (`DHN2026`) are exposed in git history — decommission that Apps Script deployment; they no longer grant access to anything in the current app.

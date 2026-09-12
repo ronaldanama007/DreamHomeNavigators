@@ -1,99 +1,45 @@
 # Dream Home Navigators — Website & Configuration Guide
 
 A 5-page blue-glassmorphism real estate website (Home, Properties, Services, About, Contact)
-plus a hidden, passcode-locked **Owner Console** (Leads Dashboard + Property Manager + Setup Guide).
+plus a hidden **Owner Console** (Leads Dashboard + Property Manager + Setup Guide) protected by
+Supabase authentication.
 
-All client-configurable settings live in **one file: `src/config.ts`**.
+Non-secret site settings live in **`src/config.ts`**; Supabase credentials live in **`.env`**.
 
 ---
 
-## 1. Google Sheet CRM Integration (Lead Form → Google Sheet)
+## 1. Leads CRM — Supabase (secure by default)
 
-The Contact form submits leads with `fetch` using `mode: "no-cors"` and
-`Content-Type: text/plain;charset=utf-8` — this avoids CORS preflight failures with
-Google Apps Script. Leads are *also* saved locally in the browser so the Admin Dashboard
-works even before the sheet is connected.
+Leads are stored in **Supabase** (Postgres) and protected by **Row Level Security (RLS)**:
+
+- The public **Contact form can only insert** a lead.
+- **Only signed-in admin accounts can read or delete** leads — anonymous visitors
+  cannot read the CRM, even though the site is static.
+
+The Supabase URL and publishable (anon) key ship in the browser bundle and are
+**public by design** — access is enforced server-side by RLS, not by hiding the key.
 
 ### Step-by-step setup
 
-1. **Create a Google Sheet** and name it `Dream Home Navigators — Leads`.
-2. Open **Extensions → Apps Script**.
-3. Delete the sample code and paste the script below, then **Save** (💾).
-   The script auto-creates a `Leads` tab with headers on the first submission.
-4. Click **Deploy → New deployment → Web app**:
-   - **Execute as:** Me
-   - **Who has access:** Anyone
-   - Authorize when prompted.
-5. **Copy the Web App URL** (ends in `/exec`).
-6. Paste it into `src/config.ts`:
+1. **Create a Supabase project** at [supabase.com](https://supabase.com).
+2. **Run the migration** in `supabase/migrations/` (Supabase → SQL Editor, or the
+   Supabase CLI). It creates the `leads` table and its RLS policies.
+3. **Disable public signups:** Supabase → Authentication → Providers/Settings →
+   turn off "Allow new users to sign up" (invite-only admins).
+4. **Create admin accounts:** Supabase → Authentication → Users → Add user (or invite
+   by email). Repeat for each admin.
+5. **Set env vars** — copy `.env.example` to `.env` and fill in (Project Settings → API):
 
-```ts
-GOOGLE_SCRIPT_URL: "https://script.google.com/macros/s/XXXX/exec",
-SHEET_READ_URL:   "https://script.google.com/macros/s/XXXX/exec", // same URL
+```
+VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+VITE_SUPABASE_ANON_KEY=YOUR_ANON_PUBLISHABLE_KEY
 ```
 
-7. Rebuild the site (`npm run build`) and test with a sample inquiry — the row appears
-   in the Sheet within seconds.
+6. Rebuild the site (`npm run build`) and test with a sample inquiry — the lead appears
+   in the Supabase `leads` table (and in the Admin Dashboard) within seconds.
 
-> ⚠️ After every edit to the Apps Script code, create a **new deployment version**
-> (Deploy → Manage deployments → ✏️ → New version) or changes won't go live.
-
-### The Apps Script to paste
-
-```js
-// ─── Dream Home Navigators · Lead CRM (Google Apps Script) ───
-var SHEET_NAME = "Leads";
-var HEADERS = ["Timestamp", "Name", "Phone", "Email", "Location",
-  "Budget", "Property of Interest", "Message", "Source"];
-
-function doGet() {
-  var rows = getSheet_().getDataRange().getValues();
-  var headers = rows.shift() || HEADERS;
-  var leads = rows.map(function (r) {
-    var o = {};
-    headers.forEach(function (h, i) { o[h] = r[i]; });
-    return o;
-  });
-  return json_({ ok: true, leads: leads });
-}
-
-function doPost(e) {
-  var d = JSON.parse((e.postData && e.postData.contents) || "{}");
-  getSheet_().appendRow([
-    new Date(),
-    d.name || "", d.phone || "", d.email || "",
-    d.location || "", d.budget || "",
-    d.propertyInterest || "", d.message || "",
-    d.source || "Website"
-  ]);
-  return json_({ ok: true });
-}
-
-function getSheet_() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName(SHEET_NAME);
-  if (!sheet) {
-    sheet = ss.insertSheet(SHEET_NAME);
-    sheet.appendRow(HEADERS);
-    sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight("bold");
-  }
-  return sheet;
-}
-
-function json_(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-```
-
-The same script handles **POST** (receive leads) and **GET** (return all leads as JSON),
-which powers both the form and the dashboard sync below.
-
-### Dashboard → "Sync from Sheet"
-
-With `SHEET_READ_URL` set, the **Admin Console → Leads Dashboard → Sync from Sheet**
-button pulls every row from the sheet (including leads typed directly into it),
-normalizes headers, and de-duplicates by timestamp + phone.
+> If a submission ever fails (e.g. the browser is offline), the lead is queued in
+> `localStorage` as a fallback so it is never lost.
 
 ---
 
@@ -135,20 +81,17 @@ MESSENGER_QUICK_REPLIES: [
 >
 > - **Hidden route** — change it via `ADMIN_ROUTE_HASH` in `src/config.ts`
 >   (keep the leading `#/`). The browser tab title shows only "Owner Console".
-> - **Passcode** — default `DHN2026`; change `ADMIN_PASSCODE` before launch.
-> - **Lockout** — after `ADMIN_MAX_ATTEMPTS` (5) wrong codes the gate locks for
->   `ADMIN_LOCK_SECONDS` (60 s). The lock persists across page reloads.
-> - **Session** — unlocking lasts only for the current browser tab; closing the
->   tab or pressing **Lock** ends the session.
-> - **Honest note** — this is a static site, so the gate deters casual visitors
->   but a developer could inspect the bundle. For truly private data, also
->   protect the route at the host level (Cloudflare Access, Netlify password
->   protection, `.htpasswd`) and keep the Google Sheet as the only sensitive record.
+>   This is a convenience, **not** the security boundary.
+> - **Authentication** — sign in with a Supabase admin email/password. Only invited
+>   accounts exist (public signups disabled), and Supabase rate-limits sign-in attempts.
+> - **Session** — the login persists across reloads; press **Sign out** to end it.
+> - **Data protection** — leads are guarded by Supabase RLS: the publishable key in
+>   the bundle can only insert a lead, so anonymous visitors can never read the CRM.
 
 ### Leads Dashboard
 - Stat chips: total leads, last 7 days, top location, most-requested property.
 - Full lead table with click-to-call phone links, per-row delete, and clear-all (with confirm).
-- **Sync from Sheet** (requires `SHEET_READ_URL`) and **Export CSV**.
+- Leads load live from Supabase; **Export CSV** downloads the current list.
 
 ### Properties tab — add, edit & delete listings with no code
 - **Add:** name, location, area, price (PHP), price note, beds/baths/parking,
@@ -180,28 +123,32 @@ MESSENGER_QUICK_REPLIES: [
 - **Restore defaults** returns the original copy. (Team roster stays in
   `src/data.ts` → `TEAM`.)
 
-> 📌 **Production note:** localStorage is per-browser. For a multi-user rollout, keep the
-> Google Sheet as the source of truth — manage listings in a second `Properties` tab and
-> pull leads via "Sync from Sheet". The same Apps Script pattern extends to listings.
+> 📌 **Production note:** listing edits use per-browser `localStorage`, so they are not
+> yet shared across admins. Leads, however, are already centralized in Supabase and shared
+> across all admins. A future step could move listings into Supabase too.
 
 ### Setup Guide tab
-The Admin Console contains this same guide in-app, with **copy buttons** for the Apps
-Script and live status badges showing which integrations are configured.
+The Admin Console contains this same guide in-app, with live status badges and notes on
+the Supabase and Messenger integrations.
 
 ---
 
-## 4. Everything configurable in `src/config.ts`
+## 4. Configuration reference
+
+**Supabase credentials — `.env`** (copy from `.env.example`; public by design, RLS-protected):
 
 | Key | Purpose |
 | --- | --- |
-| `GOOGLE_SCRIPT_URL` | Apps Script Web App URL — receives form leads (POST) |
-| `SHEET_READ_URL` | Same URL — dashboard pulls leads (GET) |
+| `VITE_SUPABASE_URL` | Supabase project API URL |
+| `VITE_SUPABASE_ANON_KEY` | Supabase publishable (anon) key |
+
+**Non-secret site config — `src/config.ts`:**
+
+| Key | Purpose |
+| --- | --- |
 | `MESSENGER_URL` | Messenger widget target |
 | `MESSENGER_QUICK_REPLIES` | Widget quick-reply prompts |
 | `ADMIN_ROUTE_HASH` | Hidden route that opens the Owner Console (default `#/dhn-owner`) |
-| `ADMIN_PASSCODE` | Owner Console passcode |
-| `ADMIN_MAX_ATTEMPTS` | Wrong-code attempts before lockout (default 5) |
-| `ADMIN_LOCK_SECONDS` | Lockout duration in seconds (default 60) |
 | `EMAIL` | Business email shown site-wide |
 
 ## 5. Handover to another developer or AI agent
