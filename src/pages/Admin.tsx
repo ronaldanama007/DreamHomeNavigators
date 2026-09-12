@@ -1916,9 +1916,9 @@ function BackupAdmin({ notify }: { notify: (msg: string, ok?: boolean) => void }
                   </span>
                 </div>
                 <ul className="mt-3 space-y-1 text-xs text-slate-300">
-                  <li>• Custom for-sale listings: <b>{importPreview.customProperties?.length ?? 0}</b></li>
-                  <li>• Custom rental listings: <b>{importPreview.customRentals?.length ?? 0}</b></li>
-                  <li>• Leads log: <b>{importPreview.leads?.length ?? 0}</b> entries</li>
+                  <li>• For-sale listings: <b>{importPreview.customProperties?.length ?? 0}</b></li>
+                  <li>• Rental listings: <b>{importPreview.customRentals?.length ?? 0}</b></li>
+                  <li>• Leads snapshot: <b>{importPreview.leads?.length ?? 0}</b> entries</li>
                   <li>• Services catalog: <b>{importPreview.services?.length ?? 0}</b> packages</li>
                 </ul>
               </div>
