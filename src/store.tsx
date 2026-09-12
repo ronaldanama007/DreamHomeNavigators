@@ -10,6 +10,7 @@ import { v4 as uuid } from "uuid";
 import {
   AboutContent,
   ABOUT_SEED,
+  FEATURED_ID,
   Property,
   PROPERTIES,
   RENTAL_PROPERTIES,
@@ -19,12 +20,15 @@ import {
 import { supabase } from "./supabase";
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Persistent client-side store.
-   - Properties: seeded from src/data.ts; additions/deletions persist in
-     localStorage so the Admin Console works immediately, with zero backend.
-   - Leads: submitted inquiries are inserted into the Supabase `leads` table
-     (RLS: anon insert-only); a localStorage queue is used only as an offline
-     fallback when an insert fails. Admins read leads via refreshLeads().
+   Store — Supabase-backed content + leads.
+   - Properties, rentals, services and page content (about / featured) live in
+     Supabase (public READ, admin WRITE). They are seeded from src/data.ts, and
+     data.ts is also used as an instant first-paint + offline fallback.
+   - Content mutators are OPTIMISTIC: they update local state immediately (so the
+     Owner Console feels instant and keeps the same synchronous API) and persist
+     to Supabase in the background, so edits become live for every visitor.
+   - Leads: inserted into the Supabase `leads` table (RLS: anon insert-only);
+     a localStorage queue is only an offline fallback when an insert fails.
    ──────────────────────────────────────────────────────────────────────────── */
 
 export interface Lead {
@@ -40,29 +44,33 @@ export interface Lead {
   source: string;
 }
 
-const LS_CUSTOM = "dhn_custom_properties_v3";
-const LS_DELETED = "dhn_deleted_properties_v3";
-const LS_CUSTOM_RENTALS = "dhn_custom_rentals_v1";
-const LS_DELETED_RENTALS = "dhn_deleted_rentals_v1";
 const LS_LEADS = "dhn_leads_v1";
-const LS_SERVICES = "dhn_services_v2";
-const LS_ABOUT = "dhn_about_v1";
-const LS_FEATURED = "dhn_featured_v1";
 
 export interface SiteBackupData {
   version: string;
   exportedAt: string;
   source: string;
-  customProperties: Property[];
-  deletedProperties: string[];
-  customRentals: Property[];
-  deletedRentals: string[];
+  customProperties: Property[]; // all for-sale listings
+  deletedProperties: string[]; // retained for backup-format compatibility
+  customRentals: Property[]; // all rental listings
+  deletedRentals: string[]; // retained for backup-format compatibility
   leads: Lead[];
   services: ServiceItem[];
   about: AboutContent;
   featuredId: string | null;
 }
 
+/* ── seeds (also the offline fallback) ── */
+const SEED_SALE: Property[] = PROPERTIES.map((p) => ({ ...p, category: "sale" as const }));
+const SEED_RENTAL: Property[] = RENTAL_PROPERTIES.map((p) => ({
+  ...p,
+  category: "rental" as const,
+  isRental: true,
+}));
+
+interface PropRow { id: string; category: "sale" | "rental"; sort: number; data: Property }
+interface SvcRow { id: string; sort: number; data: ServiceItem }
+interface ContentRow { key: string; data: unknown }
 interface LeadRow {
   id: string;
   created_at: string;
@@ -107,6 +115,13 @@ function write(key: string, value: unknown) {
   }
 }
 
+/** Fire a Supabase write in the background; log (don't throw) on failure. */
+function bg(p: PromiseLike<{ error: unknown }>, label: string) {
+  Promise.resolve(p).then(({ error }) => {
+    if (error) console.warn(`[DHN] ${label} failed to persist:`, error);
+  });
+}
+
 interface StoreValue {
   properties: Property[];
   rentalProperties: Property[];
@@ -114,7 +129,6 @@ interface StoreValue {
   deletedCount: number;
   rentalCustomCount: number;
   rentalDeletedCount: number;
-  /** ids of default listings that were edited via the console (stored as overrides) */
   editedIds: string[];
   rentalEditedIds: string[];
   addProperty: (p: Omit<Property, "id">) => Property;
@@ -148,119 +162,121 @@ interface StoreValue {
 const StoreCtx = createContext<StoreValue | null>(null);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [custom, setCustom] = useState<Property[]>(() => read(LS_CUSTOM, []));
-  const [deleted, setDeleted] = useState<string[]>(() => read(LS_DELETED, []));
-  const [customRentals, setCustomRentals] = useState<Property[]>(() => read(LS_CUSTOM_RENTALS, []));
-  const [deletedRentals, setDeletedRentals] = useState<string[]>(() => read(LS_DELETED_RENTALS, []));
-  // Leads live in Supabase. This in-memory list is populated by refreshLeads()
-  // for authenticated admins. LS_LEADS is only a fallback for inserts that fail
-  // while offline, so a submitted lead is never lost.
+  // Seed-first so the public site paints listings instantly; refreshed from
+  // Supabase on mount (loadContent below).
+  const [propRows, setPropRows] = useState<Property[]>(() => [...SEED_SALE, ...SEED_RENTAL]);
+  const [services, setServices] = useState<ServiceItem[]>(SERVICE_SEED);
+  const [about, setAbout] = useState<AboutContent>(ABOUT_SEED);
+  const [featuredId, setFeaturedId] = useState<string | null>(FEATURED_ID);
   const [leads, setLeads] = useState<Lead[]>([]);
-  const [services, setServices] = useState<ServiceItem[]>(() =>
-    read(LS_SERVICES, SERVICE_SEED)
-  );
-  const [about, setAbout] = useState<AboutContent>(() => read(LS_ABOUT, ABOUT_SEED));
-  const [featuredId, setFeaturedId] = useState<string | null>(() =>
-    read<string | null>(LS_FEATURED, null)
-  );
 
-  useEffect(() => write(LS_CUSTOM, custom), [custom]);
-  useEffect(() => write(LS_DELETED, deleted), [deleted]);
-  useEffect(() => write(LS_CUSTOM_RENTALS, customRentals), [customRentals]);
-  useEffect(() => write(LS_DELETED_RENTALS, deletedRentals), [deletedRentals]);
-  useEffect(() => write(LS_SERVICES, services), [services]);
-  useEffect(() => write(LS_ABOUT, about), [about]);
-  useEffect(() => write(LS_FEATURED, featuredId), [featuredId]);
+  // Load shared content from Supabase (public read). Falls back to seeds on error.
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const [pRes, sRes, cRes] = await Promise.all([
+        supabase.from("properties").select("*").order("category").order("sort"),
+        supabase.from("services").select("*").order("sort"),
+        supabase.from("site_content").select("*"),
+      ]);
+      if (!active) return;
+      if (!pRes.error && pRes.data && pRes.data.length) {
+        setPropRows(
+          (pRes.data as PropRow[]).map((r) => ({ ...r.data, id: r.id, category: r.category }))
+        );
+      }
+      if (!sRes.error && sRes.data && sRes.data.length) {
+        setServices((sRes.data as SvcRow[]).map((r) => ({ ...r.data, id: r.id })));
+      }
+      if (!cRes.error && cRes.data) {
+        const rows = cRes.data as ContentRow[];
+        const a = rows.find((r) => r.key === "about")?.data as AboutContent | undefined;
+        const feat = rows.find((r) => r.key === "featured")?.data as { id: string } | undefined;
+        if (a) setAbout(a);
+        if (feat && typeof feat.id === "string") setFeaturedId(feat.id);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
-  const properties = useMemo(
-    () => [
-      ...PROPERTIES.filter((p) => !deleted.includes(p.id)),
-      ...custom,
-    ],
-    [deleted, custom]
-  );
+  const properties = useMemo(() => propRows.filter((p) => p.category !== "rental"), [propRows]);
+  const rentalProperties = useMemo(() => propRows.filter((p) => p.category === "rental"), [propRows]);
 
-  const rentalProperties = useMemo(
-    () => [
-      ...RENTAL_PROPERTIES.filter((p) => !deletedRentals.includes(p.id)),
-      ...customRentals,
-    ],
-    [deletedRentals, customRentals]
-  );
+  const insertProp = (p: Property, sort: number) =>
+    bg(supabase.from("properties").insert({ id: p.id, category: p.category ?? "sale", sort, data: p }), "add listing");
+  const updateProp = (p: Property) =>
+    bg(supabase.from("properties").update({ category: p.category ?? "sale", data: p }).eq("id", p.id), "update listing");
 
   const value: StoreValue = {
     properties,
     rentalProperties,
-    customCount: custom.length,
-    deletedCount: deleted.length,
-    rentalCustomCount: customRentals.length,
-    rentalDeletedCount: deletedRentals.length,
-    editedIds: useMemo(
-      () => custom.filter((p) => !p.id.startsWith("custom-")).map((p) => p.id),
-      [custom]
-    ),
-    rentalEditedIds: useMemo(
-      () => customRentals.filter((p) => !p.id.startsWith("custom-rent-")).map((p) => p.id),
-      [customRentals]
-    ),
+    customCount: properties.filter((p) => p.id.startsWith("custom-")).length,
+    deletedCount: 0,
+    rentalCustomCount: rentalProperties.filter((p) => p.id.startsWith("custom-rent-")).length,
+    rentalDeletedCount: 0,
+    editedIds: [],
+    rentalEditedIds: [],
+
     addProperty: (p) => {
       const created: Property = { ...p, id: `custom-${uuid().slice(0, 8)}`, category: "sale" };
-      setCustom((c) => [created, ...c]);
+      setPropRows((rows) => [...rows, created]);
+      insertProp(created, Math.floor(Date.now() / 1000));
       return created;
     },
     updateProperty: (p) => {
-      if (p.id.startsWith("custom-")) {
-        /* Custom listing → edit in place */
-        setCustom((c) => c.map((x) => (x.id === p.id ? p : x)));
-      } else {
-        /* Default listing → hide the original, store the edited override */
-        setDeleted((d) => (d.includes(p.id) ? d : [...d, p.id]));
-        setCustom((c) => [...c.filter((x) => x.id !== p.id), p]);
-      }
+      const enriched: Property = { ...p, category: "sale" };
+      setPropRows((rows) => rows.map((x) => (x.id === p.id ? enriched : x)));
+      updateProp(enriched);
     },
     deleteProperty: (id) => {
-      /* Covers custom listings AND edited-default overrides */
-      setCustom((c) => c.filter((p) => p.id !== id));
-      if (!id.startsWith("custom-")) {
-        setDeleted((d) => (d.includes(id) ? d : [...d, id]));
-      }
+      setPropRows((rows) => rows.filter((x) => x.id !== id));
+      bg(supabase.from("properties").delete().eq("id", id), "delete listing");
     },
     resetProperties: () => {
-      setCustom([]);
-      setDeleted([]);
-      setFeaturedId(null);
+      setPropRows((rows) => [...SEED_SALE, ...rows.filter((r) => r.category === "rental")]);
+      void (async () => {
+        await supabase.from("properties").delete().eq("category", "sale");
+        bg(
+          supabase.from("properties").insert(SEED_SALE.map((p, i) => ({ id: p.id, category: "sale", sort: i, data: p }))),
+          "reseed for-sale"
+        );
+      })();
     },
+
     addRentalProperty: (p) => {
-      const created: Property = {
-        ...p,
-        id: `custom-rent-${uuid().slice(0, 8)}`,
-        category: "rental",
-        isRental: true,
-      };
-      setCustomRentals((c) => [created, ...c]);
+      const created: Property = { ...p, id: `custom-rent-${uuid().slice(0, 8)}`, category: "rental", isRental: true };
+      setPropRows((rows) => [...rows, created]);
+      insertProp(created, Math.floor(Date.now() / 1000));
       return created;
     },
     updateRentalProperty: (p) => {
       const enriched: Property = { ...p, category: "rental", isRental: true };
-      if (p.id.startsWith("custom-rent-")) {
-        setCustomRentals((c) => c.map((x) => (x.id === p.id ? enriched : x)));
-      } else {
-        setDeletedRentals((d) => (d.includes(p.id) ? d : [...d, p.id]));
-        setCustomRentals((c) => [...c.filter((x) => x.id !== p.id), enriched]);
-      }
+      setPropRows((rows) => rows.map((x) => (x.id === p.id ? enriched : x)));
+      updateProp(enriched);
     },
     deleteRentalProperty: (id) => {
-      setCustomRentals((c) => c.filter((p) => p.id !== id));
-      if (!id.startsWith("custom-rent-")) {
-        setDeletedRentals((d) => (d.includes(id) ? d : [...d, id]));
-      }
+      setPropRows((rows) => rows.filter((x) => x.id !== id));
+      bg(supabase.from("properties").delete().eq("id", id), "delete rental");
     },
     resetRentalProperties: () => {
-      setCustomRentals([]);
-      setDeletedRentals([]);
+      setPropRows((rows) => [...rows.filter((r) => r.category !== "rental"), ...SEED_RENTAL]);
+      void (async () => {
+        await supabase.from("properties").delete().eq("category", "rental");
+        bg(
+          supabase.from("properties").insert(SEED_RENTAL.map((p, i) => ({ id: p.id, category: "rental", sort: i, data: p }))),
+          "reseed rentals"
+        );
+      })();
     },
+
     featuredId,
-    setFeatured: (id) => setFeaturedId(id),
+    setFeatured: (id) => {
+      setFeaturedId(id);
+      bg(supabase.from("site_content").upsert({ key: "featured", data: { id } }), "set featured");
+    },
+
     leads,
     refreshLeads: async () => {
       const { data, error } = await supabase
@@ -284,13 +300,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       };
       const { error } = await supabase.from("leads").insert(row);
       if (error) {
-        // Never lose a lead: queue it locally so it can be recovered.
         const pending = read<Lead[]>(LS_LEADS, []);
-        const fallback: Lead = {
-          ...l,
-          id: uuid(),
-          timestamp: new Date().toISOString(),
-        };
+        const fallback: Lead = { ...l, id: uuid(), timestamp: new Date().toISOString() };
         write(LS_LEADS, [fallback, ...pending]);
         return { ok: false };
       }
@@ -307,27 +318,53 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         .neq("id", "00000000-0000-0000-0000-000000000000");
       if (!error) setLeads([]);
     },
-    /* ── Services page content ── */
+
+    /* ── Services ── */
     services,
-    addService: (s) =>
-      setServices((sv) => [...sv, { ...s, id: `svc-${uuid().slice(0, 8)}` }]),
-    updateService: (s) =>
-      setServices((sv) => sv.map((x) => (x.id === s.id ? s : x))),
-    deleteService: (id) => setServices((sv) => sv.filter((x) => x.id !== id)),
-    resetServices: () => setServices(SERVICE_SEED),
-    /* ── About page content ── */
+    addService: (s) => {
+      const created: ServiceItem = { ...s, id: `svc-${uuid().slice(0, 8)}` };
+      setServices((sv) => [...sv, created]);
+      bg(supabase.from("services").insert({ id: created.id, sort: Math.floor(Date.now() / 1000), data: created }), "add service");
+    },
+    updateService: (s) => {
+      setServices((sv) => sv.map((x) => (x.id === s.id ? s : x)));
+      bg(supabase.from("services").update({ data: s }).eq("id", s.id), "update service");
+    },
+    deleteService: (id) => {
+      setServices((sv) => sv.filter((x) => x.id !== id));
+      bg(supabase.from("services").delete().eq("id", id), "delete service");
+    },
+    resetServices: () => {
+      setServices(SERVICE_SEED);
+      void (async () => {
+        await supabase.from("services").delete().neq("id", "");
+        bg(
+          supabase.from("services").insert(SERVICE_SEED.map((s, i) => ({ id: s.id, sort: i, data: s }))),
+          "reseed services"
+        );
+      })();
+    },
+
+    /* ── About ── */
     about,
-    updateAbout: (a) => setAbout(a),
-    resetAbout: () => setAbout(ABOUT_SEED),
-    /* ── Global Website Auth Backup & Restore ── */
+    updateAbout: (a) => {
+      setAbout(a);
+      bg(supabase.from("site_content").upsert({ key: "about", data: a }), "update about");
+    },
+    resetAbout: () => {
+      setAbout(ABOUT_SEED);
+      bg(supabase.from("site_content").upsert({ key: "about", data: ABOUT_SEED }), "reset about");
+    },
+
+    /* ── Backup & restore ── */
     createBackup: (): SiteBackupData => ({
-      version: "1.0",
+      version: "2.0",
       exportedAt: new Date().toISOString(),
       source: "Dream Home Navigators Owner Console",
-      customProperties: custom,
-      deletedProperties: deleted,
-      customRentals: customRentals,
-      deletedRentals: deletedRentals,
+      customProperties: properties,
+      deletedProperties: [],
+      customRentals: rentalProperties,
+      deletedRentals: [],
       leads,
       services,
       about,
@@ -338,18 +375,37 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (!data || typeof data !== "object") {
           return { ok: false, message: "Invalid backup data format." };
         }
-        if (Array.isArray(data.customProperties)) setCustom(data.customProperties);
-        if (Array.isArray(data.deletedProperties)) setDeleted(data.deletedProperties);
-        if (Array.isArray(data.customRentals)) setCustomRentals(data.customRentals);
-        if (Array.isArray(data.deletedRentals)) setDeletedRentals(data.deletedRentals);
-        // Leads are NOT restored from backup — they live in Supabase.
+        const sale = Array.isArray(data.customProperties)
+          ? data.customProperties.map((p) => ({ ...p, category: "sale" as const }))
+          : SEED_SALE;
+        const rental = Array.isArray(data.customRentals)
+          ? data.customRentals.map((p) => ({ ...p, category: "rental" as const, isRental: true }))
+          : SEED_RENTAL;
+        setPropRows([...sale, ...rental]);
         if (Array.isArray(data.services)) setServices(data.services);
         if (data.about && typeof data.about === "object") setAbout(data.about);
         if (data.featuredId !== undefined) setFeaturedId(data.featuredId);
 
+        // Publish the restored content to Supabase so it is live for everyone.
+        void (async () => {
+          await supabase.from("properties").delete().neq("id", "");
+          bg(
+            supabase.from("properties").insert(
+              [...sale, ...rental].map((p, i) => ({ id: p.id, category: p.category ?? "sale", sort: i, data: p }))
+            ),
+            "restore listings"
+          );
+          if (Array.isArray(data.services)) {
+            await supabase.from("services").delete().neq("id", "");
+            bg(supabase.from("services").insert(data.services.map((s, i) => ({ id: s.id, sort: i, data: s }))), "restore services");
+          }
+          if (data.about) bg(supabase.from("site_content").upsert({ key: "about", data: data.about }), "restore about");
+          if (data.featuredId !== undefined) bg(supabase.from("site_content").upsert({ key: "featured", data: { id: data.featuredId } }), "restore featured");
+        })();
+
         return {
           ok: true,
-          message: `Backup restored successfully (exported: ${new Date(data.exportedAt || Date.now()).toLocaleDateString()}).`,
+          message: `Backup restored and published (exported: ${new Date(data.exportedAt || Date.now()).toLocaleDateString()}).`,
         };
       } catch (err) {
         return {
@@ -359,14 +415,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     },
     resetAllToFactory: () => {
-      setCustom([]);
-      setDeleted([]);
-      setCustomRentals([]);
-      setDeletedRentals([]);
-      // Leads are NOT reset here — they live in Supabase, not local content.
+      setPropRows([...SEED_SALE, ...SEED_RENTAL]);
       setServices(SERVICE_SEED);
       setAbout(ABOUT_SEED);
-      setFeaturedId(null);
+      setFeaturedId(FEATURED_ID);
+      // Leads are NOT reset here — they live in Supabase, not local content.
+      void (async () => {
+        await supabase.from("properties").delete().neq("id", "");
+        bg(
+          supabase.from("properties").insert(
+            [...SEED_SALE, ...SEED_RENTAL].map((p, i) => ({ id: p.id, category: p.category ?? "sale", sort: i, data: p }))
+          ),
+          "factory reset listings"
+        );
+        await supabase.from("services").delete().neq("id", "");
+        bg(supabase.from("services").insert(SERVICE_SEED.map((s, i) => ({ id: s.id, sort: i, data: s }))), "factory reset services");
+        bg(supabase.from("site_content").upsert({ key: "about", data: ABOUT_SEED }), "factory reset about");
+        bg(supabase.from("site_content").upsert({ key: "featured", data: { id: FEATURED_ID } }), "factory reset featured");
+      })();
     },
   };
 
