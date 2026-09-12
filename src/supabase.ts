@@ -9,11 +9,17 @@ const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
 if (!url || !anonKey) {
-  // Surface misconfiguration early in dev; in prod the calls will simply fail
-  // and the UI degrades (contact form falls back to local save).
+  // Missing env (e.g. not configured in the production host). Warn, but do NOT
+  // let createClient() throw on an empty URL — that would blank the ENTIRE site
+  // because this module loads before the app mounts. Instead the public pages
+  // still render; lead submission falls back to a local queue and admin sign-in
+  // stays unavailable until VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY are set.
   console.warn(
-    "[DHN] Supabase env vars missing — set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env"
+    "[DHN] Supabase env vars missing — set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY. CRM features are disabled until then."
   );
 }
 
-export const supabase = createClient(url ?? "", anonKey ?? "");
+export const supabase = createClient(
+  url || "https://unconfigured.supabase.co",
+  anonKey || "anon-key-not-set"
+);
